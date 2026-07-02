@@ -19,31 +19,45 @@
 
                     {{-- Formulasi RM - All roles can view, Staff can create --}}
                     @can('formula.view')
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('formulas.*')">
+                        <x-nav-link :href="route('formulas.index')" :active="request()->routeIs('formulas.*')">
                             Formulasi RM
                         </x-nav-link>
                     @endcan
 
                     {{-- Trial RM - All roles can view, Staff can create --}}
                     @can('trial_rm.view')
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('trial-rms.*')">
+                        <x-nav-link :href="route('trial-rms.index')" :active="request()->routeIs('trial-rms.*')">
                             Trial RM
                         </x-nav-link>
                     @endcan
 
                     {{-- Trial PM - All roles can view, Staff can create --}}
                     @can('trial_pm.view')
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('trial-pms.*')">
+                        <x-nav-link :href="route('trial-pms.index')" :active="request()->routeIs('trial-pms.*')">
                             Trial PM
                         </x-nav-link>
                     @endcan
 
                     {{-- Approval Center - Manager & GM only --}}
                     @can('approval_center.access')
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('approval-center.*')">
+                        <x-nav-link :href="route('approval-center.index')" :active="request()->routeIs('approval-center.*')">
                             Approval Center
                         </x-nav-link>
                     @endcan
+
+                    {{-- Superadmin Access Control --}}
+                    @role('Superadmin')
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            Akses Kontrol
+                        </x-nav-link>
+                    @endrole
+
+                    {{-- Data Master for Superadmin & Staff R&D --}}
+                    @hasanyrole('Superadmin|Staff R&D')
+                        <x-nav-link :href="route('materials.index')" :active="request()->routeIs('materials.*') || request()->routeIs('suppliers.*')">
+                            Data Master
+                        </x-nav-link>
+                    @endhasanyrole
                 </div>
             </div>
 
@@ -122,28 +136,40 @@
             </x-responsive-nav-link>
 
             @can('formula.view')
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('formulas.*')">
+                <x-responsive-nav-link :href="route('formulas.index')" :active="request()->routeIs('formulas.*')">
                     Formulasi RM
                 </x-responsive-nav-link>
             @endcan
 
             @can('trial_rm.view')
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('trial-rms.*')">
+                <x-responsive-nav-link :href="route('trial-rms.index')" :active="request()->routeIs('trial-rms.*')">
                     Trial RM
                 </x-responsive-nav-link>
             @endcan
 
             @can('trial_pm.view')
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('trial-pms.*')">
+                <x-responsive-nav-link :href="route('trial-pms.index')" :active="request()->routeIs('trial-pms.*')">
                     Trial PM
                 </x-responsive-nav-link>
             @endcan
 
             @can('approval_center.access')
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('approval-center.*')">
+                <x-responsive-nav-link :href="route('approval-center.index')" :active="request()->routeIs('approval-center.*')">
                     Approval Center
                 </x-responsive-nav-link>
             @endcan
+
+            @role('Superadmin')
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    Akses Kontrol
+                </x-responsive-nav-link>
+            @endrole
+
+            @hasanyrole('Superadmin|Staff R&D')
+                <x-responsive-nav-link :href="route('materials.index')" :active="request()->routeIs('materials.*') || request()->routeIs('suppliers.*')">
+                    Data Master
+                </x-responsive-nav-link>
+            @endhasanyrole
         </div>
 
         <!-- Responsive Settings Options -->

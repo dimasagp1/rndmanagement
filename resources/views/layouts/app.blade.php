@@ -5,14 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="R&D Management System — PT Herbatech Innopharma Industry">
-    <title>{{ isset($title) ? $title . ' — ' : '' }}{{ config('app.name', 'Herbatech R&D') }}</title>
+    <title>{{ isset($title) ? $title . ' — ' : '' }}{{ setting('app_name', 'Herbatech R&D') }}</title>
 
     <!-- Preconnect Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- Favicon -->
+    @if(setting('app_favicon'))
+    <link rel="icon" type="image/png" href="{{ asset('storage/' . setting('app_favicon')) }}">
+    @else
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+    @endif
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -42,12 +46,16 @@
         >
             <!-- Sidebar Header (Logo) -->
             <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-                <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shadow-sm flex-shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shadow-sm overflow-hidden flex-shrink-0">
+                    @if(setting('app_logo'))
+                    <img src="{{ asset('storage/' . setting('app_logo')) }}" class="w-full h-full object-cover">
+                    @else
                     <span class="text-2xl leading-none">🌿</span>
+                    @endif
                 </div>
                 <div class="min-w-0">
-                    <p class="text-white font-heading font-semibold text-sm leading-tight">Herbatech R&D</p>
-                    <p class="text-white/50 text-xs leading-tight truncate">PT Herbatech Innopharma</p>
+                    <p class="text-white font-heading font-semibold text-sm leading-tight">{{ setting('app_name', 'Herbatech R&D') }}</p>
+                    <p class="text-white/50 text-xs leading-tight truncate">{{ setting('company_name', 'PT Herbatech Innopharma') }}</p>
                 </div>
                 <!-- Mobile Close -->
                 <button
@@ -134,6 +142,43 @@
                 </a>
                 @endcan
 
+                {{-- Superadmin-only Menus --}}
+                @role('Superadmin')
+                <div class="my-3 border-t border-white/10"></div>
+                <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Akses & Sistem</p>
+
+                <a href="{{ route('users.index') }}"
+                   class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span>Akses Kontrol</span>
+                </a>
+
+                <a href="{{ route('settings.index') }}"
+                   class="sidebar-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Pengaturan Sistem</span>
+                </a>
+
+                @endrole
+
+                {{-- Data Master (Superadmin & Staff R&D) --}}
+                @hasanyrole('Superadmin|Staff R&D')
+                <div class="my-3 border-t border-white/10"></div>
+                <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Master Data</p>
+
+                <a href="{{ route('materials.index') }}"
+                   class="sidebar-link {{ request()->routeIs('materials.*') || request()->routeIs('suppliers.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>Data Master</span>
+                </a>
+                @endhasanyrole
             </nav>
 
             <!-- Sidebar Footer (User Info) -->

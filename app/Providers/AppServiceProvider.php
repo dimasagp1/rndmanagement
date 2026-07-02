@@ -21,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Require global settings helper
+        require_once app_path('Helpers/setting.php');
+
         // Bind Services sebagai singleton
         $this->app->singleton(FormulaService::class);
         $this->app->singleton(TrialRmService::class);
@@ -33,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Formula::class, FormulaPolicy::class);
         Gate::policy(TrialRm::class, TrialRmPolicy::class);
         Gate::policy(TrialPm::class, TrialPmPolicy::class);
+
+        // Implicitly grant "Superadmin" role all permission checks
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Superadmin') ? true : null;
+        });
 
         // Share pending approval count ke semua view layout
         View::composer('layouts.app', function ($view) {

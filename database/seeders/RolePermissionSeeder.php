@@ -63,6 +63,7 @@ class RolePermissionSeeder extends Seeder
         Permission::findOrCreate('approval_center.access');
 
         // Create roles
+        $superadmin = Role::findOrCreate('Superadmin');
         $staffRnd = Role::findOrCreate('Staff R&D');
         $operationalManager = Role::findOrCreate('Operational Manager');
         $generalManager = Role::findOrCreate('General Manager');

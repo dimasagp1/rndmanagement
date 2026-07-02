@@ -6,6 +6,10 @@ use App\Http\Controllers\FormulaController;
 use App\Http\Controllers\TrialRmController;
 use App\Http\Controllers\TrialPmController;
 use App\Http\Controllers\ApprovalCenterController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,6 +74,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/approval-center/trial-rms/{trialRm}/reject', [ApprovalCenterController::class, 'rejectTrialRm'])
          ->name('approval-center.trial-rms.reject')
          ->middleware('can:approval_center.access');
+
+    // ── User Management (Superadmin Only) ───────────────────
+    Route::resource('users', UserController::class)->middleware('role:Superadmin');
+
+    // ── System Settings (Superadmin Only) ───────────────────
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:Superadmin');
+    Route::put('/settings', [SettingController::class, 'update'])->name('settings.update')->middleware('role:Superadmin');
+
+    // ── Data Master (Superadmin & Staff R&D) ─────────────
+    Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
+    Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
 });
 
 require __DIR__.'/auth.php';

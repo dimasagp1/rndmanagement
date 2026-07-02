@@ -13,6 +13,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Superadmin
+        $super = User::create([
+            'name' => 'Super Administrator',
+            'email' => 'superadmin@herbatech.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $super->assignRole('Superadmin');
+
+        $this->command->info('✅ Superadmin: superadmin@herbatech.com (password: password)');
+
         // Staff R&D
         $staff = User::create([
             'name' => 'Ahmad Fauzi',
