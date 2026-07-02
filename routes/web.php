@@ -32,6 +32,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Formulasi RM ──────────────────────────────────────
     Route::resource('formulas', FormulaController::class)->middleware('can:formula.view');
+    Route::get('formulas/{formula}/print', [FormulaController::class, 'print'])
+         ->name('formulas.print')
+         ->middleware('can:formula.view');
     Route::post('formulas/{formula}/submit',     [FormulaController::class, 'submit'])
          ->name('formulas.submit')
          ->middleware('can:formula.view');
@@ -43,6 +46,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('trial-rms', TrialRmController::class)
          ->middleware('can:trial_rm.view')
          ->parameters(['trial-rms' => 'trialRm']);
+    Route::get('trial-rms/{trialRm}/print', [TrialRmController::class, 'print'])
+         ->name('trial-rms.print')
+         ->middleware('can:trial_rm.view');
     Route::post('trial-rms/{trialRm}/submit', [TrialRmController::class, 'submit'])
          ->name('trial-rms.submit')
          ->middleware('can:trial_rm.view');
@@ -56,6 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:trial_pm.view');
     Route::post('trial-pms/{trialPm}/approve', [TrialPmController::class, 'approve'])
          ->name('trial-pms.approve')
+         ->middleware('can:trial_pm.view');
+    Route::get('trial-pms/{trialPm}/print', [TrialPmController::class, 'print'])
+         ->name('trial-pms.print')
          ->middleware('can:trial_pm.view');
 
     // ── Approval Center ───────────────────────────────────

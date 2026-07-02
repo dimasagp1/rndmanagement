@@ -57,17 +57,48 @@ class TrialPmController extends Controller
         Gate::authorize('create', TrialPm::class);
 
         $validated = $request->validate([
-            'packaging_material' => 'required|string|max:255',
-            'specifications'     => 'required|string',
-            'parameters'         => 'array',
-            'parameters.kecepatan_filling' => 'required|string|max:255',
-            'parameters.suhu_sealing'      => 'required|string|max:255',
-            'parameters.tekanan_mesin'     => 'required|string|max:255',
-            'risk_analysis'      => 'nullable|string',
+            'proposal_number'            => 'nullable|string|max:255',
+            'packaging_material'         => 'required|string|max:255',
+            'supplier'                   => 'required|string|max:255',
+            'product_use'                => 'required|string|max:255',
+            'product_trial'              => 'required|string|max:255',
+            'trial_sample_quantity'      => 'required|string|max:255',
+            'old_supplier'               => 'nullable|string|max:255',
+            'difference_with_existing'   => 'nullable|string',
+            'specifications'             => 'required|array|min:1',
+            'specifications.*'           => 'required|string|max:1000',
+            'executions'                 => 'nullable|array',
+            'executions.*.machine'       => 'required|string|max:255',
+            'executions.*.setting'       => 'required|string|max:255',
+            'executions.*.actual'        => 'required|string|max:255',
+            'executions.*.start_time'    => 'nullable|string|max:100',
+            'executions.*.end_time'      => 'nullable|string|max:100',
+            'executions.*.reject'        => 'nullable|string|max:100',
+            'executions.*.good'          => 'nullable|string|max:100',
+            'executions.*.paraf_prod'    => 'nullable|boolean',
+            'executions.*.paraf_eng'     => 'nullable|boolean',
+            'executions.*.paraf_qc'      => 'nullable|boolean',
+            'discussion_rows'            => 'nullable|array',
+            'discussion_rows.*.evaluation'     => 'required|string',
+            'discussion_rows.*.risk_analysis'   => 'required|string',
+            'discussion_rows.*.recommendation' => 'required|string',
+            'uploaded_photos'            => 'nullable|array',
+            'uploaded_photos.*'          => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            'risk_analysis'              => 'nullable|string',
         ]);
 
+        // Handle uploads
+        $photos = [];
+        if ($request->hasFile('uploaded_photos')) {
+            foreach ($request->file('uploaded_photos') as $file) {
+                $path = $file->store('trial-pm-photos', 'public');
+                $photos[] = '/storage/' . $path;
+            }
+        }
+        $validated['photos'] = $photos;
+
         try {
-            $trial = $this->service->create($validated, auth()->id());
+            $trial = $this->service->create($validated, auth()->id(), auth()->user());
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
@@ -90,6 +121,18 @@ class TrialPmController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────
+    // PRINT (dedicated print view matching official form layout)
+    // ──────────────────────────────────────────────────────────────
+    public function print(TrialPm $trialPm)
+    {
+        Gate::authorize('view', $trialPm);
+
+        $trialPm->load(['creator', 'operationalManager', 'departmentApprovals.approver']);
+
+        return view('trial-pms.print', compact('trialPm'));
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // EDIT
     // ──────────────────────────────────────────────────────────────
     public function edit(TrialPm $trialPm)
@@ -107,17 +150,48 @@ class TrialPmController extends Controller
         Gate::authorize('edit', $trialPm);
 
         $validated = $request->validate([
-            'packaging_material' => 'required|string|max:255',
-            'specifications'     => 'required|string',
-            'parameters'         => 'array',
-            'parameters.kecepatan_filling' => 'required|string|max:255',
-            'parameters.suhu_sealing'      => 'required|string|max:255',
-            'parameters.tekanan_mesin'     => 'required|string|max:255',
-            'risk_analysis'      => 'nullable|string',
+            'proposal_number'            => 'nullable|string|max:255',
+            'packaging_material'         => 'required|string|max:255',
+            'supplier'                   => 'required|string|max:255',
+            'product_use'                => 'required|string|max:255',
+            'product_trial'              => 'required|string|max:255',
+            'trial_sample_quantity'      => 'required|string|max:255',
+            'old_supplier'               => 'nullable|string|max:255',
+            'difference_with_existing'   => 'nullable|string',
+            'specifications'             => 'required|array|min:1',
+            'specifications.*'           => 'required|string|max:1000',
+            'executions'                 => 'nullable|array',
+            'executions.*.machine'       => 'required|string|max:255',
+            'executions.*.setting'       => 'required|string|max:255',
+            'executions.*.actual'        => 'required|string|max:255',
+            'executions.*.start_time'    => 'nullable|string|max:100',
+            'executions.*.end_time'      => 'nullable|string|max:100',
+            'executions.*.reject'        => 'nullable|string|max:100',
+            'executions.*.good'          => 'nullable|string|max:100',
+            'executions.*.paraf_prod'    => 'nullable|boolean',
+            'executions.*.paraf_eng'     => 'nullable|boolean',
+            'executions.*.paraf_qc'      => 'nullable|boolean',
+            'discussion_rows'            => 'nullable|array',
+            'discussion_rows.*.evaluation'     => 'required|string',
+            'discussion_rows.*.risk_analysis'   => 'required|string',
+            'discussion_rows.*.recommendation' => 'required|string',
+            'uploaded_photos'            => 'nullable|array',
+            'uploaded_photos.*'          => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            'risk_analysis'              => 'nullable|string',
         ]);
 
+        // Handle uploads (append to existing or keep existing if none uploaded)
+        $photos = $trialPm->photos ?? [];
+        if ($request->hasFile('uploaded_photos')) {
+            foreach ($request->file('uploaded_photos') as $file) {
+                $path = $file->store('trial-pm-photos', 'public');
+                $photos[] = '/storage/' . $path;
+            }
+        }
+        $validated['photos'] = $photos;
+
         try {
-            $this->service->update($trialPm, $validated);
+            $this->service->update($trialPm, $validated, auth()->user());
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }

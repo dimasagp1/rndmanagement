@@ -12,8 +12,18 @@ class TrialPm extends Model
 
     protected $fillable = [
         'code',
+        'proposal_number',
         'packaging_material',
+        'supplier',
+        'product_use',
+        'product_trial',
+        'trial_sample_quantity',
+        'old_supplier',
+        'difference_with_existing',
         'specifications',
+        'executions',
+        'discussion_rows',
+        'photos',
         'parameters',
         'risk_analysis',
         'approval_status',
@@ -25,8 +35,12 @@ class TrialPm extends Model
     ];
 
     protected $casts = [
-        'parameters' => 'array',
-        'approved_at' => 'datetime',
+        'specifications'  => 'array',
+        'executions'      => 'array',
+        'discussion_rows' => 'array',
+        'photos'          => 'array',
+        'parameters'      => 'array',
+        'approved_at'     => 'datetime',
     ];
 
     public function getActivitylogOptions(): LogOptions

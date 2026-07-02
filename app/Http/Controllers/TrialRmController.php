@@ -75,6 +75,9 @@ class TrialRmController extends Controller
         $validated = $request->validate([
             'formula_id'      => 'required|exists:formulas,id',
             'sample_identity' => 'required|string|max:255',
+            'trial_objective' => 'nullable|string|max:10000',
+            'batch_qty'       => 'nullable|string|max:255',
+            'packaging_design' => 'nullable|string|max:255',
             'process_steps'   => 'required|string',
             'decision'        => 'nullable|in:Lulus,Reformulasi',
             'verifications'   => 'array',
@@ -133,6 +136,9 @@ class TrialRmController extends Controller
 
         $validated = $request->validate([
             'sample_identity' => 'required|string|max:255',
+            'trial_objective' => 'nullable|string|max:10000',
+            'batch_qty'       => 'nullable|string|max:255',
+            'packaging_design' => 'nullable|string|max:255',
             'process_steps'   => 'required|string',
             'decision'        => 'nullable|in:Lulus,Reformulasi',
             'verifications'   => 'array',
@@ -184,5 +190,23 @@ class TrialRmController extends Controller
         return redirect()
             ->route('trial-rms.show', $trialRm)
             ->with('success', "Catatan Trial RM {$trialRm->code} berhasil diajukan untuk approval.");
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PRINT
+    // ──────────────────────────────────────────────────────────────
+    public function print(TrialRm $trialRm)
+    {
+        Gate::authorize('view', $trialRm);
+
+        $trialRm->load([
+            'formula.materials.material',
+            'formula.materials.supplier',
+            'creator',
+            'operationalManager',
+            'verifications',
+        ]);
+
+        return view('trial-rms.print', compact('trialRm'));
     }
 }

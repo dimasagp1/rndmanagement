@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\TrialPm;
 use App\Models\TrialPmApproval;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -32,21 +33,28 @@ class TrialPmService
     // ──────────────────────────────────────────────────────────────
     // Buat catatan trial PM baru beserta inisialisasi 4 dept approval
     // ──────────────────────────────────────────────────────────────
-    public function create(array $data, int $createdBy): TrialPm
+    public function create(array $data, int $createdBy, ?User $signer = null): TrialPm
     {
-        return DB::transaction(function () use ($data, $createdBy) {
+        return DB::transaction(function () use ($data, $createdBy, $signer) {
+            $executions = $this->enrichExecutionParafs($data['executions'] ?? [], $signer);
+
             $trial = TrialPm::create([
-                'code'               => $this->generateCode(),
-                'packaging_material' => $data['packaging_material'],
-                'specifications'     => $data['specifications'],
-                'parameters'         => [
-                    'kecepatan_filling' => $data['parameters']['kecepatan_filling'] ?? '',
-                    'suhu_sealing'      => $data['parameters']['suhu_sealing'] ?? '',
-                    'tekanan_mesin'     => $data['parameters']['tekanan_mesin'] ?? '',
-                ],
-                'risk_analysis'      => $data['risk_analysis'] ?? '',
-                'approval_status'    => 'Draft',
-                'created_by'         => $createdBy,
+                'code'                     => $this->generateCode(),
+                'proposal_number'          => $data['proposal_number'] ?? null,
+                'packaging_material'       => $data['packaging_material'],
+                'supplier'                 => $data['supplier'] ?? '',
+                'product_use'              => $data['product_use'] ?? '',
+                'product_trial'            => $data['product_trial'] ?? '',
+                'trial_sample_quantity'    => $data['trial_sample_quantity'] ?? '',
+                'old_supplier'             => $data['old_supplier'] ?? null,
+                'difference_with_existing' => $data['difference_with_existing'] ?? null,
+                'specifications'           => $data['specifications'] ?? [],
+                'executions'               => $executions,
+                'discussion_rows'          => $data['discussion_rows'] ?? [],
+                'photos'                   => $data['photos'] ?? [],
+                'risk_analysis'            => $data['risk_analysis'] ?? '',
+                'approval_status'          => 'Draft',
+                'created_by'               => $createdBy,
             ]);
 
             // Inisialisasi record approval untuk 4 departemen
@@ -67,28 +75,77 @@ class TrialPmService
     // ──────────────────────────────────────────────────────────────
     // Update catatan trial PM
     // ──────────────────────────────────────────────────────────────
-    public function update(TrialPm $trial, array $data): TrialPm
+    public function update(TrialPm $trial, array $data, ?User $signer = null): TrialPm
     {
-        return DB::transaction(function () use ($trial, $data) {
+        return DB::transaction(function () use ($trial, $data, $signer) {
             if ($trial->approval_status !== 'Draft') {
                 throw ValidationException::withMessages([
                     'status' => 'Hanya Trial PM berstatus Draft yang dapat diperbarui.',
                 ]);
             }
 
+            $executions = $this->enrichExecutionParafs($data['executions'] ?? [], $signer);
+
             $trial->update([
-                'packaging_material' => $data['packaging_material'],
-                'specifications'     => $data['specifications'],
-                'parameters'         => [
-                    'kecepatan_filling' => $data['parameters']['kecepatan_filling'] ?? '',
-                    'suhu_sealing'      => $data['parameters']['suhu_sealing'] ?? '',
-                    'tekanan_mesin'     => $data['parameters']['tekanan_mesin'] ?? '',
-                ],
-                'risk_analysis'      => $data['risk_analysis'] ?? '',
+                'proposal_number'          => $data['proposal_number'] ?? null,
+                'packaging_material'       => $data['packaging_material'],
+                'supplier'                 => $data['supplier'] ?? '',
+                'product_use'              => $data['product_use'] ?? '',
+                'product_trial'            => $data['product_trial'] ?? '',
+                'trial_sample_quantity'    => $data['trial_sample_quantity'] ?? '',
+                'old_supplier'             => $data['old_supplier'] ?? null,
+                'difference_with_existing' => $data['difference_with_existing'] ?? null,
+                'specifications'           => $data['specifications'] ?? [],
+                'executions'               => $executions,
+                'discussion_rows'          => $data['discussion_rows'] ?? [],
+                'photos'                   => $data['photos'] ?? $trial->photos ?? [],
+                'risk_analysis'            => $data['risk_analysis'] ?? '',
             ]);
 
             return $trial->fresh();
         });
+    }
+
+    /**
+     * Jika checkbox paraf dicentang, simpan metadata tanda tangan digital user
+     * dan gunakan gambar paraf resmi dari pengaturan admin.
+     * Jika tidak dicentang, hapus metadata paraf agar bersih.
+     */
+    private function enrichExecutionParafs(array $executions, ?User $signer): array
+    {
+        if (!$signer) {
+            return $executions;
+        }
+
+        // Peta tipe paraf ke setting key untuk gambar paraf admin
+        $parafMap = [
+            'paraf_prod' => 'paraf_prod',
+            'paraf_eng'  => 'paraf_eng',
+            'paraf_qc'   => 'paraf_qc',
+        ];
+
+        return array_map(function ($execution) use ($signer, $parafMap) {
+            foreach ($parafMap as $type => $settingKey) {
+                $signedByKey         = $type . '_signed_by';
+                $signedAtKey         = $type . '_signed_at';
+                $signedNameKey       = $type . '_signed_name';
+                $signedSignatureKey  = $type . '_signature';
+
+                if (!empty($execution[$type])) {
+                    if (empty($execution[$signedByKey])) {
+                        $execution[$signedByKey]        = $signer->id;
+                        $execution[$signedAtKey]        = now()->toDateTimeString();
+                        $execution[$signedNameKey]      = $signer->name;
+                    }
+                    // Selalu gunakan gambar paraf resmi terbaru dari pengaturan admin
+                    $execution[$signedSignatureKey] = setting($settingKey);
+                } else {
+                    unset($execution[$signedByKey], $execution[$signedAtKey], $execution[$signedNameKey], $execution[$signedSignatureKey]);
+                }
+            }
+
+            return $execution;
+        }, $executions);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -143,9 +200,15 @@ class TrialPmService
                 ->count();
 
             if ($approvedCount === 4) {
+                $rdApproval = TrialPmApproval::where('trial_pm_id', $trial->id)
+                    ->where('department', 'rd')
+                    ->first();
+                $omId = $rdApproval ? $rdApproval->approved_by : $approvedBy;
+
                 $trial->update([
                     'approval_status' => 'Approved',
                     'approved_at'     => now(),
+                    'approved_by_om'  => $omId,
                 ]);
             }
         });

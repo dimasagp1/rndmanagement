@@ -65,13 +65,16 @@ class TrialRmService
             }
 
             $trial = TrialRm::create([
-                'code'            => $this->generateCode($formula),
-                'formula_id'      => $formula->id,
-                'sample_identity' => $data['sample_identity'],
-                'process_steps'   => $data['process_steps'],
-                'decision'        => $data['decision'] ?? null,
-                'approval_status' => 'Draft',
-                'created_by'      => $createdBy,
+                'code'             => $this->generateCode($formula),
+                'formula_id'       => $formula->id,
+                'sample_identity'  => $data['sample_identity'],
+                'trial_objective'  => $data['trial_objective'] ?? null,
+                'batch_qty'        => $data['batch_qty'] ?? null,
+                'packaging_design' => $data['packaging_design'] ?? null,
+                'process_steps'    => $data['process_steps'],
+                'decision'         => $data['decision'] ?? null,
+                'approval_status'  => 'Draft',
+                'created_by'       => $createdBy,
             ]);
 
             $this->saveVerifications($trial, $data['verifications'] ?? []);
@@ -93,9 +96,12 @@ class TrialRmService
             }
 
             $trial->update([
-                'sample_identity' => $data['sample_identity'],
-                'process_steps'   => $data['process_steps'],
-                'decision'        => $data['decision'] ?? null,
+                'sample_identity'  => $data['sample_identity'],
+                'trial_objective'  => $data['trial_objective'] ?? null,
+                'batch_qty'        => $data['batch_qty'] ?? null,
+                'packaging_design' => $data['packaging_design'] ?? null,
+                'process_steps'    => $data['process_steps'],
+                'decision'         => $data['decision'] ?? null,
             ]);
 
             $this->saveVerifications($trial, $data['verifications'] ?? []);

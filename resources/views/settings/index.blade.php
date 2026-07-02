@@ -108,6 +108,74 @@
                         </div>
                     </div>
 
+                    {{-- ─── Tanda Tangan Paraf Departemen ──────────────────────── --}}
+                    <div class="pt-4 border-t border-gray-100">
+                        <h3 class="text-sm font-bold text-ink mb-1">Tanda Tangan Paraf Departemen</h3>
+                        <p class="text-xs text-gray-400 mb-4">Unggah gambar paraf resmi untuk masing-masing departemen. Gambar ini akan tampil otomatis saat checkbox paraf dicentang pada form Trial PM.</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            {{-- Paraf Produksi --}}
+                            <div class="space-y-3">
+                                <label class="form-label font-bold text-ink">Paraf Produksi</label>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-20 h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                        @if(setting('paraf_prod'))
+                                        <img src="{{ asset('storage/' . setting('paraf_prod')) }}" class="w-full h-full object-contain p-1" id="preview-paraf-prod">
+                                        @else
+                                        <span class="text-lg text-gray-300">—</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <p class="font-semibold">Paraf Prod</p>
+                                        <p class="text-[10px]">PNG, JPG (Maks. 2MB)</p>
+                                    </div>
+                                </div>
+                                <input type="file" id="paraf_prod" name="paraf_prod" accept="image/png, image/jpeg"
+                                       class="block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                            </div>
+
+                            {{-- Paraf Engineering --}}
+                            <div class="space-y-3">
+                                <label class="form-label font-bold text-ink">Paraf Engineering</label>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-20 h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                        @if(setting('paraf_eng'))
+                                        <img src="{{ asset('storage/' . setting('paraf_eng')) }}" class="w-full h-full object-contain p-1" id="preview-paraf-eng">
+                                        @else
+                                        <span class="text-lg text-gray-300">—</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <p class="font-semibold">Paraf Eng</p>
+                                        <p class="text-[10px]">PNG, JPG (Maks. 2MB)</p>
+                                    </div>
+                                </div>
+                                <input type="file" id="paraf_eng" name="paraf_eng" accept="image/png, image/jpeg"
+                                       class="block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                            </div>
+
+                            {{-- Paraf QC --}}
+                            <div class="space-y-3">
+                                <label class="form-label font-bold text-ink">Paraf QC</label>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-20 h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                        @if(setting('paraf_qc'))
+                                        <img src="{{ asset('storage/' . setting('paraf_qc')) }}" class="w-full h-full object-contain p-1" id="preview-paraf-qc">
+                                        @else
+                                        <span class="text-lg text-gray-300">—</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <p class="font-semibold">Paraf QC</p>
+                                        <p class="text-[10px]">PNG, JPG (Maks. 2MB)</p>
+                                    </div>
+                                </div>
+                                <input type="file" id="paraf_qc" name="paraf_qc" accept="image/png, image/jpeg"
+                                       class="block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="pt-6 border-t border-gray-100 flex justify-end gap-2">
                         <button type="submit" class="btn-primary" id="btn-save-settings">
                             Simpan Perubahan

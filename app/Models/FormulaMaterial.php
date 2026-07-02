@@ -11,6 +11,12 @@ class FormulaMaterial extends Model
         'material_id',
         'supplier_id',
         'percentage',
+        'price_per_kg',
+        'price_per_gram',
+        'dose_2g',
+        'dose_05g',
+        'sachet_30',
+        'hpp_rm',
     ];
 
     protected $casts = [

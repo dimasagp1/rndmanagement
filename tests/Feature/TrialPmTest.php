@@ -33,13 +33,13 @@ class TrialPmTest extends TestCase
     public function test_staff_rnd_can_create_trial_pm_and_initializes_4_department_approvals()
     {
         $response = $this->actingAs($this->staff)->post(route('trial-pms.store'), [
+            'proposal_number'    => 'USUL-12345',
             'packaging_material' => 'Botol PET 250ml',
-            'specifications'     => 'Spesifikasi detail',
-            'parameters'         => [
-                'kecepatan_filling' => '80 botol/menit',
-                'suhu_sealing'      => '180°C',
-                'tekanan_mesin'     => '4.5 bar',
-            ],
+            'supplier'           => 'PT Kemas Makmur',
+            'product_use'        => 'Jahe Merah',
+            'product_trial'      => 'Batch A',
+            'trial_sample_quantity' => '500 pcs',
+            'specifications'     => ['Spesifikasi detail'],
             'risk_analysis'      => 'Resiko bocor',
         ]);
 
@@ -62,8 +62,13 @@ class TrialPmTest extends TestCase
     {
         $trial = TrialPm::create([
             'code'               => 'TPM-202607-001',
+            'proposal_number'    => 'USUL-12345',
             'packaging_material' => 'Sachet alu',
-            'specifications'     => 'Foil',
+            'supplier'           => 'PT Foilindo',
+            'product_use'        => 'Jahe',
+            'product_trial'      => 'Batch B',
+            'trial_sample_quantity' => '1000 pcs',
+            'specifications'     => ['Foil'],
             'approval_status'    => 'Draft',
             'created_by'         => $this->staff->id,
         ]);
@@ -108,8 +113,13 @@ class TrialPmTest extends TestCase
     {
         $trial = TrialPm::create([
             'code'               => 'TPM-202607-001',
+            'proposal_number'    => 'USUL-12345',
             'packaging_material' => 'Sachet alu',
-            'specifications'     => 'Foil',
+            'supplier'           => 'PT Foilindo',
+            'product_use'        => 'Jahe',
+            'product_trial'      => 'Batch B',
+            'trial_sample_quantity' => '1000 pcs',
+            'specifications'     => ['Foil'],
             'approval_status'    => 'Draft',
             'created_by'         => $this->staff->id,
         ]);

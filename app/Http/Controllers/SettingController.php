@@ -28,6 +28,9 @@ class SettingController extends Controller
             'company_name' => ['required', 'string', 'max:100'],
             'app_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
             'app_favicon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,ico', 'max:1024'],
+            'paraf_prod' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'paraf_eng' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'paraf_qc' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
         ]);
 
         // Save text settings
@@ -52,6 +55,19 @@ class SettingController extends Controller
             }
             $path = $request->file('app_favicon')->store('settings', 'public');
             Setting::updateOrCreate(['key' => 'app_favicon'], ['value' => $path]);
+        }
+
+        // Process paraf uploads
+        $parafTypes = ['paraf_prod', 'paraf_eng', 'paraf_qc'];
+        foreach ($parafTypes as $parafType) {
+            if ($request->hasFile($parafType)) {
+                $oldParaf = setting($parafType);
+                if ($oldParaf) {
+                    Storage::disk('public')->delete($oldParaf);
+                }
+                $path = $request->file($parafType)->store('settings/paraf', 'public');
+                Setting::updateOrCreate(['key' => $parafType], ['value' => $path]);
+            }
         }
 
         return back()->with('success', 'Konfigurasi identitas sistem berhasil diperbarui.');

@@ -61,7 +61,7 @@ class FormulaController extends Controller
 
         $materials = Material::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
-        $stages    = ['Draf', 'Pra-Trial', 'Optimalisasi', 'Final'];
+        $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
 
         return view('formulas.create', compact('materials', 'suppliers', 'stages'));
     }
@@ -75,11 +75,22 @@ class FormulaController extends Controller
 
         $validated = $request->validate([
             'name'              => 'required|string|max:255',
-            'development_stage' => 'required|in:Draf,Pra-Trial,Optimalisasi,Final',
+            'formula_type'      => 'nullable|in:existing,new_product,substitution',
+            'formula_date'      => 'nullable|date',
+            'development_stage' => 'required|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
+            'preparation_method' => 'nullable|string|max:10000',
+            'notes'             => 'nullable|string|max:10000',
+            'result'            => 'nullable|in:Approved,Need Improvement,Rejected',
             'materials'         => 'array',
             'materials.*.material_id' => 'required|exists:materials,id',
             'materials.*.supplier_id' => 'nullable|exists:suppliers,id',
-            'materials.*.percentage'  => 'required|numeric|min:0.01|max:100',
+            'materials.*.percentage'  => 'required|numeric|min:0.001|max:100',
+            'materials.*.price_per_kg'  => 'nullable|numeric|min:0',
+            'materials.*.price_per_gram' => 'nullable|numeric|min:0',
+            'materials.*.dose_2g'   => 'nullable|numeric|min:0',
+            'materials.*.dose_05g'  => 'nullable|numeric|min:0',
+            'materials.*.sachet_30' => 'nullable|numeric|min:0',
+            'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -114,7 +125,7 @@ class FormulaController extends Controller
 
         $materials = Material::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
-        $stages    = ['Draf', 'Pra-Trial', 'Optimalisasi', 'Final'];
+        $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
 
         $formula->load(['materials.material', 'materials.supplier']);
 
@@ -130,11 +141,22 @@ class FormulaController extends Controller
 
         $validated = $request->validate([
             'name'              => 'required|string|max:255',
-            'development_stage' => 'required|in:Draf,Pra-Trial,Optimalisasi,Final',
+            'formula_type'      => 'nullable|in:existing,new_product,substitution',
+            'formula_date'      => 'nullable|date',
+            'development_stage' => 'required|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
+            'preparation_method' => 'nullable|string|max:10000',
+            'notes'             => 'nullable|string|max:10000',
+            'result'            => 'nullable|in:Approved,Need Improvement,Rejected',
             'materials'         => 'array',
             'materials.*.material_id' => 'required|exists:materials,id',
             'materials.*.supplier_id' => 'nullable|exists:suppliers,id',
-            'materials.*.percentage'  => 'required|numeric|min:0.01|max:100',
+            'materials.*.percentage'  => 'required|numeric|min:0.001|max:100',
+            'materials.*.price_per_kg'  => 'nullable|numeric|min:0',
+            'materials.*.price_per_gram' => 'nullable|numeric|min:0',
+            'materials.*.dose_2g'   => 'nullable|numeric|min:0',
+            'materials.*.dose_05g'  => 'nullable|numeric|min:0',
+            'materials.*.sachet_30' => 'nullable|numeric|min:0',
+            'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -196,5 +218,23 @@ class FormulaController extends Controller
         return redirect()
             ->route('formulas.edit', $newFormula)
             ->with('success', "Reformulasi berhasil. Formula versi baru {$newFormula->code} (V{$newFormula->version}) siap diedit.");
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PRINT
+    // ──────────────────────────────────────────────────────────────
+    public function print(Formula $formula)
+    {
+        Gate::authorize('view', $formula);
+
+        $formula->load([
+            'materials.material',
+            'materials.supplier',
+            'creator',
+            'operationalManager',
+            'generalManager',
+        ]);
+
+        return view('formulas.print', compact('formula'));
     }
 }

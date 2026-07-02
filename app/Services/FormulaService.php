@@ -38,12 +38,17 @@ class FormulaService
             $this->validateComposition($data['materials'] ?? []);
 
             $formula = Formula::create([
-                'code'              => $this->generateCode(),
-                'name'              => $data['name'],
-                'version'           => 1,
-                'development_stage' => $data['development_stage'],
-                'approval_status'   => 'Draft',
-                'created_by'        => $createdBy,
+                'code'               => $this->generateCode(),
+                'name'               => $data['name'],
+                'formula_type'       => $data['formula_type'] ?? null,
+                'formula_date'       => $data['formula_date'] ?? now()->format('Y-m-d'),
+                'version'            => 1,
+                'development_stage'  => $data['development_stage'],
+                'preparation_method' => $data['preparation_method'] ?? null,
+                'notes'              => $data['notes'] ?? null,
+                'result'             => $data['result'] ?? null,
+                'approval_status'    => 'Draft',
+                'created_by'         => $createdBy,
             ]);
 
             $this->syncMaterials($formula, $data['materials'] ?? []);
@@ -61,8 +66,13 @@ class FormulaService
             $this->validateComposition($data['materials'] ?? []);
 
             $formula->update([
-                'name'              => $data['name'],
-                'development_stage' => $data['development_stage'],
+                'name'               => $data['name'],
+                'formula_type'       => $data['formula_type'] ?? null,
+                'formula_date'       => $data['formula_date'] ?? null,
+                'development_stage'  => $data['development_stage'],
+                'preparation_method' => $data['preparation_method'] ?? null,
+                'notes'              => $data['notes'] ?? null,
+                'result'             => $data['result'] ?? null,
             ]);
 
             $this->syncMaterials($formula, $data['materials'] ?? []);
@@ -168,9 +178,12 @@ class FormulaService
             $newFormula = Formula::create([
                 'code'              => $this->generateCode(),
                 'name'              => $formula->name,
+                'formula_type'      => $formula->formula_type,
+                'formula_date'      => now()->format('Y-m-d'),
                 'version'           => $newVersion,
                 'parent_formula_id' => $formula->parent_formula_id ?? $formula->id,
-                'development_stage' => 'Draf',
+                'development_stage' => 'Product Form',
+                'preparation_method' => $formula->preparation_method,
                 'approval_status'   => 'Draft',
                 'created_by'        => $createdBy,
             ]);
@@ -178,10 +191,16 @@ class FormulaService
             // Copy materials dari versi sebelumnya sebagai titik awal
             foreach ($formula->materials as $mat) {
                 FormulaMaterial::create([
-                    'formula_id'  => $newFormula->id,
-                    'material_id' => $mat->material_id,
-                    'supplier_id' => $mat->supplier_id,
-                    'percentage'  => $mat->percentage,
+                    'formula_id'     => $newFormula->id,
+                    'material_id'    => $mat->material_id,
+                    'supplier_id'    => $mat->supplier_id,
+                    'percentage'     => $mat->percentage,
+                    'price_per_kg'   => $mat->price_per_kg,
+                    'price_per_gram' => $mat->price_per_gram,
+                    'dose_2g'        => $mat->dose_2g,
+                    'dose_05g'       => $mat->dose_05g,
+                    'sachet_30'      => $mat->sachet_30,
+                    'hpp_rm'         => $mat->hpp_rm,
                 ]);
             }
 
@@ -211,16 +230,22 @@ class FormulaService
     private function syncMaterials(Formula $formula, array $materials): void
     {
         $formula->materials()->delete();
-
+    
         foreach ($materials as $mat) {
             if (empty($mat['material_id']) || ! isset($mat['percentage'])) {
                 continue;
             }
             FormulaMaterial::create([
-                'formula_id'  => $formula->id,
-                'material_id' => $mat['material_id'],
-                'supplier_id' => $mat['supplier_id'] ?: null,
-                'percentage'  => $mat['percentage'],
+                'formula_id'     => $formula->id,
+                'material_id'    => $mat['material_id'],
+                'supplier_id'    => $mat['supplier_id'] ?: null,
+                'percentage'     => $mat['percentage'],
+                'price_per_kg'   => $mat['price_per_kg'] ?? null,
+                'price_per_gram' => $mat['price_per_gram'] ?? null,
+                'dose_2g'        => $mat['dose_2g'] ?? null,
+                'dose_05g'       => $mat['dose_05g'] ?? null,
+                'sachet_30'      => $mat['sachet_30'] ?? null,
+                'hpp_rm'         => $mat['hpp_rm'] ?? null,
             ]);
         }
     }

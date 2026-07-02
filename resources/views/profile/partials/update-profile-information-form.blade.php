@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -45,6 +45,20 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="signature" :value="__('Tanda Tangan (Signature Image)')" />
+            
+            @if($user->signature_path)
+                <div class="mt-2 mb-3 p-2 bg-gray-50 border border-gray-200 rounded-lg max-w-[200px] flex items-center justify-center">
+                    <img src="{{ $user->signature_path }}" alt="Tanda Tangan Anda" class="max-h-16 object-contain">
+                </div>
+            @endif
+
+            <input id="signature" name="signature" type="file" accept="image/*" class="mt-1 block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+            <p class="mt-1 text-xs text-gray-400">Pilih gambar tanda tangan berlatar belakang transparan (format PNG/JPG/SVG, maks 2MB).</p>
+            <x-input-error class="mt-2" :messages="$errors->get('signature')" />
         </div>
 
         <div class="flex items-center gap-4">

@@ -214,14 +214,50 @@ class DemoDataSeeder extends Seeder
         // ──────────────────────────────────────────────────
         // TRIAL PM 1 — Botol PET 250ml (4/4 Approved)
         // ──────────────────────────────────────────────────
+        // ──────────────────────────────────────────────────
+        // TRIAL PM 1 — Botol PET 250ml (4/4 Approved)
+        // ──────────────────────────────────────────────────
         $tp1 = TrialPm::create([
             'code'               => 'TPM-202606-001',
+            'proposal_number'    => 'USUL-202606-RD01',
             'packaging_material' => 'Botol PET 250ml dengan tutup flip-top',
-            'specifications'     => 'Botol PET grade food, kapasitas 250ml, diameter 55mm, tinggi 140mm. Tutup flip-top HDPE warna hijau.',
-            'parameters'         => ['kecepatan_filling' => '80 botol/menit', 'suhu_sealing' => '180°C', 'tekanan_mesin' => '4.5 bar'],
+            'supplier'           => 'PT Kemas Makmur Lestari',
+            'product_use'        => 'Jahe Merah Hangat 250ml',
+            'product_trial'      => 'Jahe Merah Hangat Batch A',
+            'trial_sample_quantity' => '500 pcs',
+            'old_supplier'       => 'CV Indopack Utama',
+            'difference_with_existing' => 'Tutup flip-top lebih rapat, ketebalan dinding botol bertambah 0.2mm untuk kekuatan kompresi.',
+            'specifications'     => [
+                'Botol PET grade food, kapasitas 250ml',
+                'Diameter 55mm, tinggi 140mm',
+                'Tutup flip-top HDPE warna hijau'
+            ],
+            'executions'         => [
+                [
+                    'machine' => 'Mesin Filling Liquid Rotary A',
+                    'setting' => 'Speed 80 botol/menit, Suhu Sealing 180°C, Tekanan 4.5 bar',
+                    'actual' => 'Speed 80 botol/menit, Suhu Sealing 180°C, Tekanan 4.5 bar',
+                    'start_time' => '08:30',
+                    'end_time' => '10:00',
+                    'reject' => 2,
+                    'good' => 498,
+                    'paraf_prod' => true,
+                    'paraf_eng' => true,
+                    'paraf_qc' => true
+                ]
+            ],
+            'discussion_rows'    => [
+                [
+                    'evaluation' => 'Hasil sealing rapi dan tidak bocor saat dilakukan leak test.',
+                    'risk_analysis' => 'Risiko utama kebocoran pada sambungan tutup jika torsi penutupan kurang.',
+                    'recommendation' => 'Pastikan torque mesin penutup diset minimal 15 Nm.'
+                ]
+            ],
             'risk_analysis'      => 'Risiko utama kebocoran pada sambungan tutup. Mitigasi: uji torque 15 Nm minimum.',
             'approval_status'    => 'Approved',
             'created_by'         => $staff->id,
+            'approved_by_om'    => $manager->id,
+            'approved_at'        => Carbon::now()->subDays(7),
             'created_at'         => Carbon::now()->subDays(12),
             'updated_at'         => Carbon::now()->subDays(7),
         ]);
@@ -241,9 +277,40 @@ class DemoDataSeeder extends Seeder
         // ──────────────────────────────────────────────────
         $tp2 = TrialPm::create([
             'code'               => 'TPM-202607-001',
+            'proposal_number'    => 'USUL-202607-RD02',
             'packaging_material' => 'Sachet aluminium foil 30ml',
-            'specifications'     => 'Sachet alu-foil 4-layer (PET/AL/NY/PE), 80x120mm, kapasitas 30ml. Sealing 8mm.',
-            'parameters'         => ['kecepatan_filling' => '120 sachet/menit', 'suhu_sealing' => '210°C', 'tekanan_mesin' => '5.0 bar'],
+            'supplier'           => 'PT Foilindo Kemasan Indah',
+            'product_use'        => 'Kunyit Asam Segar 30ml',
+            'product_trial'      => 'Kunyit Asam Segar Batch B',
+            'trial_sample_quantity' => '1000 pcs',
+            'old_supplier'       => null,
+            'difference_with_existing' => 'Bahan alu-foil lebih tebal untuk proteksi cahaya maksimal.',
+            'specifications'     => [
+                'Sachet alu-foil 4-layer (PET/AL/NY/PE)',
+                'Dimensi 80x120mm, kapasitas 30ml',
+                'Ketebalan sealing 8mm'
+            ],
+            'executions'         => [
+                [
+                    'machine' => 'Mesin Vertical Sachet Packing B',
+                    'setting' => 'Speed 120 sachet/menit, Suhu Sealing 210°C, Tekanan 5.0 bar',
+                    'actual' => 'Speed 118 sachet/menit, Suhu Sealing 208°C, Tekanan 5.0 bar',
+                    'start_time' => '13:00',
+                    'end_time' => '15:30',
+                    'reject' => 12,
+                    'good' => 988,
+                    'paraf_prod' => true,
+                    'paraf_eng' => true,
+                    'paraf_qc' => false
+                ]
+            ],
+            'discussion_rows'    => [
+                [
+                    'evaluation' => 'Kecepatan filling optimal, namun terdapat reject akibat seal lipat.',
+                    'risk_analysis' => 'Risiko kebocoran pada sealing. Uji kebocoran water immersion test 30 menit.',
+                    'recommendation' => 'Lakukan pembersihan berkala pada jaw sealer untuk mencegah tumpukan residu.'
+                ]
+            ],
             'risk_analysis'      => 'Risiko kebocoran pada sealing. Uji kebocoran water immersion test 30 menit.',
             'approval_status'    => 'Draft',
             'created_by'         => $siti->id,

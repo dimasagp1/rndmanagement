@@ -1,4 +1,5 @@
 <x-app-layout>
+    <div x-data="{ showPrintModal: false }">
     <x-slot name="header">
         <div class="flex items-center gap-2 text-sm text-gray-500">
             <a href="{{ route('dashboard') }}" class="hover:text-primary">Dashboard</a>
@@ -78,6 +79,11 @@
             </form>
             @endcan
 
+            <button type="button" x-on:click="showPrintModal = true; document.getElementById('printPreviewFrame').src = '{{ route('formulas.print', $formula) }}'" class="btn-outline text-gray-700 hover:bg-gray-100">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Cetak Formula
+            </button>
+
             <a href="{{ route('formulas.index') }}" class="btn-ghost">← Kembali</a>
         </div>
     </div>
@@ -115,6 +121,14 @@
                         <p class="font-semibold text-ink">{{ $formula->name }}</p>
                     </div>
                     <div>
+                        <p class="text-xs text-gray-400 mb-1">Type</p>
+                        <p>{{ $formula->formula_type ? ucfirst(str_replace('_', ' ', $formula->formula_type)) : '—' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">Date</p>
+                        <p>{{ $formula->formula_date ? $formula->formula_date->format('d M Y') : $formula->created_at->format('d M Y') }}</p>
+                    </div>
+                    <div>
                         <p class="text-xs text-gray-400 mb-1">Versi</p>
                         <p>V{{ $formula->version }}</p>
                     </div>
@@ -125,6 +139,18 @@
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Status</p>
                         <x-status-badge :status="$formula->approval_status" />
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">Result</p>
+                        @if($formula->result === 'Approved')
+                        <span class="badge bg-emerald-100 text-emerald-700">Approved</span>
+                        @elseif($formula->result === 'Need Improvement')
+                        <span class="badge bg-amber-100 text-amber-700">Need Improvement</span>
+                        @elseif($formula->result === 'Rejected')
+                        <span class="badge bg-red-100 text-red-700">Rejected</span>
+                        @else
+                        <span class="text-gray-400">—</span>
+                        @endif
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Dibuat Oleh</p>
@@ -179,9 +205,12 @@
                             <tr>
                                 <th class="w-8">#</th>
                                 <th>Material</th>
-                                <th>Jenis</th>
                                 <th>Supplier</th>
+                                <th class="text-right">Harga/kg</th>
                                 <th class="text-right">Persentase</th>
+                                <th class="text-right">2g</th>
+                                <th class="text-right">0.5g</th>
+                                <th class="text-right">HPP RM</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -189,17 +218,20 @@
                             <tr>
                                 <td class="text-gray-300 text-xs">{{ $i + 1 }}</td>
                                 <td class="font-medium text-ink">{{ $mat->material?->name ?? '—' }}</td>
-                                <td class="text-xs text-gray-500">{{ $mat->material?->type ?? '—' }}</td>
                                 <td class="text-xs text-gray-500">{{ $mat->supplier?->name ?? '—' }}</td>
+                                <td class="text-right text-xs font-mono">{{ $mat->price_per_kg ? number_format($mat->price_per_kg, 0) : '—' }}</td>
                                 <td class="text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <div class="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-1.5 w-12 bg-gray-100 rounded-full overflow-hidden">
                                             <div class="h-full bg-primary/60 rounded-full"
                                                  style="width: {{ $mat->percentage }}%"></div>
                                         </div>
                                         <span class="font-mono font-semibold text-sm text-primary">{{ $mat->percentage }}%</span>
                                     </div>
                                 </td>
+                                <td class="text-right text-xs font-mono">{{ $mat->dose_2g ? number_format($mat->dose_2g, 3) : '—' }}</td>
+                                <td class="text-right text-xs font-mono">{{ $mat->dose_05g ? number_format($mat->dose_05g, 3) : '—' }}</td>
+                                <td class="text-right text-xs font-mono">{{ $mat->hpp_rm ? 'Rp' . number_format($mat->hpp_rm, 2) : '—' }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -211,12 +243,33 @@
                                         {{ $pct }}%
                                     </span>
                                 </td>
+                                <td colspan="3"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
                 @endif
             </div>
+
+            {{-- Cara Penyajian --}}
+            @if($formula->preparation_method)
+            <div class="card">
+                <div class="card-header"><h2 class="text-sm font-heading font-semibold text-ink">Cara Penyajian</h2></div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-700 whitespace-pre-line">{{ $formula->preparation_method }}</p>
+                </div>
+            </div>
+            @endif
+
+            {{-- Notes --}}
+            @if($formula->notes)
+            <div class="card">
+                <div class="card-header"><h2 class="text-sm font-heading font-semibold text-ink">Note</h2></div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-700 whitespace-pre-line">{{ $formula->notes }}</p>
+                </div>
+            </div>
+            @endif
 
             {{-- Related Trial RMs --}}
             @if($formula->trialRms->isNotEmpty())
@@ -335,5 +388,69 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    {{-- ══════════════════════════════════════════════════════
+         PRINT PREVIEW MODAL
+    ════════════════════════════════════════════════════════ --}}
+    <style>
+        .print-modal-backdrop { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); }
+        .print-modal-container { width: 95vw; max-width: 1200px; height: 92vh; }
+        .print-iframe-wrapper { background: #64748b; overflow: auto; display: flex; justify-content: center; padding: 20px; }
+        .print-iframe-wrapper iframe { width: 794px; min-height: 1123px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); border-radius: 4px; background: #fff; flex-shrink: 0; }
+        .btn-toolbar { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.15s; border: none; cursor: pointer; }
+        .btn-toolbar svg { width: 15px; height: 15px; }
+        .btn-print-action { background: #16a34a; color: #fff; }
+        .btn-print-action:hover { background: #15803d; }
+        .btn-download-action { background: #f59e0b; color: #fff; }
+        .btn-download-action:hover { background: #d97706; }
+        .btn-close-action { background: #ef4444; color: #fff; }
+        .btn-close-action:hover { background: #dc2626; }
+    </style>
+
+    <div x-show="showPrintModal"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="print-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="display: none;"
+         @keydown.escape.window="showPrintModal = false">
+
+        <div x-show="showPrintModal"
+             x-transition:enter="ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="print-modal-container bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden">
+
+            <div class="flex items-center justify-between px-5 py-3 bg-slate-800 text-white rounded-t-xl flex-shrink-0">
+                <span class="font-semibold text-sm tracking-wide">Preview Cetak — {{ $formula->code }}</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="document.getElementById('printPreviewFrame').contentWindow.print()" class="btn-toolbar btn-print-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        Print
+                    </button>
+                    <button type="button" onclick="document.getElementById('printPreviewFrame').contentWindow.print()" class="btn-toolbar btn-download-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Download PDF
+                    </button>
+                    <button type="button" x-on:click="showPrintModal = false" class="btn-toolbar btn-close-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Tutup
+                    </button>
+                </div>
+            </div>
+
+            <div class="print-iframe-wrapper flex-1">
+                <iframe id="printPreviewFrame" src="" frameborder="0" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
     </div>
 </x-app-layout>

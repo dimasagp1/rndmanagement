@@ -65,6 +65,30 @@
                             </div>
                         </div>
 
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label" for="batch_qty">Jumlah Bets Trial</label>
+                                <input type="text" id="batch_qty" name="batch_qty"
+                                       value="{{ old('batch_qty') }}"
+                                       placeholder="mis. 3 bets @ 500ml"
+                                       class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label" for="packaging_design">Rancangan Kemasan</label>
+                                <input type="text" id="packaging_design" name="packaging_design"
+                                       value="{{ old('packaging_design') }}"
+                                       placeholder="mis. Botol PET 250ml + tutup flip-top"
+                                       class="form-input">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label" for="trial_objective">Tujuan Trial</label>
+                            <textarea id="trial_objective" name="trial_objective" rows="3"
+                                      placeholder="Tujuan dilakukannya uji coba ini..."
+                                      class="form-input">{{ old('trial_objective') }}</textarea>
+                        </div>
+
                         <div>
                             <label class="form-label" for="process_steps">Tahapan Proses & Metode Uji <span class="text-red-500">*</span></label>
                             <textarea id="process_steps" name="process_steps" rows="6"
