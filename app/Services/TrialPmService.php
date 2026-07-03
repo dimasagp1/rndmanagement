@@ -17,7 +17,7 @@ class TrialPmService
     {
         if ($proposalNumber) {
             $cleanProposal = str_replace(' ', '-', trim($proposalNumber));
-            $prefix = 'TPM-' . $cleanProposal . '-';
+            $prefix = $cleanProposal . '-';
             
             $lastSeq = TrialPm::where('code', 'like', $prefix . '%')
                 ->pluck('code')
