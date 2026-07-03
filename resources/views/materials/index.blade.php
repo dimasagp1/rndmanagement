@@ -50,9 +50,9 @@
                     <tr>
                         <th class="w-20">No</th>
                         <th>Nama Bahan Baku</th>
-                        <th>Tipe</th>
+                        <th>Bentuk Sediaan</th>
                         <th>Satuan</th>
-                        <th>Deskripsi</th>
+                        <th>Aplikasi Penggunaan</th>
                         <th class="w-32 text-center">Aksi</th>
                     </tr>
                 </thead>

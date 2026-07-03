@@ -12,7 +12,7 @@
     <div class="page-header">
         <div>
             <h1 class="page-title">Edit Bahan Baku</h1>
-            <p class="page-subtitle">Ubah informasi nama, tipe, satuan, atau deskripsi dari bahan baku terpilih.</p>
+            <p class="page-subtitle">Ubah informasi nama, bentuk sediaan, satuan, atau aplikasi penggunaan dari bahan baku terpilih.</p>
         </div>
         <a href="{{ route('materials.index') }}" class="btn-ghost">← Batal</a>
     </div>

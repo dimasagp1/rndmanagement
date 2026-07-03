@@ -450,9 +450,9 @@
                 <tr>
                     <th style="width: 8mm;">No</th>
                     <th>Nama Bahan</th>
-                    <th>Nama INCI</th>
+                    <th>Aplikasi Penggunaan</th>
                     <th>Supplier</th>
-                    <th>Fungsi Bahan</th>
+                    <th>Bentuk Sediaan</th>
                     <th style="width: 24mm;">Persentase (%)</th>
                 </tr>
             </thead>

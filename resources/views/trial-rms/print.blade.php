@@ -181,9 +181,9 @@
                 <tr>
                     <th rowspan="2" style="width: 8mm;">No</th>
                     <th rowspan="2">Nama Bahan</th>
-                    <th rowspan="2">Nama INCI</th>
+                    <th rowspan="2">Aplikasi Penggunaan</th>
                     <th rowspan="2">Supplier</th>
-                    <th rowspan="2">Fungsi Bahan</th>
+                    <th rowspan="2">Bentuk Sediaan</th>
                     <th colspan="3">Formula</th>
                 </tr>
                 <tr>
