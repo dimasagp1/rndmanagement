@@ -62,8 +62,9 @@ class FormulaController extends Controller
         $materials = Material::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
         $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
+        $autoCode  = $this->service->generateCode();
 
-        return view('formulas.create', compact('materials', 'suppliers', 'stages'));
+        return view('formulas.create', compact('materials', 'suppliers', 'stages', 'autoCode'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -74,6 +75,7 @@ class FormulaController extends Controller
         Gate::authorize('create', Formula::class);
 
         $validated = $request->validate([
+            'code'              => 'required|string|max:255|unique:formulas,code',
             'name'              => 'required|string|max:255',
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
@@ -140,6 +142,7 @@ class FormulaController extends Controller
         Gate::authorize('edit', $formula);
 
         $validated = $request->validate([
+            'code'              => 'required|string|max:255|unique:formulas,code,' . $formula->id,
             'name'              => 'required|string|max:255',
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',

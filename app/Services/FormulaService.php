@@ -38,7 +38,7 @@ class FormulaService
             $this->validateComposition($data['materials'] ?? []);
 
             $formula = Formula::create([
-                'code'               => $this->generateCode(),
+                'code'               => $data['code'],
                 'name'               => $data['name'],
                 'formula_type'       => $data['formula_type'] ?? null,
                 'formula_date'       => $data['formula_date'] ?? now()->format('Y-m-d'),
@@ -65,7 +65,7 @@ class FormulaService
         return DB::transaction(function () use ($formula, $data) {
             $this->validateComposition($data['materials'] ?? []);
 
-            $formula->update([
+            $updateData = [
                 'name'               => $data['name'],
                 'formula_type'       => $data['formula_type'] ?? null,
                 'formula_date'       => $data['formula_date'] ?? null,
@@ -73,7 +73,13 @@ class FormulaService
                 'preparation_method' => $data['preparation_method'] ?? null,
                 'notes'              => $data['notes'] ?? null,
                 'result'             => $data['result'] ?? null,
-            ]);
+            ];
+
+            if ($formula->approval_status === 'Draft' || $formula->approval_status === 'Rejected') {
+                $updateData['code'] = $data['code'];
+            }
+
+            $formula->update($updateData);
 
             $this->syncMaterials($formula, $data['materials'] ?? []);
 

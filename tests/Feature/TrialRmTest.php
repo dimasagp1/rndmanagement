@@ -56,6 +56,7 @@ class TrialRmTest extends TestCase
     public function test_staff_rnd_can_create_trial_rm_for_approved_formula()
     {
         $response = $this->actingAs($this->staff)->post(route('trial-rms.store'), [
+            'code'            => 'TRM-202607-001-A',
             'formula_id'      => $this->approvedFormula->id,
             'sample_identity' => 'Sample Batch 1',
             'process_steps'   => 'Langkah 1, Langkah 2',
@@ -75,8 +76,7 @@ class TrialRmTest extends TestCase
         $this->assertEquals('Sample Batch 1', $trial->sample_identity);
         $this->assertEquals('Lulus', $trial->decision);
         $this->assertEquals('Draft', $trial->approval_status);
-        $this->assertStringStartsWith('TRM-' . now()->format('Ym') . '-', $trial->code);
-        $this->assertStringEndsWith('-A', $trial->code);
+        $this->assertEquals('TRM-202607-001-A', $trial->code);
 
         $response->assertRedirect(route('trial-rms.show', $trial));
     }
@@ -84,6 +84,7 @@ class TrialRmTest extends TestCase
     public function test_cannot_create_trial_for_unapproved_formula()
     {
         $response = $this->actingAs($this->staff)->post(route('trial-rms.store'), [
+            'code'            => 'TRM-202607-999-A',
             'formula_id'      => $this->draftFormula->id,
             'sample_identity' => 'Sample Batch Unapproved',
             'process_steps'   => 'Langkah 1',
@@ -94,7 +95,7 @@ class TrialRmTest extends TestCase
         $this->assertEquals(0, TrialRm::count());
     }
 
-    public function test_repeated_trial_for_same_formula_increments_suffix_letter()
+    public function test_repeated_trial_for_same_formula_stores_manually_inputted_code()
     {
         // First trial
         $trial1 = TrialRm::create([
@@ -106,8 +107,9 @@ class TrialRmTest extends TestCase
             'created_by'      => $this->staff->id,
         ]);
 
-        // Second trial store request
+        // Second trial store request with custom code
         $response = $this->actingAs($this->staff)->post(route('trial-rms.store'), [
+            'code'            => 'CUSTOM-TRIAL-CODE-02',
             'formula_id'      => $this->approvedFormula->id,
             'sample_identity' => 'Batch 2',
             'process_steps'   => 'Process 2',
@@ -116,8 +118,7 @@ class TrialRmTest extends TestCase
 
         $trial2 = TrialRm::where('sample_identity', 'Batch 2')->first();
         $this->assertNotNull($trial2);
-        // Suffix letter should be incremented to 'B'
-        $this->assertEquals('TRM-202607-001-B', $trial2->code);
+        $this->assertEquals('CUSTOM-TRIAL-CODE-02', $trial2->code);
     }
 
     public function test_manager_cannot_edit_trial_rm()

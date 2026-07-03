@@ -62,7 +62,11 @@ class TrialRmController extends Controller
             ['name' => 'Berat Jenis', 'target' => ''],
         ];
 
-        return view('trial-rms.create', compact('formulas', 'defaultParams'));
+        // Default suggestion code
+        $firstFormula = $formulas->first();
+        $autoCode = $firstFormula ? $this->service->generateCode($firstFormula) : 'TRM-' . now()->format('Ym') . '-001-A';
+
+        return view('trial-rms.create', compact('formulas', 'defaultParams', 'autoCode'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -73,6 +77,7 @@ class TrialRmController extends Controller
         Gate::authorize('create', TrialRm::class);
 
         $validated = $request->validate([
+            'code'            => 'required|string|max:255|unique:trial_rms,code',
             'formula_id'      => 'required|exists:formulas,id',
             'sample_identity' => 'required|string|max:255',
             'trial_objective' => 'nullable|string|max:10000',
@@ -135,6 +140,7 @@ class TrialRmController extends Controller
         Gate::authorize('edit', $trialRm);
 
         $validated = $request->validate([
+            'code'            => 'required|string|max:255|unique:trial_rms,code,' . $trialRm->id,
             'sample_identity' => 'required|string|max:255',
             'trial_objective' => 'nullable|string|max:10000',
             'batch_qty'       => 'nullable|string|max:255',

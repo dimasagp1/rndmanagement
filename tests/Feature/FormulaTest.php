@@ -58,6 +58,7 @@ class FormulaTest extends TestCase
     public function test_staff_rnd_can_create_formula_draft_with_any_percentage()
     {
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
+            'code' => 'FRM-202607-001',
             'name' => 'Formula Test',
             'development_stage' => 'Draf',
             'materials' => [
@@ -75,7 +76,7 @@ class FormulaTest extends TestCase
         $this->assertEquals(1, $formula->version);
         $this->assertEquals('Draft', $formula->approval_status);
         $this->assertEquals(45.50, $formula->total_percentage);
-        $this->assertStringStartsWith('FRM-' . now()->format('Ym') . '-', $formula->code);
+        $this->assertEquals('FRM-202607-001', $formula->code);
 
         $response->assertRedirect(route('formulas.show', $formula));
     }
@@ -83,6 +84,7 @@ class FormulaTest extends TestCase
     public function test_cannot_create_formula_with_percentage_exceeding_100()
     {
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
+            'code' => 'FRM-202607-999',
             'name' => 'Formula Over 100',
             'development_stage' => 'Draf',
             'materials' => [

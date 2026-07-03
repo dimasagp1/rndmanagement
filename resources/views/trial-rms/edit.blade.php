@@ -63,7 +63,19 @@
                 <div class="card">
                     <div class="card-header"><h2 class="text-sm font-heading font-semibold text-ink">Detail Uji Coba</h2></div>
                     <div class="card-body space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="form-label" for="code">Kode Trial <span class="text-red-500">*</span></label>
+                                @if($trialRm->approval_status === 'Draft' || $trialRm->approval_status === 'Rejected')
+                                    <input type="text" id="code" name="code"
+                                           value="{{ old('code', $trialRm->code) }}"
+                                           class="form-input @error('code') border-red-400 @enderror" required>
+                                @else
+                                    <input type="text" id="code" name="code"
+                                           value="{{ $trialRm->code }}"
+                                           class="form-input bg-gray-50 text-gray-500 cursor-not-allowed" readonly>
+                                @endif
+                            </div>
                             <div>
                                 <label class="form-label">Formula Referensi</label>
                                 <input type="text" class="form-input bg-gray-50 text-gray-500 cursor-not-allowed"

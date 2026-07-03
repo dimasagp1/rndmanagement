@@ -65,7 +65,7 @@ class TrialRmService
             }
 
             $trial = TrialRm::create([
-                'code'             => $this->generateCode($formula),
+                'code'             => $data['code'],
                 'formula_id'       => $formula->id,
                 'sample_identity'  => $data['sample_identity'],
                 'trial_objective'  => $data['trial_objective'] ?? null,
@@ -95,14 +95,20 @@ class TrialRmService
                 ]);
             }
 
-            $trial->update([
+            $updateData = [
                 'sample_identity'  => $data['sample_identity'],
                 'trial_objective'  => $data['trial_objective'] ?? null,
                 'batch_qty'        => $data['batch_qty'] ?? null,
                 'packaging_design' => $data['packaging_design'] ?? null,
                 'process_steps'    => $data['process_steps'],
                 'decision'         => $data['decision'] ?? null,
-            ]);
+            ];
+
+            if ($trial->approval_status === 'Draft' || $trial->approval_status === 'Rejected') {
+                $updateData['code'] = $data['code'];
+            }
+
+            $trial->update($updateData);
 
             $this->saveVerifications($trial, $data['verifications'] ?? []);
 

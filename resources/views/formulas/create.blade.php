@@ -45,7 +45,13 @@
                         <h2 class="text-sm font-heading font-semibold text-ink">INFORMATION</h2>
                     </div>
                     <div class="card-body space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="form-label" for="code">Kode Formula <span class="text-red-500">*</span></label>
+                                <input type="text" id="code" name="code" value="{{ old('code', $autoCode) }}"
+                                       placeholder="mis. FRM-202607-001"
+                                       class="form-input @error('code') border-red-400 @enderror" required>
+                            </div>
                             <div>
                                 <label class="form-label" for="name">Product Name <span class="text-red-500">*</span></label>
                                 <input type="text" id="name" name="name" value="{{ old('name') }}"
