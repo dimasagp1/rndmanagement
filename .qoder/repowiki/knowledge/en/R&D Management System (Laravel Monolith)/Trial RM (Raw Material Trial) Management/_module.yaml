@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: trial_rms
+title: Trial RM (Raw Material Trial) Management
+scope:
+    - app/Http/Controllers/TrialRmController.php
+    - app/Services/TrialRmService.php
+    - app/Models/TrialRm.php
+    - app/Models/TrialRmVerification.php
+    - app/Policies/TrialRmPolicy.php
+    - tests/Feature/TrialRmTest.php
+source_files: []
+depends_on: []
+related_to:
+    - path: formula_management

@@ -1,0 +1,1 @@
+Laravel resource controllers, Eloquent models, migrations and factories that provide CRUD master data for materials (bahan baku) and suppliers (pemasok) consumed by the formula subsystem.

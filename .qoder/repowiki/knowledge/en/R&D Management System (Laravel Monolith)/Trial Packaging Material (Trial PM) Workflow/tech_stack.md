@@ -1,0 +1,1 @@
+Laravel Eloquent + Gates/Policies, Spatie Activitylog (`LogsActivity` trait with `LogOptions::defaults()->logOnlyDirty()`), database transactions via `Illuminate\Support\Facades\DB`, and image uploads stored under `storage/app/public/trial-pm-photos` served through `/storage/`.

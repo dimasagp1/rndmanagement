@@ -1,0 +1,4 @@
+- Authorization is enforced uniformly through Spatie's `hasRole()` API — both the `RoleMiddleware` and the `AppServiceProvider` view composer check roles instead of hard-coding strings at call sites.
+- Global helpers are provided as plain functions guarded by `function_exists()` and loaded lazily via `require_once` inside `AppServiceProvider::register()`, keeping them out of the autoloader.
+- Eloquent models expose mutability and serialization boundaries using PHP 8 attributes (`#[Fillable([...])`, `#[Hidden([...])`) rather than class properties.
+- Cross-cutting concerns (service binding, policy registration, view composition) are centralized in `AppServiceProvider::register()` / `boot()` instead of being scattered across controllers or routes.

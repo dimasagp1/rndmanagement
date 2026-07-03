@@ -1,0 +1,5 @@
+- Every controller action begins with a `Gate::authorize(...)` call against `TrialRmPolicy` before any other logic.
+- State mutations in the service are wrapped in `DB::transaction` and enforce preconditions by throwing `ValidationException::withMessages([...])` rather than returning error responses.
+- Approval-status checks use `in_array` against explicit string literals (`Draft`, `Pending Tahap 1`, `Pending Tahap 2`, `Approved`, `Rejected`) instead of enums.
+- Child collection writes (`saveVerifications`) delete existing rows first then re-create from the incoming array, skipping entries with an empty `parameter_name`.
+- Code generation follows the fixed format `TRM-YYYYMM-XXX-Suffix` where the letter suffix increments per formula within the same month.

@@ -1,0 +1,3 @@
+- All configuration values are read through `env('KEY', default)` rather than hard-coded constants, keeping deployment settings out of source code.
+- Route-level authorization is expressed declaratively via Spatie middleware attributes (`middleware('can:...')`, `middleware('role:...|...')`) applied directly on `Route::resource` or individual endpoints instead of inside controllers.
+- Writable runtime directories under `storage/` ship a `.gitignore` so generated files (Blade views, sessions, logs, uploaded signatures) are never tracked in version control.

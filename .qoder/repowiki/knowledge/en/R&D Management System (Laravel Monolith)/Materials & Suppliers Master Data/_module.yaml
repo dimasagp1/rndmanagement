@@ -1,0 +1,18 @@
+schema_version: 1
+module_path: materials_and_suppliers
+title: Materials & Suppliers Master Data
+scope:
+    - app/Http/Controllers/MaterialController.php
+    - app/Http/Controllers/SupplierController.php
+    - app/Models/Material.php
+    - app/Models/Supplier.php
+    - database/migrations/*_create_materials_table.php
+    - database/migrations/*_create_suppliers_table.php
+    - database/factories/MaterialFactory.php
+    - database/factories/SupplierFactory.php
+    - database/seeders/MaterialSupplierSeeder.php
+    - tests/Feature/TrialPmTest.php
+    - tests/Feature/TrialRmTest.php
+source_files: []
+depends_on: []
+related_to: []

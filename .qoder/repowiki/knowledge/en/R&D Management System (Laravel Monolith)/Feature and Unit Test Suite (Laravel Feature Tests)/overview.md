@@ -1,0 +1,1 @@
+Laravel PHPUnit test suite covering HTTP feature tests for auth, user management, approval center, formulas, and role-based access, plus a unit example.

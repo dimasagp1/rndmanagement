@@ -1,0 +1,1 @@
+Laravel 12+ modern bootstrap (`Application::configure` fluent API) with Spatie Laravel Permission middleware aliased as `role`/`permission`/`role_or_permission`; database defaults to SQLite with MySQL/MariaDB/PostgreSQL/SQLSRV and Redis connections available via env vars.

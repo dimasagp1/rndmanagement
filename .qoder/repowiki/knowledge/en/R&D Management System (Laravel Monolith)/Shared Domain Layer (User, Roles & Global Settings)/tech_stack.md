@@ -1,0 +1,1 @@
+Laravel 11+ with PHP 8 attributes for Eloquent metadata; Spatie Laravel-Permission for role-based access control; Gate + Policies for declarative authorization.

@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: build_system
+title: Laravel Monolith Build & Asset Pipeline
+scope: []
+source_files:
+    - composer.json
+    - package.json
+    - vite.config.js
+    - phpunit.xml
+    - tailwind.config.js
+    - postcss.config.js
+depends_on: []
+related_to: []

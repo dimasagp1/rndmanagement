@@ -1,0 +1,1 @@
+Laravel resource controller, Eloquent model, and migration that implement full create/read/update/delete for the suppliers table used by the materials/formula subsystem.

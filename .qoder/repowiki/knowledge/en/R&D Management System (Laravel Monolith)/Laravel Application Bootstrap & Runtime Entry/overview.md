@@ -1,0 +1,1 @@
+Defines the Laravel application bootstrap, service providers, web/console routes, public entrypoint, and runtime configuration for the R&D management system.

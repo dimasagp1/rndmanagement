@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: materials_and_suppliers/supplier_crud
+title: Supplier CRUD (Pemasok) — Materials & Suppliers
+scope:
+    - app/Http/Controllers/SupplierController.php
+    - app/Models/Supplier.php
+    - database/migrations/2026_07_01_092825_create_suppliers_table.php
+source_files: []
+depends_on: []
+related_to:
+    - path: formula_management

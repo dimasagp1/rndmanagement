@@ -31,7 +31,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="form-label" for="type">Tipe Bahan Baku</label>
+                            <label class="form-label" for="type">Bentuk Sediaan</label>
                             <input type="text" id="type" name="type" value="{{ old('type') }}"
                                    placeholder="Contoh: Ekstrak, Simplisia, Madu" class="form-input">
                         </div>
@@ -43,7 +43,7 @@
                     </div>
 
                     <div>
-                        <label class="form-label" for="description">Deskripsi / Catatan Tambahan</label>
+                        <label class="form-label" for="description">Aplikasi Penggunaan</label>
                         <textarea id="description" name="description" rows="3"
                                   placeholder="Tulis spesifikasi singkat bahan baku..." class="form-input">{{ old('description') }}</textarea>
                     </div>

@@ -1,0 +1,1 @@
+Core domain primitives shared across the app: the Eloquent User model with role-based access, a role-enforcing HTTP middleware, and a global settings helper wired through the application service provider.

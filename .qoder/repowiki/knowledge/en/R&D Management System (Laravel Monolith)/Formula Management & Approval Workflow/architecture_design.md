@@ -1,0 +1,6 @@
+Follows a thin-controller / service-layer pattern inside the Laravel app directory:
+- `FormulaController` is stateless — it only validates input, calls `Gate::authorize`, delegates persistence to `FormulaService`, and returns Blade views or redirects.
+- `FormulaService` owns all domain rules: code generation (`FRM-YYYYMM-XXX`), composition validation (≤100% with floating-point tolerance), two-phase approval transitions, rejection, and versioned `reformulate` which copies materials into a new child Formula row.
+- `Formula` and `FormulaMaterial` are Eloquent models; `Formula` uses Spatie's `LogsActivity` trait to audit changes on a whitelist of fields via `getActivitylogOptions()`.
+- `FormulaPolicy` centralises authorization against Spatie Permission gates (`formula.view/create/edit/delete`) plus business constraints (only creator can edit Draft/Rejected; managers cannot edit).
+- Dependency direction: Controller → Service → Models; Policy is invoked by the controller via `Gate`; tests in `tests/Feature/FormulаTest.php` drive the full HTTP flow using `RefreshDatabase`, role seeding, and assertions on status transitions and version numbering.

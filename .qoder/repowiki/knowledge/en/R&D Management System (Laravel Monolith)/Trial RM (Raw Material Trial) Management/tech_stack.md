@@ -1,0 +1,1 @@
+Laravel Eloquent models with Spatie Activitylog (`LogsActivity` trait) for audit trails; policy-driven authorization via Gates and user roles (`Staff R&D`, `Operational Manager`, `General Manager`).

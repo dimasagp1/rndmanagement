@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: logging_system
+title: Laravel Monolog Logging (Default Stack, No App-Level Usage)
+scope: []
+source_files:
+    - config/logging.php
+depends_on: []
+related_to: []

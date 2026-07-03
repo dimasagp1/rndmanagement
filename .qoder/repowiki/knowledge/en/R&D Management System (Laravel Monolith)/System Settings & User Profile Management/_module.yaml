@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: settings_and_profile
+title: System Settings & User Profile Management
+scope:
+    - app/Http/Controllers/SettingController.php
+    - app/Http/Controllers/ProfileController.php
+    - app/Models/Setting.php
+    - tests/Feature/ProfileTest.php
+source_files: []
+depends_on: []
+related_to: []

@@ -1,0 +1,3 @@
+- Controller methods validate incoming data inline with Laravel's array-style rule sets and then map request attributes directly into `$model->create([...])` / `$model->update([...])` calls.
+- Resource actions return a redirect to `route('materials.index')` and attach an Indonesian-language success flash message via `->with('success', ...)` instead of returning JSON or views.
+- The model uses the Spatie `LogsActivity` trait and centralizes audit configuration in `getActivitylogOptions()` rather than annotating individual fields.

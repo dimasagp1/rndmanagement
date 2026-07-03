@@ -1,0 +1,1 @@
+Laravel 12 + Spatie Laravel Permission for RBAC; Blade + Tailwind CSS via Vite for the frontend; PHPUnit for feature/unit tests; MySQL/MariaDB via Eloquent migrations.

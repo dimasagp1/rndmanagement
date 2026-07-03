@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: trial_pms
+title: Trial Packaging Material (Trial PM) Workflow
+scope:
+    - app/Http/Controllers/TrialPmController.php
+    - app/Services/TrialPmService.php
+    - app/Models/TrialPm.php
+    - app/Models/TrialPmApproval.php
+    - app/Policies/TrialPmPolicy.php
+    - tests/Feature/TrialPmTest.php
+source_files: []
+depends_on: []
+related_to: []

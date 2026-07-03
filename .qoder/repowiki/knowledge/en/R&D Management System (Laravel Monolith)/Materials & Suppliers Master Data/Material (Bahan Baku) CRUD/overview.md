@@ -1,0 +1,1 @@
+Laravel resource controller, Eloquent model, and migration that provide full create-read-update-delete management for the materials (bahan baku) entity.

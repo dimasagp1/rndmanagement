@@ -1,0 +1,5 @@
+Two thin Laravel controllers sit on top of a single key/value Eloquent model:
+- `ProfileController` exposes edit/update/destroy actions mapped to `/profile`, using the form-request class `App\Http\Requests\ProfileUpdateRequest` for validation and `Auth::logout()` + session invalidation for account deletion.
+- `SettingController` guards its index/update methods with an in-line `auth()->user()->hasRole('Superadmin')` check before rendering `settings.index` or persisting values via `Setting::updateOrCreate(['key'=>...], ['value'=>...])`.
+- `Setting` is a minimal fillable model (`key`, `value`) used as a flat configuration store; file uploads are persisted through `Storage::disk('public')->store(...)` under `settings/` and `signatures/` directories, with old files deleted by path lookup via the helper `setting()`.
+- `tests/Feature/ProfileTest.php` drives the profile endpoints against the live route table using `RefreshDatabase`, asserting redirect behavior, session flash messages, and the `email_verified_at` reset semantics.

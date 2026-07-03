@@ -1,0 +1,1 @@
+Laravel monolith that wires R&D formula, trial RM/PM, materials & suppliers, approval center, and settings into a single authenticated web app governed by Spatie role/permission middleware.

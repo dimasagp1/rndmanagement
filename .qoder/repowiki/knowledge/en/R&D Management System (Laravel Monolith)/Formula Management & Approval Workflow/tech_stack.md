@@ -1,0 +1,1 @@
+Laravel Eloquent + Gates/Policies, Spatie Activitylog for change auditing, Spatie Permission for RBAC, PHPUnit Feature tests with `RefreshDatabase`.

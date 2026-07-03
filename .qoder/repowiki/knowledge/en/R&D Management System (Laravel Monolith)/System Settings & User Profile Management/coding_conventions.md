@@ -1,0 +1,4 @@
+- File uploads are handled by calling `$request->file(...)->store(<subdir>, 'public')` and storing the resulting path prefixed with `/storage/` on the model attribute.
+- Key/value settings are persisted through `Setting::updateOrCreate(['key' => $k], ['value' => $v])` rather than direct insert/update, so each setting key is idempotent.
+- Admin-only routes enforce authorization inline at the top of the method with `if (! auth()->user()->hasRole('Superadmin')) { abort(403); }` instead of middleware.
+- User-facing redirects return via `Redirect::route(...)->with('status', ...)` or `back()->with('success', ...)` session flash keys instead of response bodies.

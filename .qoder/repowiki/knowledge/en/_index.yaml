@@ -1,0 +1,449 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: main
+nodes_managed: true
+exported_at: "2026-07-02T07:18:24Z"
+modules:
+    "":
+        dir_name: R&D Management System (Laravel Monolith)
+        title: R&D Management System (Laravel Monolith)
+        scope:
+            - README.md
+            - prd.md
+            - rules.md
+            - uiux.md
+            - prompt-antigravity.md
+            - .gitignore
+            - .editorconfig
+            - .npmrc
+            - composer.json
+            - package.json
+            - phpunit.xml
+            - vite.config.js
+            - tailwind.config.js
+            - postcss.config.js
+            - .env
+            - .env.example
+            - .gitattributes
+            - .phpunit.result.cache
+            - app\Helpers\setting.php
+            - app\Http\Controllers\ApprovalCenterController.php
+            - app\Http\Controllers\Auth\AuthenticatedSessionController.php
+            - app\Http\Controllers\Auth\ConfirmablePasswordController.php
+            - app\Http\Controllers\Auth\EmailVerificationNotificationController.php
+            - app\Http\Controllers\Auth\EmailVerificationPromptController.php
+            - app\Http\Controllers\Auth\NewPasswordController.php
+            - app\Http\Controllers\Auth\PasswordController.php
+            - app\Http\Controllers\Auth\PasswordResetLinkController.php
+            - app\Http\Controllers\Auth\RegisteredUserController.php
+            - app\Http\Controllers\Auth\VerifyEmailController.php
+            - app\Http\Controllers\Controller.php
+            - app\Http\Controllers\DashboardController.php
+            - app\Http\Controllers\FormulaController.php
+            - app\Http\Controllers\MaterialController.php
+            - app\Http\Controllers\ProfileController.php
+            - app\Http\Controllers\SettingController.php
+            - app\Http\Controllers\SupplierController.php
+            - app\Http\Controllers\TrialPmController.php
+            - app\Http\Controllers\TrialRmController.php
+            - app\Http\Controllers\UserController.php
+            - app\Http\Middleware\RoleMiddleware.php
+            - app\Http\Requests\Auth\LoginRequest.php
+            - app\Http\Requests\ProfileUpdateRequest.php
+            - app\Models\Formula.php
+            - app\Models\FormulaMaterial.php
+            - app\Models\Material.php
+            - app\Models\Setting.php
+            - app\Models\Supplier.php
+            - app\Models\TrialPm.php
+            - app\Models\TrialPmApproval.php
+            - app\Models\TrialRm.php
+            - app\Models\TrialRmVerification.php
+            - app\Models\User.php
+            - app\Policies\FormulaPolicy.php
+            - app\Policies\TrialPmPolicy.php
+            - app\Policies\TrialRmPolicy.php
+            - app\Providers\AppServiceProvider.php
+            - app\Services\FormulaService.php
+            - app\Services\TrialPmService.php
+            - app\Services\TrialRmService.php
+            - app\View\Components\AppLayout.php
+            - app\View\Components\GuestLayout.php
+            - art.bat
+            - artisan
+            - artisan.bat
+            - bootstrap\app.php
+            - bootstrap\cache\.gitignore
+            - bootstrap\cache\packages.php
+            - bootstrap\cache\services.php
+            - bootstrap\providers.php
+            - composer.lock
+            - config\activitylog.php
+            - config\app.php
+            - config\auth.php
+            - config\cache.php
+            - config\database.php
+            - config\filesystems.php
+            - config\logging.php
+            - config\mail.php
+            - config\permission.php
+            - config\queue.php
+            - config\services.php
+            - config\session.php
+            - database\.gitignore
+            - database\factories\MaterialFactory.php
+            - database\factories\SupplierFactory.php
+            - database\factories\UserFactory.php
+            - database\migrations\0001_01_01_000000_create_users_table.php
+            - database\migrations\0001_01_01_000001_create_cache_table.php
+            - database\migrations\0001_01_01_000002_create_jobs_table.php
+            - database\migrations\2026_07_01_092410_create_permission_tables.php
+            - database\migrations\2026_07_01_092416_create_activity_log_table.php
+            - database\migrations\2026_07_01_092417_add_event_column_to_activity_log_table.php
+            - database\migrations\2026_07_01_092418_add_batch_uuid_column_to_activity_log_table.php
+            - database\migrations\2026_07_01_092816_create_materials_table.php
+            - database\migrations\2026_07_01_092825_create_suppliers_table.php
+            - database\migrations\2026_07_01_092832_create_formulas_table.php
+            - database\migrations\2026_07_01_092840_create_formula_materials_table.php
+            - database\migrations\2026_07_01_092849_create_trial_rms_table.php
+            - database\migrations\2026_07_01_092857_create_trial_rm_verifications_table.php
+            - database\migrations\2026_07_01_092905_create_trial_pms_table.php
+            - database\migrations\2026_07_01_092919_create_trial_pm_approvals_table.php
+            - database\migrations\2026_07_02_000000_create_settings_table.php
+            - database\migrations\2026_07_02_042035_update_trial_pms_table_for_new_specification_and_executions.php
+            - database\migrations\2026_07_02_044109_add_signature_path_to_users_table.php
+            - database\seeders\DatabaseSeeder.php
+            - database\seeders\DemoDataSeeder.php
+            - database\seeders\MaterialSupplierSeeder.php
+            - database\seeders\RolePermissionSeeder.php
+            - database\seeders\UserSeeder.php
+            - node-temp\node-v22.14.0-win-x64\CHANGELOG.md
+            - node-temp\node-v22.14.0-win-x64\LICENSE
+            - node-temp\node-v22.14.0-win-x64\README.md
+            - node-temp\node-v22.14.0-win-x64\corepack
+            - node-temp\node-v22.14.0-win-x64\corepack.cmd
+            - node-temp\node-v22.14.0-win-x64\install_tools.bat
+            - node-temp\node-v22.14.0-win-x64\node.exe
+            - node-temp\node-v22.14.0-win-x64\nodevars.bat
+            - node-temp\node-v22.14.0-win-x64\npm
+            - node-temp\node-v22.14.0-win-x64\npm.cmd
+            - node-temp\node-v22.14.0-win-x64\npm.ps1
+            - node-temp\node-v22.14.0-win-x64\npx
+            - node-temp\node-v22.14.0-win-x64\npx.cmd
+            - node-temp\node-v22.14.0-win-x64\npx.ps1
+            - package-lock.json
+            - public\.htaccess
+            - public\favicon.ico
+            - public\index.php
+            - public\robots.txt
+            - resources\css\app.css
+            - resources\js\app.js
+            - resources\views\approval-center\index.blade.php
+            - resources\views\auth\confirm-password.blade.php
+            - resources\views\auth\forgot-password.blade.php
+            - resources\views\auth\login.blade.php
+            - resources\views\auth\register.blade.php
+            - resources\views\auth\reset-password.blade.php
+            - resources\views\auth\verify-email.blade.php
+            - resources\views\components\application-logo.blade.php
+            - resources\views\components\approval-timeline.blade.php
+            - resources\views\components\audit-trail.blade.php
+            - resources\views\components\auth-session-status.blade.php
+            - resources\views\components\danger-button.blade.php
+            - resources\views\components\dropdown-link.blade.php
+            - resources\views\components\dropdown.blade.php
+            - resources\views\components\empty-state.blade.php
+            - resources\views\components\input-error.blade.php
+            - resources\views\components\input-label.blade.php
+            - resources\views\components\modal.blade.php
+            - resources\views\components\nav-link.blade.php
+            - resources\views\components\primary-button.blade.php
+            - resources\views\components\responsive-nav-link.blade.php
+            - resources\views\components\secondary-button.blade.php
+            - resources\views\components\status-badge.blade.php
+            - resources\views\components\text-input.blade.php
+            - resources\views\dashboard.blade.php
+            - resources\views\formulas\create.blade.php
+            - resources\views\formulas\edit.blade.php
+            - resources\views\formulas\index.blade.php
+            - resources\views\formulas\show.blade.php
+            - resources\views\layouts\app.blade.php
+            - resources\views\layouts\guest.blade.php
+            - resources\views\layouts\navigation.blade.php
+            - resources\views\materials\create.blade.php
+            - resources\views\materials\edit.blade.php
+            - resources\views\materials\index.blade.php
+            - resources\views\profile\edit.blade.php
+            - resources\views\profile\partials\delete-user-form.blade.php
+            - resources\views\profile\partials\update-password-form.blade.php
+            - resources\views\profile\partials\update-profile-information-form.blade.php
+            - resources\views\settings\index.blade.php
+            - resources\views\suppliers\create.blade.php
+            - resources\views\suppliers\edit.blade.php
+            - resources\views\suppliers\index.blade.php
+            - resources\views\trial-pms\create.blade.php
+            - resources\views\trial-pms\edit.blade.php
+            - resources\views\trial-pms\index.blade.php
+            - resources\views\trial-pms\print.blade.php
+            - resources\views\trial-pms\show.blade.php
+            - resources\views\trial-rms\create.blade.php
+            - resources\views\trial-rms\edit.blade.php
+            - resources\views\trial-rms\index.blade.php
+            - resources\views\trial-rms\show.blade.php
+            - resources\views\users\create.blade.php
+            - resources\views\users\edit.blade.php
+            - resources\views\users\index.blade.php
+            - resources\views\welcome.blade.php
+            - routes\auth.php
+            - routes\console.php
+            - routes\web.php
+            - storage\app\.gitignore
+            - storage\app\private\.gitignore
+            - storage\app\public\.gitignore
+            - storage\app\public\signatures\WXtkILM6dHhhj6rMdbmdUFbrWKKP18Ryl27p9zEl.png
+            - storage\framework\.gitignore
+            - storage\framework\cache\.gitignore
+            - storage\framework\cache\data\.gitignore
+            - storage\framework\sessions\.gitignore
+            - storage\framework\testing\.gitignore
+            - storage\framework\views\.gitignore
+            - storage\logs\.gitignore
+            - storage\logs\laravel.log
+            - tests\Feature\ApprovalCenterTest.php
+            - tests\Feature\Auth\AuthenticationTest.php
+            - tests\Feature\Auth\EmailVerificationTest.php
+            - tests\Feature\Auth\PasswordConfirmationTest.php
+            - tests\Feature\Auth\PasswordResetTest.php
+            - tests\Feature\Auth\PasswordUpdateTest.php
+            - tests\Feature\Auth\RegistrationTest.php
+            - tests\Feature\ExampleTest.php
+            - tests\Feature\FormulaTest.php
+            - tests\Feature\ProfileTest.php
+            - tests\Feature\SuperadminSystemTest.php
+            - tests\Feature\TrialPmTest.php
+            - tests\Feature\TrialRmTest.php
+            - tests\Feature\UserManagementTest.php
+            - tests\TestCase.php
+            - tests\Unit\ExampleTest.php
+        source_files: []
+        children:
+            - formula_management
+            - laravel_framework_bootstrap
+            - materials_and_suppliers
+            - settings_and_profile
+            - shared_domain_layer
+            - tests
+            - trial_pms
+            - trial_rms
+        depends_on: []
+        related_to: []
+    build_system:
+        dir_name: Laravel Monolith Build & Asset Pipeline
+        title: Laravel Monolith Build & Asset Pipeline
+        scope: []
+        source_files:
+            - composer.json
+            - package.json
+            - vite.config.js
+            - phpunit.xml
+            - tailwind.config.js
+            - postcss.config.js
+        children: []
+        depends_on: []
+        related_to: []
+    configuration_system:
+        dir_name: Laravel .env + Eloquent Settings Hybrid
+        title: Laravel .env + Eloquent Settings Hybrid
+        scope: []
+        source_files:
+            - config/app.php
+            - .env.example
+            - app/Providers/AppServiceProvider.php
+            - app/Helpers/setting.php
+            - app/Models/Setting.php
+            - app/Http/Controllers/SettingController.php
+            - database/migrations/2026_07_02_000000_create_settings_table.php
+        children: []
+        depends_on: []
+        related_to: []
+    dependency_management:
+        dir_name: Composer & npm dual dependency management with lockfiles
+        title: Composer & npm dual dependency management with lockfiles
+        scope: []
+        source_files:
+            - composer.json
+            - composer.lock
+            - package.json
+            - package-lock.json
+        children: []
+        depends_on: []
+        related_to: []
+    error_handling:
+        dir_name: Laravel Default Exception Handling (No Custom Strategy)
+        title: Laravel Default Exception Handling (No Custom Strategy)
+        scope: []
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    formula_management:
+        dir_name: Formula Management & Approval Workflow
+        title: Formula Management & Approval Workflow
+        scope:
+            - app/Http/Controllers/FormulaController.php
+            - app/Services/FormulaService.php
+            - app/Models/Formula.php
+            - app/Models/FormulaMaterial.php
+            - app/Policies/FormulaPolicy.php
+            - tests/Feature/FormulaTest.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: materials_and_suppliers/material_crud
+            - path: materials_and_suppliers/supplier_crud
+            - path: trial_rms
+    frontend_style:
+        dir_name: Tailwind + Alpine Blade UI System
+        title: Tailwind + Alpine Blade UI System
+        scope: []
+        source_files:
+            - tailwind.config.js
+            - resources/css/app.css
+            - resources/js/app.js
+            - vite.config.js
+            - postcss.config.js
+            - package.json
+        children: []
+        depends_on: []
+        related_to: []
+    laravel_framework_bootstrap:
+        dir_name: Laravel Application Bootstrap & Runtime Entry
+        title: Laravel Application Bootstrap & Runtime Entry
+        scope:
+            - bootstrap/
+            - config/
+            - routes/
+            - public/
+            - storage/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    logging_system:
+        dir_name: Laravel Monolog Logging (Default Stack, No App-Level Usage)
+        title: Laravel Monolog Logging (Default Stack, No App-Level Usage)
+        scope: []
+        source_files:
+            - config/logging.php
+        children: []
+        depends_on: []
+        related_to: []
+    materials_and_suppliers:
+        dir_name: Materials & Suppliers Master Data
+        title: Materials & Suppliers Master Data
+        scope:
+            - app/Http/Controllers/MaterialController.php
+            - app/Http/Controllers/SupplierController.php
+            - app/Models/Material.php
+            - app/Models/Supplier.php
+            - database/migrations/*_create_materials_table.php
+            - database/migrations/*_create_suppliers_table.php
+            - database/factories/MaterialFactory.php
+            - database/factories/SupplierFactory.php
+            - database/seeders/MaterialSupplierSeeder.php
+            - tests/Feature/TrialPmTest.php
+            - tests/Feature/TrialRmTest.php
+        source_files: []
+        children:
+            - materials_and_suppliers/material_crud
+            - materials_and_suppliers/supplier_crud
+        depends_on: []
+        related_to: []
+    materials_and_suppliers/material_crud:
+        dir_name: Material (Bahan Baku) CRUD
+        title: Material (Bahan Baku) CRUD
+        scope:
+            - app/Http/Controllers/MaterialController.php
+            - app/Models/Material.php
+            - database/migrations/2026_07_01_092816_create_materials_table.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: formula_management
+    materials_and_suppliers/supplier_crud:
+        dir_name: Supplier CRUD (Pemasok) — Materials & Suppliers
+        title: Supplier CRUD (Pemasok) — Materials & Suppliers
+        scope:
+            - app/Http/Controllers/SupplierController.php
+            - app/Models/Supplier.php
+            - database/migrations/2026_07_01_092825_create_suppliers_table.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: formula_management
+    settings_and_profile:
+        dir_name: System Settings & User Profile Management
+        title: System Settings & User Profile Management
+        scope:
+            - app/Http/Controllers/SettingController.php
+            - app/Http/Controllers/ProfileController.php
+            - app/Models/Setting.php
+            - tests/Feature/ProfileTest.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    shared_domain_layer:
+        dir_name: Shared Domain Layer (User, Roles & Global Settings)
+        title: Shared Domain Layer (User, Roles & Global Settings)
+        scope:
+            - app/Models/User.php
+            - app/Http/Middleware/RoleMiddleware.php
+            - app/Providers/AppServiceProvider.php
+            - app/Helpers/setting.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    tests:
+        dir_name: Feature and Unit Test Suite (Laravel Feature Tests)
+        title: Feature and Unit Test Suite (Laravel Feature Tests)
+        scope:
+            - tests/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    trial_pms:
+        dir_name: Trial Packaging Material (Trial PM) Workflow
+        title: Trial Packaging Material (Trial PM) Workflow
+        scope:
+            - app/Http/Controllers/TrialPmController.php
+            - app/Services/TrialPmService.php
+            - app/Models/TrialPm.php
+            - app/Models/TrialPmApproval.php
+            - app/Policies/TrialPmPolicy.php
+            - tests/Feature/TrialPmTest.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    trial_rms:
+        dir_name: Trial RM (Raw Material Trial) Management
+        title: Trial RM (Raw Material Trial) Management
+        scope:
+            - app/Http/Controllers/TrialRmController.php
+            - app/Services/TrialRmService.php
+            - app/Models/TrialRm.php
+            - app/Models/TrialRmVerification.php
+            - app/Policies/TrialRmPolicy.php
+            - tests/Feature/TrialRmTest.php
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: formula_management

@@ -1,0 +1,4 @@
+- Feature routes are grouped under `Route::middleware(['auth', 'verified'])` and gated per-resource with either `can:<permission>` or `role:<RoleName>` middleware rather than inline checks.
+- Each business feature owns its own controller/model/migration/view folder pair (e.g. `formulas/`, `trial-rms/`, `trial-pms/`) and exposes a `resource` route plus explicit action routes like `submit`/`approve`/`reject`.
+- Shared UI is built from Blade layout classes (`AppView\Components\AppLayout`, `GuestLayout`) and reusable partials under `resources/views/components/*` instead of duplicated markup.
+- Global runtime configuration is accessed through the `app/Helpers/setting.php` helper rather than direct Setting model calls.

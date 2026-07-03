@@ -1,0 +1,1 @@
+End-to-end CRUD and two-stage approval workflow for raw-material trial records linked to approved Formulas, with parameter verification entries.

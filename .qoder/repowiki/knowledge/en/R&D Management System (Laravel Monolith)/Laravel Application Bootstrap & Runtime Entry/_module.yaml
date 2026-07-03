@@ -1,0 +1,12 @@
+schema_version: 1
+module_path: laravel_framework_bootstrap
+title: Laravel Application Bootstrap & Runtime Entry
+scope:
+    - bootstrap/
+    - config/
+    - routes/
+    - public/
+    - storage/
+source_files: []
+depends_on: []
+related_to: []

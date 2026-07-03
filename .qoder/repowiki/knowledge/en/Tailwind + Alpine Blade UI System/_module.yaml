@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: frontend_style
+title: Tailwind + Alpine Blade UI System
+scope: []
+source_files:
+    - tailwind.config.js
+    - resources/css/app.css
+    - resources/js/app.js
+    - vite.config.js
+    - postcss.config.js
+    - package.json
+depends_on: []
+related_to: []

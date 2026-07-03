@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: shared_domain_layer
+title: Shared Domain Layer (User, Roles & Global Settings)
+scope:
+    - app/Models/User.php
+    - app/Http/Middleware/RoleMiddleware.php
+    - app/Providers/AppServiceProvider.php
+    - app/Helpers/setting.php
+source_files: []
+depends_on: []
+related_to: []

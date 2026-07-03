@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: configuration_system
+title: Laravel .env + Eloquent Settings Hybrid
+scope: []
+source_files:
+    - config/app.php
+    - .env.example
+    - app/Providers/AppServiceProvider.php
+    - app/Helpers/setting.php
+    - app/Models/Setting.php
+    - app/Http/Controllers/SettingController.php
+    - database/migrations/2026_07_02_000000_create_settings_table.php
+depends_on: []
+related_to: []

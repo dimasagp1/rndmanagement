@@ -1,0 +1,7 @@
+Standard Laravel MVC split over four layers:
+- Controller (`TrialPmController`) exposes RESTful routes (index/create/store/show/print/edit/update/destroy/submit/approve), delegates persistence to the service, and gates every action via `Gate::authorize` against `TrialPmPolicy`.
+- Service (`TrialPmService`) owns business rules: auto-generates `TPM-YYYYMM-XXX` codes, wraps create/update/submit/approve in `DB::transaction`, enforces status transitions (Draft → Pending Review → Approved/Rejected), initializes four department approval rows on creation, and enriches execution arrays with signed-by metadata via `enrichExecutionParafs`.
+- Models (`TrialPm`, `TrialPmApproval`) are plain Eloquent entities with `$fillable` whitelists, JSON/array casts for `specifications/executions/discussion_rows/photos/parameters`, a Spatie `LogsActivity` trait logging only dirty changes to `code/packaging_material/approval_status`, and relationships back to `User` (creator, approver, OM, GM).
+- Policy (`TrialPmPolicy`) maps actions to permissions (`trial_pm.view|create|edit|delete|department_approve`) plus ownership checks (`created_by === user->id`) and state guards (`approval_status === 'Draft'`).
+- Feature test (`TrialPmTest`) seeds roles via `RolePermissionSeeder`, asserts code format, 4-department initialization, and the approve-all → Approved / any-reject → Rejected transitions.
+Dependency direction is one-way: Controller → Service → Models; Policy is invoked by the controller but has no dependency on it.

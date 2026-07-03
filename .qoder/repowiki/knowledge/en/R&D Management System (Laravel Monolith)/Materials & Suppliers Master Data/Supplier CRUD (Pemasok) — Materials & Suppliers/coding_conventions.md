@@ -1,0 +1,3 @@
+- CRUD methods follow Laravel's default resource convention: route/model binding via implicit `Supplier $supplier` parameter, request validation inline with `$request->validate([...])`, and redirect-to-index with a flash `success` message after mutations.
+- Model attributes are exposed through `$fillable` mass-assignment rather than accessors/mutators, keeping the model thin and letting the controller handle all input shaping.
+- Audit logging is configured per-model via `getActivitylogOptions()` returning a `LogOptions` instance that restricts logged columns and uses `logOnlyDirty()`, instead of overriding lifecycle hooks.

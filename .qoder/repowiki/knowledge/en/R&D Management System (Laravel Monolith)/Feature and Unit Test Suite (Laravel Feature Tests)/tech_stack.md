@@ -1,0 +1,1 @@
+PHPUnit with Laravel Dusk-free HTTP testing ($this->get/post/put/delete, assertAuthenticated, actingAs), RefreshDatabase for transactional DB resets, and Spatie Permission (Spatie\Permission\Models\Role) for RBAC assertions.

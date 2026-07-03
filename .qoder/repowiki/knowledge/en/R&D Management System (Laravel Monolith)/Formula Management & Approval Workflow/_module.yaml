@@ -1,0 +1,16 @@
+schema_version: 1
+module_path: formula_management
+title: Formula Management & Approval Workflow
+scope:
+    - app/Http/Controllers/FormulaController.php
+    - app/Services/FormulaService.php
+    - app/Models/Formula.php
+    - app/Models/FormulaMaterial.php
+    - app/Policies/FormulaPolicy.php
+    - tests/Feature/FormulaTest.php
+source_files: []
+depends_on: []
+related_to:
+    - path: materials_and_suppliers/material_crud
+    - path: materials_and_suppliers/supplier_crud
+    - path: trial_rms

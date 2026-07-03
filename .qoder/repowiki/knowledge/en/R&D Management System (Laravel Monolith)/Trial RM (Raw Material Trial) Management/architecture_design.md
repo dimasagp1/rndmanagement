@@ -1,0 +1,6 @@
+Standard Laravel resource layering around the `TrialRm` domain:
+- Controller (`app/Http/Controllers/TrialRmController.php`) exposes RESTful actions (index/create/store/show/edit/update/destroy/submit) that delegate persistence and business rules to `TrialRmService`, while using `Gate::authorize()` against `TrialRmPolicy` for every action.
+- Service (`app/Services/TrialRmService.php`) owns all state transitions — Draft → Pending Tahap 1 → Pending Tahap 2 → Approved/Rejected — plus code generation (`TRM-YYYYMM-XXX-A/B/C…`) and bulk verification save; each mutating method runs inside `DB::transaction` and throws `ValidationException` on guard violations.
+- Models: `TrialRm` (Eloquent + Spatie `LogsActivity` tracking only dirty fields `code/sample_identity/decision/approval_status`) and its child `TrialRmVerification`; relationships point back to `Formula`, `User` (creator, OM approver, GM approver).
+- Policy (`app/Policies/TrialRmPolicy.php`) gates edit/delete/submit to the record's creator when status is Draft or Rejected, and restricts approve to roles `Operational Manager` (Tahap 1) / `General Manager` (Tahap 2).
+- Feature test (`tests/Feature/TrialRmTest.php`) seeds roles via `RolePermissionSeeder`, asserts code-format generation, suffix increment, and role-based 403 responses.

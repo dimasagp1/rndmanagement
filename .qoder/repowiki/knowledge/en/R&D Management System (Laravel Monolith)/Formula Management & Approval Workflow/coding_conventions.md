@@ -1,0 +1,5 @@
+- Authorization is enforced at the controller entry point via `Gate::authorize('<action>', $modelOrClass)` before any business logic runs.
+- Domain mutations that touch multiple rows are wrapped in `DB::transaction()` so create/update/reformulate are atomic.
+- Business-rule violations raise `ValidationException::withMessages([...])` from the service layer rather than returning error responses directly.
+- Approval-state transitions are single-purpose service methods (`submitForApproval`, `approveTahap1`, `approveTahap2`, `reject`) each asserting the current status before updating.
+- Versioning is modelled as a self-referential `parent_formula_id` relationship with an auto-incremented `version` attribute copied from the parent.

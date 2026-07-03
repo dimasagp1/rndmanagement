@@ -1,0 +1,1 @@
+Laravel Eloquent + Spatie Laravel-Activitylog (via `LogsActivity` trait and `LogOptions::defaults()->logOnlyDirty()`) for audit trails on material mutations.

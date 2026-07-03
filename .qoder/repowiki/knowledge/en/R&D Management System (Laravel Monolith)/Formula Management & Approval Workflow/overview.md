@@ -1,0 +1,1 @@
+Laravel feature that manages R&D formula CRUD, multi-stage approval (Draft → Pending Tahap 1/2 → Approved), versioned reformulation, and material composition tracking.

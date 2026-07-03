@@ -1,0 +1,5 @@
+- Every controller action begins with an explicit `Gate::authorize($action, $model)` call before any business logic or view rendering.
+- State-changing operations (create, update, submitForReview, approveDepartment) are wrapped in `DB::transaction` closures to keep TrialPm and TrialPmApproval writes atomic.
+- Business-rule violations throw `ValidationException::withMessages([...])` rather than returning HTTP errors, so the controller can catch and re-render the form with errors.
+- Array-shaped request payloads (`specifications`, `executions`, `discussion_rows`, `photos`) are declared as `array` casts on the model and validated with `required|array|min:1` plus `*.*` dot-notation rules.
+- Status-driven authorization is enforced both at the policy layer (checking `approval_status === 'Draft'` / `'Pending Review'`) and again inside the service methods that throw if the transition is invalid.

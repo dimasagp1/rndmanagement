@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: materials_and_suppliers/material_crud
+title: Material (Bahan Baku) CRUD
+scope:
+    - app/Http/Controllers/MaterialController.php
+    - app/Models/Material.php
+    - database/migrations/2026_07_01_092816_create_materials_table.php
+source_files: []
+depends_on: []
+related_to:
+    - path: formula_management

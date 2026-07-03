@@ -1,0 +1,1 @@
+HTTP controllers and Eloquent model for editing authenticated users' profiles (including signature upload and account deletion) and updating global system settings (app name, company, logo, favicon) restricted to Superadmin.

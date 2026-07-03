@@ -1,0 +1,4 @@
+- Resource controllers extend `App\Http\Controllers\Controller` and implement the full index/create/store/edit/update/destroy set with route-name redirects to `{resource}.index`.
+- Validation uses inline array rules with `unique:{table},name` constraints, excluding the current id on update.
+- Success feedback is returned via `->with('success', '... berhasil ditambahkan/diperbarui/dihapus')` using Indonesian phrasing.
+- Database seeding is centralized in `MaterialSupplierSeeder` rather than per-entity seeders, ensuring materials and suppliers are seeded together.

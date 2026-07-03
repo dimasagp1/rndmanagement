@@ -1,0 +1,4 @@
+- Feature tests extend Tests\TestCase and opt into database isolation by use RefreshDatabase at the class level.
+- Test data is created via User::factory()->create() rather than hardcoded records, keeping fixtures deterministic and unique per run.
+- Authorization scenarios are expressed by creating a user, calling assignRole('<Role>'), then asserting response status or session state via actingAs($user).
+- HTTP endpoints are invoked through named routes using route('resource.action') instead of hard-coded URIs, so route changes stay in sync with tests.

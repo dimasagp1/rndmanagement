@@ -131,7 +131,7 @@
                                             <td>
                                                 <select :name="`materials[${index}][material_id]`"
                                                         x-model="row.material_id"
-                                                        class="form-input text-xs py-1 px-1.5" required>
+                                                        class="form-input text-xs py-1 px-1.5 tom-select" required>
                                                     <option value="">-- Pilih Material --</option>
                                                     @foreach($materials as $mat)
                                                     <option value="{{ $mat->id }}">{{ $mat->name }}</option>
@@ -141,7 +141,7 @@
                                             <td>
                                                 <select :name="`materials[${index}][supplier_id]`"
                                                         x-model="row.supplier_id"
-                                                        class="form-input text-xs py-1 px-1.5">
+                                                        class="form-input text-xs py-1 px-1.5 tom-select">
                                                     <option value="">-- Pilih Supplier --</option>
                                                     @foreach($suppliers as $sup)
                                                     <option value="{{ $sup->id }}">{{ $sup->name }}</option>
