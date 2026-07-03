@@ -440,8 +440,14 @@
                     @foreach($trialPm->departmentApprovals as $app)
                     @if(!$app->approved_by)
                     <div x-show="activeReviewDept === '{{ $app->department }}'"
-                         x-collapse
-                         class="p-4 bg-white border border-gray-200 rounded-xl space-y-3 mt-2 animate-fade-in shadow-sm">
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         style="display:none;"
+                         class="p-4 bg-white border border-gray-200 rounded-xl space-y-3 mt-2 shadow-sm">
                         <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Form Tinjauan: {{ $app->department_label }}</h4>
                         <form method="POST" action="{{ route('trial-pms.approve', $trialPm) }}" class="space-y-3">
                             @csrf
