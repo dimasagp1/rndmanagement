@@ -47,7 +47,7 @@ class TrialPmTest extends TestCase
         $this->assertNotNull($trial);
         $this->assertEquals('Botol PET 250ml', $trial->packaging_material);
         $this->assertEquals('Draft', $trial->approval_status);
-        $this->assertStringStartsWith('TPM-' . now()->format('Ym') . '-', $trial->code);
+        $this->assertStringContainsString('USUL-12345', $trial->code);
 
         // Verify 4 department approvals initialized
         $approvals = TrialPmApproval::where('trial_pm_id', $trial->id)->get();

@@ -11,10 +11,27 @@ use Illuminate\Validation\ValidationException;
 class TrialPmService
 {
     // ──────────────────────────────────────────────────────────────
-    // Auto-generate kode trial PM: TPM-YYYYMM-XXX
+    // Auto-generate kode trial PM: TPM-[proposal_number]-[seq] atau TPM-YYYYMM-XXX
     // ──────────────────────────────────────────────────────────────
-    public function generateCode(): string
+    public function generateCode(?string $proposalNumber = null): string
     {
+        if ($proposalNumber) {
+            $cleanProposal = str_replace(' ', '-', trim($proposalNumber));
+            $prefix = 'TPM-' . $cleanProposal . '-';
+            
+            $lastSeq = TrialPm::where('code', 'like', $prefix . '%')
+                ->pluck('code')
+                ->map(function ($code) use ($prefix) {
+                    $seqPart = substr($code, strlen($prefix));
+                    return is_numeric($seqPart) ? (int)$seqPart : 0;
+                })
+                ->max();
+
+            $nextSeq = str_pad(($lastSeq ?? 0) + 1, 2, '0', STR_PAD_LEFT);
+
+            return $prefix . $nextSeq;
+        }
+
         $prefix = 'TPM-' . now()->format('Ym') . '-';
         
         $lastSeq = TrialPm::where('code', 'like', $prefix . '%')
@@ -39,7 +56,7 @@ class TrialPmService
             $executions = $this->enrichExecutionParafs($data['executions'] ?? [], $signer);
 
             $trial = TrialPm::create([
-                'code'                     => $this->generateCode(),
+                'code'                     => $this->generateCode($data['proposal_number'] ?? null),
                 'proposal_number'          => $data['proposal_number'] ?? null,
                 'packaging_material'       => $data['packaging_material'],
                 'supplier'                 => $data['supplier'] ?? '',
@@ -86,7 +103,7 @@ class TrialPmService
 
             $executions = $this->enrichExecutionParafs($data['executions'] ?? [], $signer);
 
-            $trial->update([
+            $updateData = [
                 'proposal_number'          => $data['proposal_number'] ?? null,
                 'packaging_material'       => $data['packaging_material'],
                 'supplier'                 => $data['supplier'] ?? '',
@@ -100,7 +117,14 @@ class TrialPmService
                 'discussion_rows'          => $data['discussion_rows'] ?? [],
                 'photos'                   => $data['photos'] ?? $trial->photos ?? [],
                 'risk_analysis'            => $data['risk_analysis'] ?? '',
-            ]);
+            ];
+
+            // Regenerate code if proposal number changed
+            if ($trial->proposal_number !== ($data['proposal_number'] ?? null)) {
+                $updateData['code'] = $this->generateCode($data['proposal_number'] ?? null);
+            }
+
+            $trial->update($updateData);
 
             return $trial->fresh();
         });
