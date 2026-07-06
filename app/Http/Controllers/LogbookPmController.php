@@ -72,7 +72,7 @@ class LogbookPmController extends Controller
         $suppliers = Supplier::orderBy('name')->get();
         $trialPms  = TrialPm::where('approval_status', 'Approved')
                         ->orderBy('code')
-                        ->get(['id', 'code', 'packaging_material', 'supplier', 'catatan_trial']);
+                        ->get(['id', 'code', 'packaging_material', 'supplier']);
 
         return view('logbook-pm.create', compact('suppliers', 'trialPms'));
     }
