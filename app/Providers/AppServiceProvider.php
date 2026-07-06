@@ -32,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Register Policies
         Gate::policy(Formula::class, FormulaPolicy::class);
         Gate::policy(TrialRm::class, TrialRmPolicy::class);
