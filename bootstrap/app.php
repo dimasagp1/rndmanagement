@@ -6,6 +6,11 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
+    ->registered(function ($app) {
+        if (file_exists(base_path('build/manifest.json')) && !file_exists(base_path('public/build/manifest.json'))) {
+            $app->usePublicPath(base_path());
+        }
+    })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',

@@ -28,11 +28,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(FormulaService::class);
         $this->app->singleton(TrialRmService::class);
         $this->app->singleton(TrialPmService::class);
-
-        // Override public path if Vite build manifest is located in base_path/build instead of public/build
-        if (file_exists(base_path('build/manifest.json')) && !file_exists(base_path('public/build/manifest.json'))) {
-            $this->app->usePublicPath(base_path());
-        }
     }
 
     public function boot(): void
