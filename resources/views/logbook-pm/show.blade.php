@@ -9,6 +9,8 @@
         </div>
     </x-slot>
 
+    <div x-data="{ showPreview: false, previewUrl: '', previewType: 'image' }">
+
     @if(session('success'))
     <div class="alert-success mb-4 flash-success" role="alert">
         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -218,7 +220,10 @@
                     <div>
                         <span class="text-gray-400 block text-xs mb-1.5">File Scan (CoA / DO)</span>
                         @if($logbookPm->file_scan)
-                            <a href="{{ $logbookPm->file_scan }}" target="_blank" class="flex items-center gap-2 p-2 bg-gray-50 hover:bg-primary/5 rounded border border-gray-100 transition-colors">
+                            <a href="{{ $logbookPm->file_scan }}" 
+                               @click.prevent="previewUrl = '{{ $logbookPm->file_scan }}'; previewType = '{{ strtolower(pathinfo($logbookPm->file_scan, PATHINFO_EXTENSION)) === 'pdf' ? 'pdf' : 'image' }}'; showPreview = true;"
+                               class="flex items-center gap-2 p-2 bg-gray-50 hover:bg-primary/5 rounded border border-gray-100 transition-colors cursor-pointer"
+                               id="btn-preview-scan">
                                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span class="font-medium text-xs text-ink truncate flex-1">{{ basename($logbookPm->file_scan) }}</span>
                             </a>
@@ -232,14 +237,20 @@
                         <span class="text-gray-400 block text-xs mb-1.5">Lampiran Dokumentasi</span>
                         @if($logbookPm->lampiran_dokumentasi && count($logbookPm->lampiran_dokumentasi) > 0)
                             <div class="grid grid-cols-2 gap-2">
-                                @foreach($logbookPm->lampiran_dokumentasi as $img)
+                                @foreach($logbookPm->lampiran_dokumentasi as $index => $img)
                                     @php $ext = pathinfo($img, PATHINFO_EXTENSION); @endphp
                                     @if(in_array(strtolower($ext), ['jpg','jpeg','png']))
-                                        <a href="{{ $img }}" target="_blank" class="block border border-gray-100 rounded-lg overflow-hidden hover:opacity-85 transition-opacity">
+                                        <a href="{{ $img }}" 
+                                           @click.prevent="previewUrl = '{{ $img }}'; previewType = 'image'; showPreview = true;"
+                                           class="block border border-gray-100 rounded-lg overflow-hidden hover:opacity-85 transition-opacity cursor-pointer"
+                                           id="btn-preview-lampiran-{{ $index }}">
                                             <img src="{{ $img }}" class="w-full h-24 object-cover">
                                         </a>
                                     @else
-                                        <a href="{{ $img }}" target="_blank" class="flex flex-col items-center justify-center p-3 border border-gray-100 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-center text-xs text-ink">
+                                        <a href="{{ $img }}" 
+                                           @click.prevent="previewUrl = '{{ $img }}'; previewType = '{{ strtolower($ext) === 'pdf' ? 'pdf' : 'image' }}'; showPreview = true;"
+                                           class="flex flex-col items-center justify-center p-3 border border-gray-100 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-center text-xs text-ink cursor-pointer"
+                                           id="btn-preview-lampiran-{{ $index }}">
                                             <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                             <span class="truncate w-full font-medium">{{ basename($img) }}</span>
                                         </a>
@@ -264,5 +275,59 @@
             </div>
 
         </div>
+    </div>
+
+    <!-- Modal Pratinjau Dokumen & Scan -->
+    <div x-show="showPreview" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4" 
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <!-- Backdrop -->
+        <div @click="showPreview = false" 
+             class="absolute inset-0 bg-ink/50 backdrop-blur-sm"></div>
+
+        <!-- Modal Box -->
+        <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-150 w-full flex flex-col z-10 overflow-hidden transform transition-all duration-300"
+             style="height: 80vh; width: 95vw; max-width: 1000px;"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-surface">
+                <div>
+                    <h3 class="text-sm font-bold text-ink leading-tight font-heading">Pratinjau Dokumen</h3>
+                    <p class="text-[11px] text-gray-500 truncate max-w-md mt-0.5" x-text="previewUrl.split('/').pop()"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a :href="previewUrl" target="_blank" class="btn-outline py-1.5 px-3 text-xs flex items-center gap-1.5" id="btn-trigger-tab-baru">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        Buka Tab Baru
+                    </a>
+                    <button @click="showPreview = false" class="btn-ghost py-1.5 px-3 text-xs" id="btn-close-preview">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 bg-gray-150 p-4 overflow-auto flex items-center justify-center relative">
+                <template x-if="previewType === 'image'">
+                    <img :src="previewUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-md bg-white">
+                </template>
+                <template x-if="previewType === 'pdf'">
+                    <iframe :src="previewUrl" class="w-full h-full rounded-lg bg-white border-0 shadow-inner"></iframe>
+                </template>
+            </div>
+        </div>
+    </div>
+
     </div>
 </x-app-layout>
