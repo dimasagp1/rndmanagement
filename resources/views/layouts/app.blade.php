@@ -357,5 +357,134 @@
         </div>
     </div>
 
+    <!-- Custom Confirm Modal -->
+    <div id="custom-confirm-modal" class="fixed inset-0 z-[9999] flex items-center justify-center hidden" style="display: none;">
+        <!-- Backdrop -->
+        <div id="custom-confirm-backdrop" class="absolute inset-0 bg-ink/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 ease-out"></div>
+        
+        <!-- Modal Content Box -->
+        <div id="custom-confirm-box" class="relative bg-white rounded-2xl shadow-xl border border-gray-150 max-w-sm w-full mx-4 p-6 scale-95 opacity-0 transition-all duration-300 ease-out">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-gray-900 leading-tight">Konfirmasi Tindakan</h3>
+                    <p id="custom-confirm-message" class="text-xs text-gray-650 mt-2 leading-relaxed"></p>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-end gap-2 mt-6">
+                <button id="custom-confirm-cancel" class="btn btn-ghost btn-sm">
+                    Batal
+                </button>
+                <button id="custom-confirm-ok" class="btn btn-primary btn-sm">
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let activeCallback = null;
+            const modal = document.getElementById('custom-confirm-modal');
+            const backdrop = document.getElementById('custom-confirm-backdrop');
+            const box = document.getElementById('custom-confirm-box');
+            const messageEl = document.getElementById('custom-confirm-message');
+            const cancelBtn = document.getElementById('custom-confirm-cancel');
+            const okBtn = document.getElementById('custom-confirm-ok');
+
+            function showConfirm(message, callback) {
+                activeCallback = callback;
+                messageEl.textContent = message;
+                
+                modal.style.display = 'flex';
+                modal.classList.remove('hidden');
+                
+                // Force reflow
+                modal.offsetHeight;
+                
+                // Trigger transitions
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }
+
+            function hideConfirm(isOk) {
+                backdrop.classList.remove('opacity-100');
+                backdrop.classList.add('opacity-0');
+                box.classList.remove('scale-100', 'opacity-100');
+                box.classList.add('scale-95', 'opacity-0');
+                
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.classList.add('hidden');
+                    if (isOk && activeCallback) {
+                        activeCallback();
+                    }
+                    activeCallback = null;
+                }, 300);
+            }
+
+            cancelBtn.addEventListener('click', () => hideConfirm(false));
+            okBtn.addEventListener('click', () => hideConfirm(true));
+            backdrop.addEventListener('click', () => hideConfirm(false));
+
+            // Intercept clicks on any element with onclick containing confirm(
+            document.addEventListener('click', function(e) {
+                let target = e.target.closest('[onclick*="confirm("]');
+                if (target) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    
+                    let onclickStr = target.getAttribute('onclick');
+                    let match = onclickStr.match(/confirm\((['"])(.*?)\1\)/) || onclickStr.match(/confirm\(['"](.*?)['"]\)/);
+                    let message = match ? (match[2] || match[1]) : 'Apakah Anda yakin ingin melanjutkan?';
+                    
+                    showConfirm(message, function() {
+                        let originalOnclick = target.getAttribute('onclick');
+                        target.removeAttribute('onclick');
+                        
+                        let form = target.closest('form');
+                        if (form && target.type === 'submit') {
+                            form.submit();
+                        } else {
+                            target.click();
+                        }
+                        
+                        setTimeout(() => {
+                            target.setAttribute('onclick', originalOnclick);
+                        }, 100);
+                    });
+                }
+            }, true);
+
+            // Intercept form submissions with onsubmit containing confirm(
+            document.addEventListener('submit', function(e) {
+                let form = e.target;
+                let onsubmitStr = form.getAttribute('onsubmit');
+                if (onsubmitStr && onsubmitStr.includes('confirm(')) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    
+                    let match = onsubmitStr.match(/confirm\((['"])(.*?)\1\)/) || onsubmitStr.match(/confirm\(['"](.*?)['"]\)/);
+                    let message = match ? (match[2] || match[1]) : 'Apakah Anda yakin ingin melanjutkan?';
+                    
+                    showConfirm(message, function() {
+                        let originalOnsubmit = form.getAttribute('onsubmit');
+                        form.removeAttribute('onsubmit');
+                        form.submit();
+                        setTimeout(() => {
+                            form.setAttribute('onsubmit', originalOnsubmit);
+                        }, 100);
+                    });
+                }
+            }, true);
+        })();
+    </script>
 </body>
 </html>

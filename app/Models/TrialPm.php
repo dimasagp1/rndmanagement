@@ -71,11 +71,67 @@ class TrialPm extends Model
         return $this->hasMany(TrialPmApproval::class);
     }
 
-    // Helper: Check if all 4 departments approved
+    public function getRequiredDepartmentsAttribute()
+    {
+        $depts = ['rd'];
+
+        if ($this->hasParafChecked('production')) {
+            $depts[] = 'production';
+        }
+        if ($this->hasParafChecked('engineering')) {
+            $depts[] = 'engineering';
+        }
+        if ($this->hasParafChecked('qc')) {
+            $depts[] = 'qc';
+        }
+
+        return $depts;
+    }
+
+    // Helper: Check if all required departments approved
     public function getIsFullyApprovedByDepartmentsAttribute()
     {
-        return $this->departmentApprovals()
+        $requiredDepts = $this->required_departments;
+        
+        $approvedDeptsCount = $this->departmentApprovals()
+            ->whereIn('department', $requiredDepts)
             ->where('is_approved', true)
-            ->count() === 4;
+            ->count();
+            
+        return $approvedDeptsCount === count($requiredDepts);
+    }
+
+    /**
+     * Check if the department has checked its corresponding signature (paraf) in the executions.
+     */
+    public function hasParafChecked(string $department): bool
+    {
+        // R&D has no paraf in Section C, so it is always considered checked.
+        if ($department === 'rd') {
+            return true;
+        }
+
+        $key = match ($department) {
+            'production' => 'paraf_prod',
+            'engineering' => 'paraf_eng',
+            'qc' => 'paraf_qc',
+            default => null,
+        };
+
+        if (!$key) {
+            return false;
+        }
+
+        if (empty($this->executions) || !is_array($this->executions)) {
+            return false;
+        }
+
+        foreach ($this->executions as $exe) {
+            if (!empty($exe[$key])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

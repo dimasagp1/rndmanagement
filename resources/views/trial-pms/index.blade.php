@@ -121,16 +121,17 @@
                         <td><x-status-badge :status="$trial->approval_status" /></td>
                         <td>
                             @php
-                                $approvedCount = $trial->departmentApprovals->where('is_approved', true)->count();
+                                $requiredCount = count($trial->required_departments);
+                                $approvedCount = $trial->departmentApprovals->where('is_approved', true)->whereIn('department', $trial->required_departments)->count();
                             @endphp
                             <div class="flex items-center gap-1.5">
                                 <div class="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
                                     <div class="h-full rounded-full transition-all
-                                        {{ $approvedCount === 4 ? 'bg-emerald-400' : ($approvedCount > 0 ? 'bg-amber-400' : 'bg-gray-200') }}"
-                                        style="width: {{ $approvedCount / 4 * 100 }}%"></div>
+                                        {{ $approvedCount === $requiredCount ? 'bg-emerald-400' : ($approvedCount > 0 ? 'bg-amber-400' : 'bg-gray-200') }}"
+                                        style="width: {{ $requiredCount > 0 ? ($approvedCount / $requiredCount * 100) : 0 }}%"></div>
                                 </div>
-                                <span class="text-xs font-semibold {{ $approvedCount === 4 ? 'text-emerald-600' : 'text-gray-500' }}">
-                                    {{ $approvedCount }}/4 dept
+                                <span class="text-xs font-semibold {{ $approvedCount === $requiredCount ? 'text-emerald-600' : 'text-gray-500' }}">
+                                    {{ $approvedCount }}/{{ $requiredCount }} dept
                                 </span>
                             </div>
                         </td>

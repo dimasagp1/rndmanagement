@@ -197,6 +197,18 @@ class TrialPmService
             ]);
         }
 
+        if (!$trial->hasParafChecked($department)) {
+            $deptLabel = match ($department) {
+                'production' => 'Produksi',
+                'engineering' => 'Engineering',
+                'qc' => 'QC',
+                default => $department,
+            };
+            throw ValidationException::withMessages([
+                'department' => "Persetujuan untuk departemen {$deptLabel} tidak dapat diberikan karena paraf belum dicentang pada pelaksanaan trial.",
+            ]);
+        }
+
         DB::transaction(function () use ($trial, $department, $isApproved, $notes, $approvedBy) {
             $approval = TrialPmApproval::where('trial_pm_id', $trial->id)
                 ->where('department', $department)
@@ -218,12 +230,14 @@ class TrialPmService
                 return;
             }
 
-            // Jika semua 4 departemen approve (4/4), status trial PM otomatis Approved
+            // Jika semua departemen yang diperlukan approve, status trial PM otomatis Approved
+            $requiredDepts = $trial->required_departments;
             $approvedCount = TrialPmApproval::where('trial_pm_id', $trial->id)
+                ->whereIn('department', $requiredDepts)
                 ->where('is_approved', true)
                 ->count();
 
-            if ($approvedCount === 4) {
+            if ($approvedCount === count($requiredDepts)) {
                 $rdApproval = TrialPmApproval::where('trial_pm_id', $trial->id)
                     ->where('department', 'rd')
                     ->first();

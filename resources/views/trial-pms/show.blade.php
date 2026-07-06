@@ -322,6 +322,7 @@
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @foreach($trialPm->departmentApprovals as $app)
+                                @if($trialPm->hasParafChecked($app->department))
                                 <tr class="hover:bg-gray-50/50">
                                     <td class="px-3 py-3 font-bold text-ink">{{ $app->department_label }}</td>
                                     <td class="px-3 py-3 text-center">
@@ -336,7 +337,7 @@
                                             </span>
                                             @endif
                                         @else
-                                        <span class="px-2 py-0.5 bg-gray-50 text-gray-400 ring-1 ring-gray-200 rounded text-[10px]">
+                                        <span class="px-2 py-0.5 bg-amber-50 text-amber-700 ring-1 ring-amber-600/10 rounded text-[10px] font-semibold animate-pulse">
                                             Belum Dinilai
                                         </span>
                                         @endif
@@ -358,21 +359,82 @@
                                                 @endif
                                             </p>
                                         @else
-                                        <span class="text-gray-400 italic">Menunggu tinjauan...</span>
+                                        <span class="inline-flex items-center gap-1.5 text-amber-600/90 font-medium italic text-xs">
+                                            <svg class="w-3.5 h-3.5 text-amber-500 animate-spin" style="animation-duration: 3s;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Menunggu tinjauan...
+                                        </span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-3 text-right print:hidden">
                                         @can('approve', $trialPm)
                                             @if(!$app->approved_by)
-                                            <button type="button"
-                                                    @click="activeReviewDept = activeReviewDept === '{{ $app->department }}' ? null : '{{ $app->department }}'"
-                                                    class="btn-outline btn-sm text-[10px] py-0.5 px-2">
-                                                Input Penilaian
-                                            </button>
+                                                @if($trialPm->hasParafChecked($app->department))
+                                                <button type="button"
+                                                        @click="activeReviewDept = activeReviewDept === '{{ $app->department }}' ? null : '{{ $app->department }}'"
+                                                        class="btn-outline btn-sm text-[10px] py-0.5 px-2">
+                                                    Input Penilaian
+                                                </button>
+                                                @else
+                                                <button type="button"
+                                                        disabled
+                                                        title="Paraf untuk departemen ini belum dicentang pada pelaksanaan trial (Bagian C)"
+                                                        class="btn-outline btn-sm text-[10px] py-0.5 px-2 opacity-55 cursor-not-allowed bg-gray-50 border-gray-200 text-gray-400">
+                                                    Input Penilaian
+                                                </button>
+                                                @endif
                                             @endif
                                         @endcan
                                     </td>
                                 </tr>
+
+                                {{-- Inline Review Input Form --}}
+                                @can('approve', $trialPm)
+                                    @if(!$app->approved_by && $trialPm->hasParafChecked($app->department))
+                                    <tr x-show="activeReviewDept === '{{ $app->department }}'" 
+                                        x-collapse 
+                                        class="bg-gray-50/40 print:hidden"
+                                        style="display: none;">
+                                        <td colspan="4" class="px-4 py-4">
+                                            <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4 max-w-xl mx-auto">
+                                                <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Form Tinjauan: {{ $app->department_label }}</h4>
+                                                <form method="POST" action="{{ route('trial-pms.approve', $trialPm) }}" class="space-y-4" onsubmit="return confirm('Apakah Anda yakin ingin menyimpan penilaian departemen ini?')">
+                                                    @csrf
+                                                    <input type="hidden" name="department" value="{{ $app->department }}">
+
+                                                    <div>
+                                                        <label class="form-label text-[10px] font-bold uppercase text-gray-500">Kesimpulan Kelaikan *</label>
+                                                        <div class="flex items-center gap-6 mt-1.5">
+                                                            <label class="inline-flex items-center gap-1.5 text-xs text-gray-750 cursor-pointer">
+                                                                <input type="radio" name="is_approved" value="1" required checked class="text-primary focus:ring-primary h-4 w-4">
+                                                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10 rounded text-[10px] font-semibold">Bisa Digunakan</span>
+                                                            </label>
+                                                            <label class="inline-flex items-center gap-1.5 text-xs text-gray-750 cursor-pointer">
+                                                                <input type="radio" name="is_approved" value="0" required class="text-red-600 focus:ring-red-600 h-4 w-4">
+                                                                <span class="px-2 py-0.5 bg-red-50 text-red-700 ring-1 ring-red-600/10 rounded text-[10px] font-semibold">Tidak Bisa Digunakan</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label class="form-label text-[10px] font-bold uppercase text-gray-500" for="notes_{{ $app->department }}">Informasi Lain (Catatan Detail) *</label>
+                                                        <textarea id="notes_{{ $app->department }}" name="notes" rows="3" required
+                                                                  placeholder="Berikan catatan detail teknis uji kelayakan..."
+                                                                  class="form-input text-xs py-1.5"></textarea>
+                                                    </div>
+
+                                                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                                                        <button type="button" @click="activeReviewDept = null" class="btn-ghost btn-sm text-[10px]">Batal</button>
+                                                        <button type="submit" class="btn-primary btn-sm text-[10px]">Simpan Penilaian</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endif
+                                @endcan
+                                @endif
                                 @endforeach
                             </tbody>
                         </table>
@@ -429,62 +491,7 @@
 
         {{-- ─── RIGHT COLUMN: DEPT INPUTS & AUDIT TRAIL (print:hidden) ─────── --}}
         <div class="space-y-6 print:hidden">
-            
-            {{-- Inline Approval Input Box --}}
-            @can('approve', $trialPm)
-            <div class="card bg-emerald-50/10 border-l-4 border-emerald-500">
-                <div class="card-header"><h3 class="text-sm font-heading font-semibold text-ink">Verifikasi Departemen</h3></div>
-                <div class="card-body text-xs space-y-3">
-                    <p class="text-gray-600 leading-relaxed">Pilih <strong>"Input Penilaian"</strong> di samping baris departemen pada tabel E untuk mengisi keputusan kelayakan bahan pengemas.</p>
 
-                    @foreach($trialPm->departmentApprovals as $app)
-                    @if(!$app->approved_by)
-                    <div x-show="activeReviewDept === '{{ $app->department }}'"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 -translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 translate-y-0"
-                         x-transition:leave-end="opacity-0 -translate-y-2"
-                         style="display:none;"
-                         class="p-4 bg-white border border-gray-200 rounded-xl space-y-3 mt-2 shadow-sm">
-                        <h4 class="text-xs font-bold text-ink uppercase tracking-wider">Form Tinjauan: {{ $app->department_label }}</h4>
-                        <form method="POST" action="{{ route('trial-pms.approve', $trialPm) }}" class="space-y-3">
-                            @csrf
-                            <input type="hidden" name="department" value="{{ $app->department }}">
-
-                            <div>
-                                <label class="form-label text-[10px] font-bold uppercase text-gray-500">Kesimpulan Kelaikan *</label>
-                                <div class="flex items-center gap-4 mt-1">
-                                    <label class="inline-flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
-                                        <input type="radio" name="is_approved" value="1" required checked class="text-primary focus:ring-primary">
-                                        Bisa Digunakan
-                                    </label>
-                                    <label class="inline-flex items-center gap-1.5 text-xs text-gray-700 cursor-pointer">
-                                        <input type="radio" name="is_approved" value="0" required class="text-red-600 focus:ring-red-600">
-                                        Tidak Bisa Digunakan
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="form-label text-[10px] font-bold uppercase text-gray-500" for="notes_{{ $app->department }}">Informasi Lain (Catatan Detail) *</label>
-                                <textarea id="notes_{{ $app->department }}" name="notes" rows="3" required
-                                          placeholder="Berikan catatan detail teknis uji kelayakan..."
-                                          class="form-input text-xs py-1.5"></textarea>
-                            </div>
-
-                            <div class="flex justify-end gap-2">
-                                <button type="button" @click="activeReviewDept = null" class="btn-ghost btn-sm text-[10px]">Batal</button>
-                                <button type="submit" class="btn-primary btn-sm text-[10px]">Simpan Penilaian</button>
-                            </div>
-                        </form>
-                    </div>
-                    @endif
-                    @endforeach
-                </div>
-            </div>
-            @endcan
 
             {{-- Audit Trail (Rejected notes) --}}
             @if($trialPm->approval_status === 'Rejected' && $trialPm->rejection_notes)

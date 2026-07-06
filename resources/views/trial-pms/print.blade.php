@@ -27,8 +27,26 @@
             color: #000;
             line-height: 1.4;
             background: #fff;
-            padding-top: 22mm;
+            padding-top: 20mm;
             padding-bottom: 18mm;
+            position: relative;
+        }
+
+        /* ── Confidential Watermark ────────────────────────── */
+        body::before {
+            content: "CONFIDENTIAL";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 72pt;
+            font-weight: 900;
+            color: rgba(220, 220, 220, 0.18);
+            z-index: -1000;
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: 6px;
+            text-transform: uppercase;
         }
 
         /* ── Fixed Header (repeats on every page) ─────────── */
@@ -119,14 +137,7 @@
         /* ── Outer Border ─────────────────────────────────── */
         .form-container {
             border: 1.5px solid #000;
-            padding: 4mm 4mm 3mm 4mm;
-            min-height: 240mm;
-        }
-
-        /* ── Page Breaks ──────────────────────────────────── */
-        .page-break {
-            page-break-before: always;
-            break-before: page;
+            padding: 5mm 5mm;
         }
 
         /* ── Typography ───────────────────────────────────── */
@@ -134,8 +145,11 @@
             font-size: 10pt;
             font-weight: 700;
             text-transform: uppercase;
+            margin-top: 4mm;
             margin-bottom: 2mm;
             letter-spacing: 0.3pt;
+            break-after: avoid;
+            page-break-after: avoid;
         }
         .section-subtitle {
             font-size: 8pt;
@@ -211,6 +225,8 @@
             border-collapse: collapse;
             margin-bottom: 3mm;
             font-size: 9pt;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
         .form-table th,
         .form-table td {
@@ -245,6 +261,9 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 10pt;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-top: 4mm;
         }
         .sig-table th,
         .sig-table td {
@@ -289,14 +308,11 @@
         .mt-3 { margin-top: 3mm; }
         .mb-2 { margin-bottom: 2mm; }
         .mb-3 { margin-bottom: 3mm; }
-        .empty-row { height: 10mm; }
     </style>
 </head>
 <body>
 
-    {{-- ═══════════════════════════════════════════════════════
-         FIXED HEADER (repeats on every printed page)
-    ════════════════════════════════════════════════════════ --}}
+    {{-- Fixed Header (repeats on every printed page) --}}
     <div class="print-header">
         <div class="logo-area">
             <div class="logo-icon">HT</div>
@@ -306,19 +322,15 @@
         <div class="form-number">No. CM-06/RD/002-03.00</div>
     </div>
 
-    {{-- ═══════════════════════════════════════════════════════
-         FIXED FOOTER (repeats on every printed page)
-    ═══════════════════════════════════════════════════════ --}}
+    {{-- Fixed Footer (repeats on every printed page) --}}
     <div class="print-footer">
         <span class="lamp-text">LAMP. D PR-06/RD/002.02</span>
         <span class="master-copy">MASTER COPY</span>
-        <span class="page-number" id="footer-page">Halaman 1 dari 3</span>
+        <span class="page-number"></span>
     </div>
 
-    {{-- ═══════════════════════════════════════════════════════
-         PAGE 1
-    ═══════════════════════════════════════════════════════ --}}
-    <div class="form-container" id="page-1">
+    {{-- Fluid Document Container --}}
+    <div class="form-container">
 
         {{-- No. Usulan --}}
         <div class="field-row mb-3">
@@ -387,23 +399,24 @@
             <tbody>
                 @if(is_array($trialPm->specifications) && count($trialPm->specifications) > 0)
                     @foreach($trialPm->specifications as $index => $spec)
+                    @if(!empty(trim($spec)))
                     <tr>
                         <td class="col-center">{{ $index + 1 }}</td>
                         <td>{{ $spec }}</td>
                     </tr>
+                    @endif
                     @endforeach
+                @else
+                    <tr>
+                        <td colspan="2" class="text-center text-italic text-gray-400">Tidak ada data spesifikasi</td>
+                    </tr>
                 @endif
-                {{-- Filler empty rows to fill the table area --}}
-                @php $specCount = is_array($trialPm->specifications) ? count($trialPm->specifications) : 0; @endphp
-                @for($i = 0; $i < max(0, 6 - $specCount); $i++)
-                <tr class="empty-row"><td></td><td></td></tr>
-                @endfor
             </tbody>
         </table>
 
         {{-- C. PELAKSANAAN TRIAL DAN HASIL TRIAL --}}
         <p class="section-title mb-2">C. PELAKSANAAN TRIAL DAN HASIL TRIAL <span class="section-subtitle">* (diisi oleh R&D, QC, Dept.Produksi, dan Dept.Engineering)</span></p>
-        <table class="form-table mb-2">
+        <table class="form-table mb-3">
             <thead>
                 <tr class="merged-header">
                     <th rowspan="2" style="width: 10mm;">No.</th>
@@ -426,11 +439,17 @@
                 </tr>
             </thead>
             <tbody>
-                @php $exeCount = is_array($trialPm->executions) ? count($trialPm->executions) : 0; @endphp
+                @php 
+                    $executions = is_array($trialPm->executions) ? array_filter($trialPm->executions, function($item) {
+                        return !empty(trim($item['machine'] ?? ''));
+                    }) : [];
+                    $exeCount = count($executions);
+                @endphp
                 @if($exeCount > 0)
-                    @foreach($trialPm->executions as $index => $exe)
+                    @php $rowNo = 1; @endphp
+                    @foreach($executions as $exe)
                     <tr>
-                        <td class="col-center">{{ $index + 1 }}</td>
+                        <td class="col-center">{{ $rowNo++ }}</td>
                         <td>{{ $exe['machine'] ?? '' }}</td>
                         <td>{{ $exe['setting'] ?? '' }}</td>
                         <td>{{ $exe['actual'] ?? '' }}</td>
@@ -473,52 +492,11 @@
                         </td>
                     </tr>
                     @endforeach
+                @else
+                    <tr>
+                        <td colspan="11" class="text-center text-italic text-gray-400">Tidak ada data pelaksanaan trial</td>
+                    </tr>
                 @endif
-                {{-- Filler empty rows for page 1 (at least 3 rows) --}}
-                @for($i = 0; $i < max(3, 4 - $exeCount); $i++)
-                <tr class="empty-row">
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                @endfor
-            </tbody>
-        </table>
-
-    </div>
-
-    {{-- ═══════════════════════════════════════════════════════
-         PAGE 2
-    ════════════════════════════════════════════════════════ --}}
-    <div class="form-container page-break" id="page-2">
-
-        {{-- Continuation of Section C table (filler rows) --}}
-        <table class="form-table mb-2">
-            <thead>
-                <tr class="merged-header">
-                    <th rowspan="2" style="width: 10mm;">No.</th>
-                    <th rowspan="2" style="width: 30mm;">Mesin Pengemas</th>
-                    <th colspan="2">Parameter</th>
-                    <th colspan="2">Waktu</th>
-                    <th colspan="2">Hasil</th>
-                    <th colspan="3">Paraf</th>
-                </tr>
-                <tr class="merged-header">
-                    <th style="width: 22mm;">Setting</th>
-                    <th style="width: 22mm;">Aktual</th>
-                    <th style="width: 18mm;">Mulai</th>
-                    <th style="width: 18mm;">Selesai</th>
-                    <th style="width: 14mm;">Reject</th>
-                    <th style="width: 14mm;">Baik</th>
-                    <th style="width: 14mm;">Prod</th>
-                    <th style="width: 14mm;">Eng</th>
-                    <th style="width: 14mm;">QC</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for($i = 0; $i < 5; $i++)
-                <tr class="empty-row">
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                @endfor
             </tbody>
         </table>
 
@@ -526,7 +504,7 @@
 
         {{-- D. PEMBAHASAN HASIL TRIAL --}}
         <p class="section-title mb-2">D. PEMBAHASAN HASIL TRIAL <span class="section-subtitle">(diisi oleh R&D)</span></p>
-        <table class="form-table mb-2">
+        <table class="form-table mb-3">
             <thead>
                 <tr>
                     <th style="width: 10mm;">No</th>
@@ -536,33 +514,33 @@
                 </tr>
             </thead>
             <tbody>
-                @if(is_array($trialPm->discussion_rows) && count($trialPm->discussion_rows) > 0)
-                    @foreach($trialPm->discussion_rows as $index => $disc)
+                @php 
+                    $discussions = is_array($trialPm->discussion_rows) ? array_filter($trialPm->discussion_rows, function($item) {
+                        return !empty(trim($item['evaluation'] ?? ''));
+                    }) : [];
+                    $discCount = count($discussions);
+                @endphp
+                @if($discCount > 0)
+                    @php $rowNo = 1; @endphp
+                    @foreach($discussions as $disc)
                     <tr>
-                        <td class="col-center">{{ $index + 1 }}</td>
+                        <td class="col-center">{{ $rowNo++ }}</td>
                         <td>{{ $disc['evaluation'] ?? '' }}</td>
                         <td>{{ $disc['risk_analysis'] ?? '' }}</td>
                         <td>{{ $disc['recommendation'] ?? '' }}</td>
                     </tr>
                     @endforeach
+                @else
+                    <tr>
+                        <td colspan="4" class="text-center text-italic text-gray-400">Tidak ada data pembahasan hasil trial</td>
+                    </tr>
                 @endif
-                @php $discCount = is_array($trialPm->discussion_rows) ? count($trialPm->discussion_rows) : 0; @endphp
-                @for($i = 0; $i < max(2, 4 - $discCount); $i++)
-                <tr class="empty-row"><td></td><td></td><td></td><td></td></tr>
-                @endfor
             </tbody>
         </table>
 
-    </div>
-
-    {{-- ═══════════════════════════════════════════════════════
-         PAGE 3
-    ════════════════════════════════════════════════════════ --}}
-    <div class="form-container page-break" id="page-3">
-
         {{-- E. KESIMPULAN --}}
         <p class="section-title mb-2">E. KESIMPULAN <span class="section-subtitle">(diisi oleh R&D, QC, Dept.Produksi, dan Dept.Engineering)</span></p>
-        <table class="form-table mb-3">
+        <table class="form-table mb-4">
             <thead>
                 <tr>
                     <th style="width: 30mm;">Departemen</th>
@@ -577,6 +555,7 @@
                     $approvals = $trialPm->departmentApprovals->keyBy('department');
                 @endphp
                 @foreach($deptOrder as $dept)
+                @if($trialPm->hasParafChecked($dept))
                 <tr>
                     <td><span class="text-italic">{{ $deptLabels[$dept] }}</span></td>
                     <td>
@@ -600,6 +579,7 @@
                         @endif
                     </td>
                 </tr>
+                @endif
                 @endforeach
             </tbody>
         </table>
@@ -655,57 +635,12 @@
 
     </div>
 
-    {{-- ═══════════════════════════════════════════════════════
-         PAGE NUMBER SCRIPT (updates footer per page)
-    ════════════════════════════════════════════════════════ --}}
-    <script>
-        // For screen preview: show page 1 footer by default.
-        // When printing, browsers with fixed footer support will repeat it.
-        // For multi-page preview, we use CSS counters approach via separate footers per page.
-    </script>
-
     {{-- Per-page footer overrides using CSS counters --}}
     <style>
-        /* Hide the global footer page number and use per-page counters */
-        @media print {
-            #page-1 ~ .print-footer .page-number,
-            #page-2 ~ .print-footer .page-number {
-                /* handled by browser */
-            }
+        .print-footer .page-number { display: block !important; }
+        .print-footer .page-number::after {
+            content: "Halaman " counter(page);
         }
-        /* Per-page footer text via pseudo-elements on each page container */
-        #page-1::after {
-            content: "Halaman 1 dari 3";
-            position: fixed;
-            bottom: 2mm;
-            right: 12mm;
-            font-size: 8pt;
-            color: #333;
-            background: #fff;
-            padding: 0 2mm;
-        }
-        #page-2::after {
-            content: "Halaman 2 dari 3";
-            position: fixed;
-            bottom: 2mm;
-            right: 12mm;
-            font-size: 8pt;
-            color: #333;
-            background: #fff;
-            padding: 0 2mm;
-        }
-        #page-3::after {
-            content: "Halaman 3 dari 3";
-            position: fixed;
-            bottom: 2mm;
-            right: 12mm;
-            font-size: 8pt;
-            color: #333;
-            background: #fff;
-            padding: 0 2mm;
-        }
-        /* Hide the default footer page number since we use per-page */
-        .print-footer .page-number { display: none; }
     </style>
 
 </body>

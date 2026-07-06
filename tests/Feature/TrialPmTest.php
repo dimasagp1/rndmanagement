@@ -69,6 +69,16 @@ class TrialPmTest extends TestCase
             'product_trial'      => 'Batch B',
             'trial_sample_quantity' => '1000 pcs',
             'specifications'     => ['Foil'],
+            'executions'         => [
+                [
+                    'machine' => 'Machine A',
+                    'setting' => 'Setting A',
+                    'actual' => 'Actual A',
+                    'paraf_prod' => true,
+                    'paraf_eng' => true,
+                    'paraf_qc' => true
+                ]
+            ],
             'approval_status'    => 'Draft',
             'created_by'         => $this->staff->id,
         ]);
@@ -120,6 +130,16 @@ class TrialPmTest extends TestCase
             'product_trial'      => 'Batch B',
             'trial_sample_quantity' => '1000 pcs',
             'specifications'     => ['Foil'],
+            'executions'         => [
+                [
+                    'machine' => 'Machine A',
+                    'setting' => 'Setting A',
+                    'actual' => 'Actual A',
+                    'paraf_prod' => true,
+                    'paraf_eng' => true,
+                    'paraf_qc' => true
+                ]
+            ],
             'approval_status'    => 'Draft',
             'created_by'         => $this->staff->id,
         ]);
