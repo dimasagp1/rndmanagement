@@ -16,6 +16,8 @@ use App\Services\TrialRmService;
 use App\Models\TrialPm;
 use App\Policies\TrialPmPolicy;
 use App\Services\TrialPmService;
+use App\Models\LogbookPm;
+use App\Policies\LogbookPmPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Formula::class, FormulaPolicy::class);
         Gate::policy(TrialRm::class, TrialRmPolicy::class);
         Gate::policy(TrialPm::class, TrialPmPolicy::class);
+        Gate::policy(LogbookPm::class, LogbookPmPolicy::class);
 
         // Implicitly grant "Superadmin" role all permission checks
         Gate::before(function ($user, $ability) {

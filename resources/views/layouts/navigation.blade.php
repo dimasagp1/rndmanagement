@@ -38,6 +38,13 @@
                         </x-nav-link>
                     @endcan
 
+                    {{-- Log Book PM --}}
+                    @can('trial_pm.view')
+                        <x-nav-link :href="route('logbook-pm.index')" :active="request()->routeIs('logbook-pm.*')">
+                            Log Book PM
+                        </x-nav-link>
+                    @endcan
+
                     {{-- Approval Center - Manager & GM only --}}
                     @can('approval_center.access')
                         <x-nav-link :href="route('approval-center.index')" :active="request()->routeIs('approval-center.*')">
@@ -150,6 +157,12 @@
             @can('trial_pm.view')
                 <x-responsive-nav-link :href="route('trial-pms.index')" :active="request()->routeIs('trial-pms.*')">
                     Trial PM
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('trial_pm.view')
+                <x-responsive-nav-link :href="route('logbook-pm.index')" :active="request()->routeIs('logbook-pm.*')">
+                    Log Book PM
                 </x-responsive-nav-link>
             @endcan
 

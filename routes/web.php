@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\LogbookPmController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -65,6 +66,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:trial_pm.view');
     Route::get('trial-pms/{trialPm}/print', [TrialPmController::class, 'print'])
          ->name('trial-pms.print')
+         ->middleware('can:trial_pm.view');
+
+    // ── Log Book PM ───────────────────────────────────────
+    Route::get('logbook-pm/print-all', [LogbookPmController::class, 'printAll'])
+         ->name('logbook-pm.print-all')
+         ->middleware('can:trial_pm.view');
+    Route::get('logbook-pm/get-trial-data/{trialPm}', [LogbookPmController::class, 'getTrialData'])
+         ->name('logbook-pm.get-trial-data')
+         ->middleware('can:trial_pm.view');
+    Route::post('logbook-pm/{logbookPm}/approve', [LogbookPmController::class, 'approve'])
+         ->name('logbook-pm.approve')
+         ->middleware('can:trial_pm.view');
+    Route::resource('logbook-pm', LogbookPmController::class)
+         ->parameters(['logbook-pm' => 'logbookPm'])
          ->middleware('can:trial_pm.view');
 
     // ── Approval Center ───────────────────────────────────
