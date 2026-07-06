@@ -173,16 +173,17 @@
                                                            class="form-input text-xs py-1 px-1.5 font-mono text-right">
                                                     <span class="text-gray-400">%</span>
                                                 </div>
-                                            </td>
-                                            <td>
+                                                                <td>
                                                 <input type="number" :name="`materials[${index}][dose_2g]`"
-                                                       x-model="row.dose_2g" readonly
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right bg-gray-50 text-gray-500">
+                                                       x-model="row.dose_2g" @input="recalcHpp(index)"
+                                                       min="0" step="0.0001" placeholder="0.0000"
+                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][dose_05g]`"
-                                                       x-model="row.dose_05g" readonly
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right bg-gray-50 text-gray-500">
+                                                       x-model="row.dose_05g"
+                                                       min="0" step="0.0001" placeholder="0.0000"
+                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][sachet_30]`"
@@ -192,13 +193,14 @@
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][hpp_rm]`"
-                                                       x-model="row.hpp_rm" readonly
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right bg-gray-50 text-gray-500">
+                                                       x-model="row.hpp_rm"
+                                                       min="0" step="0.01" placeholder="0.00"
+                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" @click="removeRow(index)"
-                                                        class="text-red-400 hover:text-red-600"
-                                                        x-show="rows.length > 1" title="Hapus">
+                                                         class="text-red-400 hover:text-red-600"
+                                                         x-show="rows.length > 1" title="Hapus">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                     </svg>
@@ -262,7 +264,7 @@
                     </div>
                 </div>
 
-                {{-- NOTES --}}
+                {{-- NOTE --}}
                 <div class="card">
                     <div class="card-header">
                         <h3 class="text-sm font-heading font-semibold text-ink">Note</h3>
@@ -359,6 +361,13 @@ function formulaForm() {
 
             const dose2 = parseFloat(row.dose_2g) || 0;
             const ppg = parseFloat(row.price_per_gram) || 0;
+            row.hpp_rm = (ppg > 0 && dose2 > 0) ? (ppg * dose2).toFixed(2) : '';
+        },
+
+        recalcHpp(index) {
+            const row = this.rows[index];
+            const ppg = parseFloat(row.price_per_gram) || 0;
+            const dose2 = parseFloat(row.dose_2g) || 0;
             row.hpp_rm = (ppg > 0 && dose2 > 0) ? (ppg * dose2).toFixed(2) : '';
         },
 
