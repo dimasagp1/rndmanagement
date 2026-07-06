@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(FormulaService::class);
         $this->app->singleton(TrialRmService::class);
         $this->app->singleton(TrialPmService::class);
+
+        // Override public path if running on hosting where the root serves as the public folder
+        if (file_exists(base_path('index.php')) && !file_exists(base_path('public/index.php'))) {
+            $this->app->usePublicPath(base_path());
+        }
     }
 
     public function boot(): void
