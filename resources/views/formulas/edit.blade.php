@@ -191,19 +191,19 @@
                                                 <input type="number" :name="`materials[${index}][price_per_kg]`"
                                                        x-model="row.price_per_kg" @input="recalcRow(index)"
                                                        min="0" step="100" placeholder="0"
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
+                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][price_per_gram]`"
                                                        x-model="row.price_per_gram" readonly
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right bg-gray-50 text-gray-500">
+                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right bg-gray-50 text-gray-500">
                                             </td>
                                             <td>
                                                 <div class="flex items-center gap-1">
                                                     <input type="number" :name="`materials[${index}][percentage]`"
                                                            x-model="row.percentage" @input="recalculate()"
                                                            min="0.01" max="100" step="0.001" placeholder="0.000"
-                                                           class="form-input text-xs py-1 px-1.5 font-mono text-right" required>
+                                                           class="form-input w-full text-xs py-1 px-1.5 font-mono text-right" required>
                                                     <span class="text-gray-400">%</span>
                                                 </div>
                                             </td>
@@ -211,25 +211,25 @@
                                                 <input type="number" :name="`materials[${index}][dose_2g]`"
                                                        x-model="row.dose_2g" @input="recalcHpp(index)"
                                                        min="0" step="0.0001" placeholder="0.0000"
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
+                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][dose_05g]`"
                                                        x-model="row.dose_05g"
                                                        min="0" step="0.0001" placeholder="0.0000"
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
+                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][sachet_30]`"
                                                        x-model="row.sachet_30" @input="recalcRow(index)"
                                                        min="0" step="1" placeholder="0"
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
+                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][hpp_rm]`"
                                                        x-model="row.hpp_rm"
                                                        min="0" step="0.01" placeholder="0.00"
-                                                       class="form-input text-xs py-1 px-1.5 font-mono text-right">
+                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right">
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" @click="removeRow(index)"
