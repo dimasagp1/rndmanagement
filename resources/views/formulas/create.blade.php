@@ -31,7 +31,7 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ route('formulas.store') }}" x-data="formulaForm()" id="formula-create-form">
+    <form method="POST" action="{{ route('formulas.store') }}" x-data="formulaForm({{ json_encode(old('materials', [])) }}, {{ old('target_dose_a', 2.0000) }}, '{{ old('target_dose_a_unit', 'g') }}', {{ old('target_dose_b', 0.5000) }}, '{{ old('target_dose_b_unit', 'g') }}', {{ old('target_sachet', 30) }}, '{{ old('target_sachet_unit', 'sachet') }}')" id="formula-create-form">
         @csrf
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -123,9 +123,30 @@
                                         <th class="w-24" style="min-width: 100px;">Harga/kg</th>
                                         <th class="w-20" style="min-width: 80px;">Harga/g</th>
                                         <th class="w-20" style="min-width: 80px;">Persentase</th>
-                                        <th class="w-24" style="min-width: 90px;">2 g</th>
-                                        <th class="w-24" style="min-width: 90px;">0.5 g</th>
-                                        <th class="w-24" style="min-width: 90px;">30 sachet</th>
+                                        <th class="w-24" style="min-width: 90px;">
+                                            <div class="flex flex-col items-center">
+                                                <div class="flex items-center justify-center gap-0.5">
+                                                    <input type="number" name="target_dose_a" x-model="targetDoseA" @input="recalculateAllDoses()" step="0.0001" min="0" class="w-10 text-center bg-transparent border-b border-gray-300 focus:border-primary focus:outline-none p-0 text-xs font-bold text-ink font-heading">
+                                                    <input type="text" name="target_dose_a_unit" x-model="targetDoseAUnit" maxlength="10" class="w-8 text-center bg-transparent border-b border-gray-300 focus:border-primary focus:outline-none p-0 text-xs font-bold text-ink font-heading">
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="w-24" style="min-width: 90px;">
+                                            <div class="flex flex-col items-center">
+                                                <div class="flex items-center justify-center gap-0.5">
+                                                    <input type="number" name="target_dose_b" x-model="targetDoseB" @input="recalculateAllDoses()" step="0.0001" min="0" class="w-10 text-center bg-transparent border-b border-gray-300 focus:border-primary focus:outline-none p-0 text-xs font-bold text-ink font-heading">
+                                                    <input type="text" name="target_dose_b_unit" x-model="targetDoseBUnit" maxlength="10" class="w-8 text-center bg-transparent border-b border-gray-300 focus:border-primary focus:outline-none p-0 text-xs font-bold text-ink font-heading">
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="w-28" style="min-width: 100px;">
+                                            <div class="flex flex-col items-center">
+                                                <div class="flex items-center justify-center gap-0.5">
+                                                    <input type="number" name="target_sachet" x-model="targetSachet" step="1" min="1" class="w-8 text-center bg-transparent border-b border-gray-300 focus:border-primary focus:outline-none p-0 text-xs font-bold text-ink font-heading">
+                                                    <input type="text" name="target_sachet_unit" x-model="targetSachetUnit" maxlength="15" class="w-12 text-center bg-transparent border-b border-gray-300 focus:border-primary focus:outline-none p-0 text-xs font-bold text-ink font-heading">
+                                                </div>
+                                            </div>
+                                        </th>
                                         <th class="w-32" style="min-width: 110px;">HPP RM</th>
                                         <th class="w-10"></th>
                                     </tr>
@@ -336,14 +357,24 @@
 </x-app-layout>
 
 <script>
-function formulaForm() {
+function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', targetDoseB = 0.5000, targetDoseBUnit = 'g', targetSachet = 30, targetSachetUnit = 'sachet') {
+    const rows = initial.length > 0
+        ? initial.map(m => ({ id: m.id || Date.now() + Math.random(), ...m }))
+        : [{ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' }];
+
     return {
         formType: 'new_product',
-        rows: [{ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' }],
-        totalPercentage: 0,
+        rows,
+        totalPercentage: rows.reduce((s, r) => s + (parseFloat(r.percentage) || 0), 0),
+        targetDoseA: parseFloat(targetDoseA) || 2.0000,
+        targetDoseAUnit: targetDoseAUnit || 'g',
+        targetDoseB: parseFloat(targetDoseB) || 0.5000,
+        targetDoseBUnit: targetDoseBUnit || 'g',
+        targetSachet: parseInt(targetSachet) || 30,
+        targetSachetUnit: targetSachetUnit || 'sachet',
 
         addRow() {
-            this.rows.push({ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' });
+            this.rows.push({ id: Date.now() + Math.random(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' });
         },
 
         removeRow(index) {
@@ -357,8 +388,8 @@ function formulaForm() {
             row.price_per_gram = pricePerKg > 0 ? (pricePerKg / 1000).toFixed(4) : '';
 
             const pct = parseFloat(row.percentage) || 0;
-            row.dose_2g = pct > 0 ? (pct * 2 / 100).toFixed(4) : '';
-            row.dose_05g = pct > 0 ? (pct * 0.5 / 100).toFixed(4) : '';
+            row.dose_2g = pct > 0 ? (pct * this.targetDoseA / 100).toFixed(4) : '';
+            row.dose_05g = pct > 0 ? (pct * this.targetDoseB / 100).toFixed(4) : '';
 
             const dose2 = parseFloat(row.dose_2g) || 0;
             const ppg = parseFloat(row.price_per_gram) || 0;
@@ -372,12 +403,15 @@ function formulaForm() {
             row.hpp_rm = (ppg > 0 && dose2 > 0) ? (ppg * dose2).toFixed(2) : '';
         },
 
+        recalculateAllDoses() {
+            this.rows.forEach((row, i) => this.recalcRow(i));
+        },
+
         recalculate() {
             this.totalPercentage = this.rows.reduce((sum, row) => {
                 return sum + (parseFloat(row.percentage) || 0);
             }, 0);
-            // Recalc all rows
-            this.rows.forEach((row, i) => this.recalcRow(i));
+            this.recalculateAllDoses();
         }
     }
 }

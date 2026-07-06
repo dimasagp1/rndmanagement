@@ -47,6 +47,12 @@ class FormulaService
                 'preparation_method' => $data['preparation_method'] ?? null,
                 'notes'              => $data['notes'] ?? null,
                 'result'             => $data['result'] ?? null,
+                'target_dose_a'      => $data['target_dose_a'] ?? 2.0000,
+                'target_dose_a_unit' => $data['target_dose_a_unit'] ?? 'g',
+                'target_dose_b'      => $data['target_dose_b'] ?? 0.5000,
+                'target_dose_b_unit' => $data['target_dose_b_unit'] ?? 'g',
+                'target_sachet'      => $data['target_sachet'] ?? 30,
+                'target_sachet_unit' => $data['target_sachet_unit'] ?? 'sachet',
                 'approval_status'    => 'Draft',
                 'created_by'         => $createdBy,
             ]);
@@ -73,6 +79,12 @@ class FormulaService
                 'preparation_method' => $data['preparation_method'] ?? null,
                 'notes'              => $data['notes'] ?? null,
                 'result'             => $data['result'] ?? null,
+                'target_dose_a'      => $data['target_dose_a'] ?? 2.0000,
+                'target_dose_a_unit' => $data['target_dose_a_unit'] ?? 'g',
+                'target_dose_b'      => $data['target_dose_b'] ?? 0.5000,
+                'target_dose_b_unit' => $data['target_dose_b_unit'] ?? 'g',
+                'target_sachet'      => $data['target_sachet'] ?? 30,
+                'target_sachet_unit' => $data['target_sachet_unit'] ?? 'sachet',
             ];
 
             if ($formula->approval_status === 'Draft' || $formula->approval_status === 'Rejected') {

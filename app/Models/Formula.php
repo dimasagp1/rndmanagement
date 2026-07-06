@@ -27,6 +27,12 @@ class Formula extends Model
         'approved_by_gm',
         'approved_at',
         'rejection_notes',
+        'target_dose_a',
+        'target_dose_a_unit',
+        'target_dose_b',
+        'target_dose_b_unit',
+        'target_sachet',
+        'target_sachet_unit',
     ];
 
     protected $casts = [

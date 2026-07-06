@@ -123,9 +123,9 @@
                             <th>Harga/kg</th>
                             <th>Harga/g</th>
                             <th>Persentase</th>
-                            <th>2 g</th>
-                            <th>0.5 g</th>
-                            <th>30 sachet</th>
+                            <th>{{ (float)$formula->target_dose_a }} {{ $formula->target_dose_a_unit ?? 'g' }}</th>
+                            <th>{{ (float)$formula->target_dose_b }} {{ $formula->target_dose_b_unit ?? 'g' }}</th>
+                            <th>{{ $formula->target_sachet }} {{ $formula->target_sachet_unit ?? 'sachet' }}</th>
                             <th>HPP RM</th>
                         </tr>
                     </thead>

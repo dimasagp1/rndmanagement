@@ -208,8 +208,9 @@
                                 <th>Supplier</th>
                                 <th class="text-right">Harga/kg</th>
                                 <th class="text-right">Persentase</th>
-                                <th class="text-right">2g</th>
-                                <th class="text-right">0.5g</th>
+                                <th class="text-right">{{ (float)$formula->target_dose_a }}{{ $formula->target_dose_a_unit ?? 'g' }}</th>
+                                <th class="text-right">{{ (float)$formula->target_dose_b }}{{ $formula->target_dose_b_unit ?? 'g' }}</th>
+                                <th class="text-right">{{ $formula->target_sachet }} {{ $formula->target_sachet_unit ?? 'sachet' }}</th>
                                 <th class="text-right">HPP RM</th>
                             </tr>
                         </thead>
@@ -229,8 +230,9 @@
                                         <span class="font-mono font-semibold text-sm text-primary">{{ $mat->percentage }}%</span>
                                     </div>
                                 </td>
-                                <td class="text-right text-xs font-mono">{{ $mat->dose_2g ? number_format($mat->dose_2g, 3) : '—' }}</td>
-                                <td class="text-right text-xs font-mono">{{ $mat->dose_05g ? number_format($mat->dose_05g, 3) : '—' }}</td>
+                                <td class="text-right text-xs font-mono">{{ $mat->dose_2g ? number_format($mat->dose_2g, 4) : '—' }}</td>
+                                <td class="text-right text-xs font-mono">{{ $mat->dose_05g ? number_format($mat->dose_05g, 4) : '—' }}</td>
+                                <td class="text-right text-xs font-mono">{{ $mat->sachet_30 ? number_format($mat->sachet_30, 2) : '—' }}</td>
                                 <td class="text-right text-xs font-mono">{{ $mat->hpp_rm ? 'Rp' . number_format($mat->hpp_rm, 2) : '—' }}</td>
                             </tr>
                             @endforeach
@@ -238,12 +240,19 @@
                         <tfoot>
                             <tr class="bg-surface">
                                 <td colspan="4" class="text-right text-xs font-semibold text-gray-500 py-2 px-4">TOTAL</td>
-                                <td class="text-right">
-                                    <span class="font-mono font-bold text-sm {{ $pct == 100 ? 'text-emerald-600' : 'text-amber-600' }}">
-                                        {{ $pct }}%
-                                    </span>
+                                <td class="text-right text-sm font-bold text-primary py-2 px-4 font-mono">{{ $formula->total_percentage }}%</td>
+                                <td class="text-right text-xs font-bold text-ink py-2 px-4 font-mono">
+                                    {{ number_format($formula->materials->sum('dose_2g'), 4) }}g
                                 </td>
-                                <td colspan="3"></td>
+                                <td class="text-right text-xs font-bold text-ink py-2 px-4 font-mono">
+                                    {{ number_format($formula->materials->sum('dose_05g'), 4) }}g
+                                </td>
+                                <td class="text-right text-xs font-bold text-ink py-2 px-4 font-mono">
+                                    {{ number_format($formula->materials->sum('sachet_30'), 2) }}
+                                </td>
+                                <td class="text-right text-xs font-bold text-ink py-2 px-4 font-mono">
+                                    Rp{{ number_format($formula->materials->sum('hpp_rm'), 2) }}
+                                </td>
                             </tr>
                         </tfoot>
                     </table>
