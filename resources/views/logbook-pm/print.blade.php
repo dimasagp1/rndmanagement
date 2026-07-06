@@ -99,7 +99,7 @@
                 <td>{{ $entry->satuan }}</td>
                 <td class="text-center">{{ $entry->kelengkapan_dokumen }}</td>
                 <td style="font-size: 6.5pt; line-height: 1.2;">{{ $entry->kondisi_fisik_aktual }}</td>
-                <td style="font-size: 6pt; font-family: monospace; line-height: 1.1; white-space: pre-wrap;">{{ $entry->trialPm ? '['.$entry->trialPm->code.'] ' : '' }}{{ Str::limit($entry->catatan_trial, 180) }}</td>
+                <td style="font-size: 6pt; font-family: monospace; line-height: 1.1; white-space: pre-wrap;">{{ $entry->trialPm ? '['.$entry->trialPm->code.'] ' : '' }}{{ $entry->catatan_trial }}</td>
                 <td class="text-center text-bold">{{ $entry->status_pengujian }}</td>
                 <td class="text-center">{{ $entry->kondisi_fisik ?? '—' }}</td>
                 <td class="text-center">
