@@ -67,10 +67,11 @@
             <tr>
                 <th style="width: 4mm;">No</th>
                 <th style="width: 14mm;">Tgl Terima</th>
-                <th style="width: 25mm;">Nama Supplier/Produsen</th>
+                <th style="width: 23mm;">Nama Supplier/Produsen</th>
                 <th style="width: 20mm;">Jenis Kemasan</th>
-                <th style="width: 35mm;">Nama / Deskripsi Material</th>
-                <th style="width: 18mm;">Kode / Sample No.</th>
+                <th style="width: 31mm;">Nama / Deskripsi Material</th>
+                <th style="width: 11mm;">Kode Bahan</th>
+                <th style="width: 11mm;">No. Sample</th>
                 <th style="width: 12mm;">Jumlah</th>
                 <th style="width: 10mm;">Satuan</th>
                 <th style="width: 15mm;">Kelengkapan Dok.</th>
@@ -96,10 +97,8 @@
                     <br><span style="font-size: 6pt; color: #555;">{{ $entry->deskripsi_material }}</span>
                     @endif
                 </td>
-                <td style="font-family: monospace; font-size: 6.5pt;">
-                    {{ $entry->kode_bahan ?? '—' }}<br>
-                    <span style="color:#666;">{{ $entry->no_sample ?? '—' }}</span>
-                </td>
+                <td style="font-family: monospace; font-size: 6.5pt;">{{ $entry->kode_bahan ?? '—' }}</td>
+                <td style="font-family: monospace; font-size: 6.5pt; color:#666;">{{ $entry->no_sample ?? '—' }}</td>
                 <td class="text-right text-bold">{{ number_format($entry->jumlah_diterima, 0) }}</td>
                 <td>{{ $entry->satuan }}</td>
                 <td class="text-center">{{ $entry->kelengkapan_dokumen }}</td>
@@ -118,7 +117,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="16" class="text-center" style="padding: 10mm; font-style: italic;">
+                <td colspan="17" class="text-center" style="padding: 10mm; font-style: italic;">
                     Tidak ada data log book untuk dicetak.
                 </td>
             </tr>

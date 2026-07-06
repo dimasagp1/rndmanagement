@@ -7,7 +7,7 @@
         </div>
     </x-slot>
 
-    <div x-data="{ showPrintPreview: false, printUrl: '' }">
+    <div x-data="{ showPrintPreview: false, printUrl: '', showPreview: false, previewUrl: '', previewType: 'image' }">
 
     @if(session('success'))
     <div class="alert-success mb-4 flash-success" role="alert">
@@ -130,7 +130,8 @@
                         <th class="px-3 py-2.5 text-left font-bold text-gray-500 min-w-[130px]">Supplier/Produsen</th>
                         <th class="px-3 py-2.5 text-left font-bold text-gray-500 min-w-[100px]">Jenis Kemasan</th>
                         <th class="px-3 py-2.5 text-left font-bold text-gray-500 min-w-[140px]">Nama/Deskripsi Material</th>
-                        <th class="px-3 py-2.5 text-left font-bold text-gray-500 w-28">Kode Bahan | No.Sample</th>
+                        <th class="px-3 py-2.5 text-left font-bold text-gray-500 w-24">Kode Bahan</th>
+                        <th class="px-3 py-2.5 text-left font-bold text-gray-500 w-24">No. Sample</th>
                         <th class="px-3 py-2.5 text-right font-bold text-gray-500 w-24">Jml Diterima</th>
                         <th class="px-3 py-2.5 text-left font-bold text-gray-500 w-16">Satuan</th>
                         <th class="px-3 py-2.5 text-center font-bold text-gray-500 w-24">Kelengkapan Dok.</th>
@@ -160,10 +161,8 @@
                             <p class="text-gray-400 text-[10px] mt-0.5 leading-tight">{{ Str::limit($entry->deskripsi_material, 50) }}</p>
                             @endif
                         </td>
-                        <td class="px-3 py-2.5">
-                            <p class="font-mono text-[10px] text-gray-600">{{ $entry->kode_bahan ?? '—' }}</p>
-                            <p class="font-mono text-[10px] text-primary">{{ $entry->no_sample ?? '—' }}</p>
-                        </td>
+                        <td class="px-3 py-2.5 font-mono text-[10px] text-gray-600">{{ $entry->kode_bahan ?? '—' }}</td>
+                        <td class="px-3 py-2.5 font-mono text-[10px] text-primary">{{ $entry->no_sample ?? '—' }}</td>
                         <td class="px-3 py-2.5 text-right font-semibold text-ink">{{ number_format($entry->jumlah_diterima, 0) }}</td>
                         <td class="px-3 py-2.5 text-gray-600">{{ $entry->satuan }}</td>
                         <td class="px-3 py-2.5 text-center">
@@ -201,7 +200,10 @@
                         </td>
                         <td class="px-3 py-2.5 text-center">
                             @if($entry->file_scan)
-                            <a href="{{ $entry->file_scan }}" target="_blank" class="text-primary hover:underline">
+                            @php $ext = pathinfo($entry->file_scan, PATHINFO_EXTENSION); @endphp
+                            <a href="{{ $entry->file_scan }}" 
+                               @click.prevent="previewUrl = '{{ $entry->file_scan }}'; previewType = '{{ strtolower($ext) === 'pdf' ? 'pdf' : 'image' }}'; showPreview = true;"
+                               class="text-primary hover:underline cursor-pointer">
                                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </a>
                             @else
@@ -217,7 +219,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="20" class="px-4 py-10 text-center text-gray-400 italic text-sm">
+                        <td colspan="21" class="px-4 py-10 text-center text-gray-400 italic text-sm">
                             Belum ada entri Log Book PM.
                             @can('create', App\Models\LogbookPm::class)
                             <a href="{{ route('logbook-pm.create') }}" class="text-primary hover:underline ml-1">Tambah sekarang →</a>
@@ -302,6 +304,58 @@
                             :style="'width: 1122px; height: 794px; transform: scale(' + scale + '); transform-origin: center center; position: absolute; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);'" 
                             class="bg-white rounded-lg">
                     </iframe>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pratinjau Dokumen & Scan -->
+    <div x-show="showPreview" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4" 
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <!-- Backdrop -->
+        <div @click="showPreview = false" 
+             class="absolute inset-0 bg-ink/50 backdrop-blur-sm"></div>
+
+        <!-- Modal Box -->
+        <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-150 w-full flex flex-col z-10 overflow-hidden transform transition-all duration-300"
+             style="height: 80vh; width: 95vw; max-width: 1000px;"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-surface">
+                <div>
+                    <h3 class="text-sm font-bold text-ink leading-tight font-heading">Pratinjau Dokumen</h3>
+                    <p class="text-[11px] text-gray-500 truncate max-w-md mt-0.5" x-text="previewUrl.split('/').pop()"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a :href="previewUrl" target="_blank" class="btn-outline py-1.5 px-3 text-xs flex items-center gap-1.5" id="btn-trigger-tab-baru">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        Buka Tab Baru
+                    </a>
+                    <button @click="showPreview = false" class="btn-ghost py-1.5 px-3 text-xs" id="btn-close-preview">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 bg-gray-150 p-4 overflow-auto flex items-center justify-center relative">
+                <template x-if="previewType === 'image'">
+                    <img :src="previewUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-md bg-white">
+                </template>
+                <template x-if="previewType === 'pdf'">
+                    <iframe :src="previewUrl" class="w-full h-full rounded-lg bg-white border-0 shadow-inner"></iframe>
                 </template>
             </div>
         </div>
