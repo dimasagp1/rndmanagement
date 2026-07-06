@@ -251,7 +251,8 @@
              class="absolute inset-0 bg-ink/40 backdrop-blur-sm"></div>
 
         <!-- Modal Box -->
-        <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-150 w-full max-w-6xl h-[85vh] flex flex-col z-10 overflow-hidden transform transition-all duration-300"
+        <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-150 w-full flex flex-col z-10 overflow-hidden transform transition-all duration-300"
+             style="height: 85vh; width: 95vw; max-width: 1200px;"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95"
              x-transition:enter-end="opacity-100 scale-100"
@@ -278,9 +279,29 @@
             </div>
 
             <!-- Preview Area -->
-            <div class="flex-1 bg-gray-150 p-4 overflow-hidden relative">
+            <div class="flex-1 bg-gray-150 p-4 overflow-hidden relative flex items-center justify-center"
+                 x-data="{ scale: 0.6 }"
+                 x-init="
+                    const updateScale = () => {
+                        const containerWidth = $el.clientWidth - 32;
+                        const containerHeight = $el.clientHeight - 32;
+                        const scaleW = containerWidth / 1122;
+                        const scaleH = containerHeight / 794;
+                        scale = Math.min(scaleW, scaleH, 1);
+                    };
+                    $watch('showPrintPreview', value => {
+                        if (value) {
+                            setTimeout(updateScale, 150);
+                        }
+                    });
+                    window.addEventListener('resize', updateScale);
+                 ">
                 <template x-if="showPrintPreview">
-                    <iframe id="preview-iframe" :src="printUrl" class="w-full h-full rounded-xl bg-white border border-gray-250 shadow-inner"></iframe>
+                    <iframe id="preview-iframe" 
+                            :src="printUrl" 
+                            :style="'width: 1122px; height: 794px; transform: scale(' + scale + '); transform-origin: center center; position: absolute; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);'" 
+                            class="bg-white rounded-lg">
+                    </iframe>
                 </template>
             </div>
         </div>
