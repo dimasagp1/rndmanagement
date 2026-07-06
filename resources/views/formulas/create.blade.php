@@ -123,10 +123,10 @@
                                         <th class="w-24">Harga/kg</th>
                                         <th class="w-20">Harga/g</th>
                                         <th class="w-20">Persentase</th>
-                                        <th class="w-16">2 g</th>
-                                        <th class="w-16">0.5 g</th>
-                                        <th class="w-20">30 sachet</th>
-                                        <th class="w-24">HPP RM</th>
+                                        <th class="w-24">2 g</th>
+                                        <th class="w-24">0.5 g</th>
+                                        <th class="w-24">30 sachet</th>
+                                        <th class="w-32">HPP RM</th>
                                         <th class="w-10"></th>
                                     </tr>
                                 </thead>
