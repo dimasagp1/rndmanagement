@@ -120,13 +120,13 @@
                                         <th class="w-8">No</th>
                                         <th class="min-w-[140px]">Material</th>
                                         <th class="min-w-[120px]">Supplier</th>
-                                        <th class="w-24">Harga/kg</th>
-                                        <th class="w-20">Harga/g</th>
-                                        <th class="w-20">Persentase</th>
-                                        <th class="w-24">2 g</th>
-                                        <th class="w-24">0.5 g</th>
-                                        <th class="w-24">30 sachet</th>
-                                        <th class="w-32">HPP RM</th>
+                                        <th class="w-24" style="min-width: 100px;">Harga/kg</th>
+                                        <th class="w-20" style="min-width: 80px;">Harga/g</th>
+                                        <th class="w-20" style="min-width: 80px;">Persentase</th>
+                                        <th class="w-24" style="min-width: 90px;">2 g</th>
+                                        <th class="w-24" style="min-width: 90px;">0.5 g</th>
+                                        <th class="w-24" style="min-width: 90px;">30 sachet</th>
+                                        <th class="w-32" style="min-width: 110px;">HPP RM</th>
                                         <th class="w-10"></th>
                                     </tr>
                                 </thead>
