@@ -39,7 +39,12 @@
         @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
     </style>
 </head>
-<body onload="window.print()">
+<body>
+    <script>
+        if (window.self === window.top) {
+            window.onload = function() { window.print(); }
+        }
+    </script>
 
     <div class="watermark">R&D HERBATECH</div>
 

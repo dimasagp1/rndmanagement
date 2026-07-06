@@ -7,6 +7,8 @@
         </div>
     </x-slot>
 
+    <div x-data="{ showPrintPreview: false, printUrl: '' }">
+
     @if(session('success'))
     <div class="alert-success mb-4 flash-success" role="alert">
         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -67,12 +69,11 @@
                 Tambah Entri
             </a>
             @endcan
-            <a href="{{ route('logbook-pm.print-all', request()->query()) }}" 
-               onclick="window.open(this.href, 'Cetak Log Book PM', 'width=1200,height=800,scrollbars=yes,status=no,resizable=yes'); return false;"
-               class="btn-outline" id="btn-cetak-logbook">
+            <button @click="printUrl = '{{ route('logbook-pm.print-all', request()->query()) }}'; showPrintPreview = true;"
+                    class="btn-outline" id="btn-cetak-logbook">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Cetak Log Book
-            </a>
+            </button>
         </div>
     </div>
 
@@ -233,6 +234,58 @@
             {{ $entries->links() }}
         </div>
         @endif
+    </div>
+
+    <!-- Modal Pratinjau Cetak -->
+    <div x-show="showPrintPreview" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4" 
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <!-- Backdrop -->
+        <div @click="showPrintPreview = false" 
+             class="absolute inset-0 bg-ink/40 backdrop-blur-sm"></div>
+
+        <!-- Modal Box -->
+        <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-150 w-full max-w-6xl h-[85vh] flex flex-col z-10 overflow-hidden transform transition-all duration-300"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-surface">
+                <div>
+                    <h3 class="text-sm font-bold text-ink leading-tight font-heading">Pratinjau Cetak Log Book PM</h3>
+                    <p class="text-xs text-gray-500">Tampilan cetak lembar dokumen A4 Landscape</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="document.getElementById('preview-iframe').contentWindow.print()" 
+                            class="btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5"
+                            id="btn-trigger-cetak-modal">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        Cetak / Download
+                    </button>
+                    <button @click="showPrintPreview = false" class="btn-ghost py-1.5 px-3 text-xs">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Area -->
+            <div class="flex-1 bg-gray-150 p-4 overflow-hidden relative">
+                <template x-if="showPrintPreview">
+                    <iframe id="preview-iframe" :src="printUrl" class="w-full h-full rounded-xl bg-white border border-gray-250 shadow-inner"></iframe>
+                </template>
+            </div>
+        </div>
+    </div>
+
     </div>
 
 </x-app-layout>
