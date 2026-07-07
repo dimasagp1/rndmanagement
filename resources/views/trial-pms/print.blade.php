@@ -27,8 +27,7 @@
             color: #000;
             line-height: 1.4;
             background: #fff;
-            padding-top: 20mm;
-            padding-bottom: 18mm;
+            padding: 0;
             position: relative;
         }
 
@@ -138,6 +137,13 @@
         .form-container {
             border: 1.5px solid #000;
             padding: 5mm 5mm;
+            margin-top: 18mm;
+            margin-bottom: 18mm;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
         }
 
         /* ── Typography ───────────────────────────────────── */
@@ -556,6 +562,12 @@
                 @endif
             </tbody>
         </table>
+
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="form-container">
 
         {{-- E. KESIMPULAN --}}
         <p class="section-title mb-2">E. KESIMPULAN <span class="section-subtitle">(diisi oleh R&D, QC, Dept.Produksi, dan Dept.Engineering)</span></p>
