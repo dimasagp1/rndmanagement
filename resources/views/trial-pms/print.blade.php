@@ -308,9 +308,24 @@
         .mt-3 { margin-top: 3mm; }
         .mb-2 { margin-bottom: 2mm; }
         .mb-3 { margin-bottom: 3mm; }
+
+        /* ── Watermark ────────────────────────────── */
+        .watermark {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 72pt; font-weight: 900;
+            color: rgba(0,0,0,0.06);
+            letter-spacing: 8pt;
+            z-index: 50;
+            pointer-events: none;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
+
+    {{-- CONFIDENTIAL Watermark --}}
+    <div class="watermark">CONFIDENTIAL</div>
 
     {{-- Fixed Header (repeats on every printed page) --}}
     <div class="print-header">
