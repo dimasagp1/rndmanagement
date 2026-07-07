@@ -23,8 +23,7 @@
             color: #000;
             line-height: 1.4;
             background: #fff;
-            padding-top: 22mm;
-            padding-bottom: 18mm;
+            padding: 0;
         }
 
         /* ── Fixed Header ─────────────────────────── */
@@ -52,6 +51,7 @@
         }
         .print-footer .lamp-text { font-size: 8pt; color: #333; }
         .print-footer .page-number { font-size: 8pt; color: #333; }
+        .page-num-val::after { content: counter(page); }
 
         /* ── Watermark ────────────────────────────── */
         .watermark {
@@ -86,7 +86,13 @@
         .sig-image { height: 8mm; width: auto; max-width: 24mm; object-fit: contain; display: inline-block; vertical-align: middle; }
 
         /* ── Form Container ───────────────────────── */
-        .form-container { border: 1.5px solid #000; padding: 4mm 4mm 3mm 4mm; min-height: 240mm; }
+        .form-container {
+            border: 1.5px solid #000;
+            padding: 4mm 4mm 3mm 4mm;
+            min-height: 220mm;
+            margin-top: 18mm;
+            margin-bottom: 18mm;
+        }
         .page-break { page-break-before: always; break-before: page; }
 
         /* ── Utility ──────────────────────────────── */
@@ -131,7 +137,7 @@
     ════════════════════════════════════════════════════════ --}}
     <div class="print-footer">
         <span class="lamp-text">LAMP. B PR-05/RD/001.03</span>
-        <span class="page-number">Halaman 1 dari 2</span>
+        <span class="page-number">Halaman <span class="page-num-val"></span> dari 2</span>
     </div>
 
     {{-- ═══════════════════════════════════════════════════════
@@ -199,37 +205,35 @@
             <tbody>
                 @php
                     $materials = $trialRm->formula?->materials ?? collect();
-                    $rowCount = max($materials->count(), 16);
                 @endphp
-                @for($i = 0; $i < $rowCount; $i++)
-                    @php $fm = $materials->values()->get($i); @endphp
+                @foreach($materials->values() as $i => $fm)
                     <tr>
                         <td class="text-center">{{ $i + 1 }}</td>
-                        <td>{{ $fm?->material?->name ?? '' }}</td>
-                        <td>{{ $fm?->material?->description ?? '' }}</td>
-                        <td>{{ $fm?->supplier?->name ?? '' }}</td>
-                        <td>{{ $fm?->material?->type ?? '' }}</td>
-                        <td class="text-center">{{ $fm ? number_format($fm->percentage, 2) . '%' : '' }}</td>
+                        <td>{{ $fm->material?->name ?? '' }}</td>
+                        <td>{{ $fm->material?->description ?? '' }}</td>
+                        <td>{{ $fm->supplier?->name ?? '' }}</td>
+                        <td>{{ $fm->material?->type ?? '' }}</td>
+                        <td class="text-center">{{ number_format($fm->percentage, 2) }}%</td>
                         <td></td>
                         <td></td>
                     </tr>
-                @endfor
+                @endforeach
             </tbody>
         </table>
-    </div>
 
-    {{-- ═══════════════════════════════════════════════════════
-         PAGE 2: D, E, F
-    ════════════════════════════════════════════════════════ --}}
-    <div class="page-break"></div>
-
-    <div class="form-container">
+        <div class="mt-3 mb-3"></div>
 
         {{-- Section D: TAHAPAN PROSES --}}
         <div class="section-title">D. TAHAPAN PROSES <span class="section-subtitle">(diisi oleh Staff R&D)</span></div>
         <div style="border: 1px solid #000; padding: 2mm; min-height: 30mm; white-space: pre-line; font-size: 9pt;">{{ $trialRm->process_steps }}</div>
+    </div>
 
-        <div class="mt-3 mb-3"></div>
+    {{-- ═══════════════════════════════════════════════════════
+         PAGE 2: E, F
+    ════════════════════════════════════════════════════════ --}}
+    <div class="page-break"></div>
+
+    <div class="form-container">
 
         {{-- Section E: HASIL TRIAL --}}
         <div class="section-title">E. HASIL TRIAL <span class="section-subtitle">(diisi oleh Staff R&D)</span></div>
