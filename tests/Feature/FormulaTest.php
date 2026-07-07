@@ -60,7 +60,7 @@ class FormulaTest extends TestCase
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
             'code' => 'FRM-202607-001',
             'name' => 'Formula Test',
-            'development_stage' => 'Draf',
+            'development_stage' => 'Product Form',
             'materials' => [
                 [
                     'material_id' => $this->material1->id,
@@ -86,7 +86,7 @@ class FormulaTest extends TestCase
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
             'code' => 'FRM-202607-999',
             'name' => 'Formula Over 100',
-            'development_stage' => 'Draf',
+            'development_stage' => 'Product Form',
             'materials' => [
                 [
                     'material_id' => $this->material1->id,

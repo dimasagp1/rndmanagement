@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Login — R&D Management System PT Herbatech Innopharma Industry">
-    <title>Login — {{ config('app.name', 'Herbatech R&D') }}</title>
+    <title>Login — {{ setting('app_name', 'Herbatech R&D') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Favicon -->
+    @if(setting('app_favicon'))
+    <link rel="icon" type="image/png" href="{{ asset('storage/' . setting('app_favicon')) }}">
+    @else
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
@@ -27,12 +33,20 @@
 
             <!-- Content -->
             <div class="relative z-10 text-center max-w-md">
+                @if(setting('app_logo'))
+                <div class="mb-8 flex justify-center">
+                    <div class="w-24 h-24 rounded-2xl bg-white/15 flex items-center justify-center shadow-lg overflow-hidden p-2">
+                        <img src="{{ asset('storage/' . setting('app_logo')) }}" class="w-full h-full object-contain">
+                    </div>
+                </div>
+                @else
                 <div class="text-8xl mb-8 drop-shadow-lg select-none">🌿</div>
+                @endif
                 <h1 class="text-4xl font-heading font-bold text-white mb-4 leading-tight">
-                    R&D Management<br>System
+                    {{ setting('app_name', 'Herbatech R&D') }}
                 </h1>
                 <p class="text-white/70 text-lg leading-relaxed">
-                    Sistem manajemen riset & pengembangan produk herbal PT Herbatech Innopharma Industry
+                    Sistem manajemen riset & pengembangan produk herbal {{ setting('company_name', 'PT Herbatech Innopharma') }}
                 </p>
 
                 <!-- Features list -->
@@ -63,10 +77,16 @@
                 <!-- Mobile logo (visible only on mobile) -->
                 <div class="lg:hidden text-center mb-8">
                     <div class="inline-flex items-center gap-2 text-primary">
+                        @if(setting('app_logo'))
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
+                            <img src="{{ asset('storage/' . setting('app_logo')) }}" class="w-full h-full object-contain">
+                        </div>
+                        @else
                         <span class="text-4xl">🌿</span>
+                        @endif
                         <div class="text-left">
-                            <p class="font-heading font-bold text-lg leading-tight">Herbatech R&D</p>
-                            <p class="text-xs text-gray-500">PT Herbatech Innopharma Industry</p>
+                            <p class="font-heading font-bold text-lg leading-tight">{{ setting('app_name', 'Herbatech R&D') }}</p>
+                            <p class="text-xs text-gray-500">{{ setting('company_name', 'PT Herbatech Innopharma') }}</p>
                         </div>
                     </div>
                 </div>
