@@ -66,8 +66,12 @@
 
     <div class="print-header">
         <div class="logo-area">
-            <div class="logo-icon">HT</div>
-            <span class="logo-text">HERBATECH</span>
+            @if(setting('app_logo'))
+                <img src="{{ asset('storage/' . setting('app_logo')) }}" style="height: 8mm; width: auto; max-width: 25mm; object-fit: contain; vertical-align: middle;">
+            @else
+                <div class="logo-icon">HT</div>
+            @endif
+            <span class="logo-text">{{ strtoupper(setting('app_name', 'HERBATECH')) }}</span>
         </div>
         <div class="title-area">FORM FORMULASI RM</div>
         <div class="form-number">No. CM-04/RD/001.01</div>
@@ -383,8 +387,12 @@
     ════════════════════════════════════════════════════════ --}}
     <div class="print-header">
         <div class="logo-area">
-            <div class="logo-icon">HT</div>
-            <span class="logo-text">HERBATECH</span>
+            @if(setting('app_logo'))
+                <img src="{{ asset('storage/' . setting('app_logo')) }}" style="height: 10mm; width: auto; max-width: 28mm; object-fit: contain; vertical-align: middle;">
+            @else
+                <div class="logo-icon">HT</div>
+            @endif
+            <span class="logo-text">{{ strtoupper(setting('app_name', 'HERBATECH')) }}</span>
         </div>
         <div class="title-area">FORM FORMULASI RM</div>
         <div class="form-number">No. CM-04/RD/001.01</div>
