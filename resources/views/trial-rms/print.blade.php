@@ -119,8 +119,8 @@
                 <img src="{{ asset('storage/' . setting('print_logo')) }}" style="height: 10mm; width: auto; max-width: 28mm; object-fit: contain; vertical-align: middle;">
             @else
                 <div class="logo-icon">HT</div>
+                <span class="logo-text">{{ strtoupper(setting('app_name', 'HERBATECH')) }}</span>
             @endif
-            <span class="logo-text">{{ strtoupper(setting('app_name', 'HERBATECH')) }}</span>
         </div>
         <div class="title-area">FORM CATATAN TRIAL<br>PRODUK/PROSES</div>
         <div class="form-number">No. CM-05/RD/001-B.03</div>

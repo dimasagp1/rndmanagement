@@ -54,8 +54,8 @@
                 <img src="{{ asset('storage/' . setting('print_logo')) }}" style="height: 8mm; width: auto; max-width: 25mm; object-fit: contain; vertical-align: middle;">
             @else
                 <div class="logo-icon">HT</div>
+                <span class="logo-text">{{ strtoupper(setting('app_name', 'HERBATECH')) }}</span>
             @endif
-            <span class="logo-text">{{ strtoupper(setting('app_name', 'HERBATECH')) }}</span>
         </div>
         <div class="title-area">LOG BOOK BAHAN PENGEMAS (PM)</div>
         <div class="form-number">CM-04/RD/LBP-001</div>
