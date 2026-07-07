@@ -27,6 +27,7 @@ class SettingController extends Controller
             'app_name' => ['required', 'string', 'max:100'],
             'company_name' => ['required', 'string', 'max:100'],
             'app_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'print_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
             'app_favicon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,ico', 'max:1024'],
             'paraf_prod' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
             'paraf_eng' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
@@ -45,6 +46,16 @@ class SettingController extends Controller
             }
             $path = $request->file('app_logo')->store('settings', 'public');
             Setting::updateOrCreate(['key' => 'app_logo'], ['value' => $path]);
+        }
+
+        // Process print logo upload
+        if ($request->hasFile('print_logo')) {
+            $oldPrintLogo = setting('print_logo');
+            if ($oldPrintLogo) {
+                Storage::disk('public')->delete($oldPrintLogo);
+            }
+            $path = $request->file('print_logo')->store('settings', 'public');
+            Setting::updateOrCreate(['key' => 'print_logo'], ['value' => $path]);
         }
 
         // Process favicon upload

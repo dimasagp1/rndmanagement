@@ -66,8 +66,8 @@
 
     <div class="print-header">
         <div class="logo-area">
-            @if(setting('app_logo'))
-                <img src="{{ asset('storage/' . setting('app_logo')) }}" style="height: 8mm; width: auto; max-width: 25mm; object-fit: contain; vertical-align: middle;">
+            @if(setting('print_logo'))
+                <img src="{{ asset('storage/' . setting('print_logo')) }}" style="height: 8mm; width: auto; max-width: 25mm; object-fit: contain; vertical-align: middle;">
             @else
                 <div class="logo-icon">HT</div>
             @endif
@@ -387,8 +387,8 @@
     ════════════════════════════════════════════════════════ --}}
     <div class="print-header">
         <div class="logo-area">
-            @if(setting('app_logo'))
-                <img src="{{ asset('storage/' . setting('app_logo')) }}" style="height: 10mm; width: auto; max-width: 28mm; object-fit: contain; vertical-align: middle;">
+            @if(setting('print_logo'))
+                <img src="{{ asset('storage/' . setting('print_logo')) }}" style="height: 10mm; width: auto; max-width: 28mm; object-fit: contain; vertical-align: middle;">
             @else
                 <div class="logo-icon">HT</div>
             @endif

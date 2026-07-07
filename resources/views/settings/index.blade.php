@@ -60,7 +60,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
                         {{-- App Logo --}}
                         <div class="space-y-3">
                             <label class="form-label font-bold text-ink">Logo Sidebar</label>
@@ -81,6 +81,29 @@
                             </div>
 
                             <input type="file" id="app_logo" name="app_logo" accept="image/png, image/jpeg"
+                                   class="block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
+                        </div>
+
+                        {{-- Print Logo --}}
+                        <div class="space-y-3">
+                            <label class="form-label font-bold text-ink">Logo Menu Cetak</label>
+                            
+                            {{-- Preview Current Print Logo --}}
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    @if(setting('print_logo'))
+                                    <img src="{{ asset('storage/' . setting('print_logo')) }}" class="w-full h-full object-contain p-1" id="preview-print-logo">
+                                    @else
+                                    <span class="text-3xl text-gray-300">🌿</span>
+                                    @endif
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    <p class="font-semibold">Logo Cetak Aktif</p>
+                                    <p class="text-[10px]">Format: PNG, JPG (Maks. 2MB)</p>
+                                </div>
+                            </div>
+
+                            <input type="file" id="print_logo" name="print_logo" accept="image/png, image/jpeg"
                                    class="block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
                         </div>
 
