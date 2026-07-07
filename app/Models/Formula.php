@@ -37,6 +37,7 @@ class Formula extends Model
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'formula_date' => 'date',
     ];
 
     public function getActivitylogOptions(): LogOptions
