@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Formula;
 use App\Models\TrialRm;
+use App\Models\TrialPm;
 use App\Services\FormulaService;
 use App\Services\TrialRmService;
+use App\Services\TrialPmService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -14,7 +16,8 @@ class ApprovalCenterController extends Controller
 {
     public function __construct(
         private FormulaService $formulaService,
-        private TrialRmService $trialRmService
+        private TrialRmService $trialRmService,
+        private TrialPmService $trialPmService
     ) {}
 
     // ──────────────────────────────────────────────────────────────
@@ -30,6 +33,7 @@ class ApprovalCenterController extends Controller
 
         $pendingFormulas = collect();
         $pendingTrialRms = collect();
+        $pendingTrialPms = collect();
 
         // Antrean Operational Manager (Tahap 1)
         if ($user->hasRole('Operational Manager')) {
@@ -39,6 +43,11 @@ class ApprovalCenterController extends Controller
                 ->get();
 
             $pendingTrialRms = TrialRm::where('approval_status', 'Pending Tahap 1')
+                ->with('creator')
+                ->latest()
+                ->get();
+
+            $pendingTrialPms = TrialPm::where('approval_status', 'Pending Approval')
                 ->with('creator')
                 ->latest()
                 ->get();
@@ -57,7 +66,7 @@ class ApprovalCenterController extends Controller
                 ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -146,5 +155,51 @@ class ApprovalCenterController extends Controller
         return redirect()
             ->route('approval-center.index')
             ->with('success', "Trial RM {$trialRm->code} berhasil ditolak.");
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // APPROVE TRIAL PM
+    // ──────────────────────────────────────────────────────────────
+    public function approveTrialPm(TrialPm $trialPm)
+    {
+        $user = auth()->user();
+
+        if (! $user->hasRole('Operational Manager')) {
+            abort(403, 'Hanya Operational Manager yang dapat melakukan persetujuan.');
+        }
+
+        try {
+            $this->trialPmService->approveOM($trialPm, $user->id);
+            $msg = "Trial PM {$trialPm->code} telah berhasil disetujui (Approved).";
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()->route('approval-center.index')->with('success', $msg);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // REJECT TRIAL PM
+    // ──────────────────────────────────────────────────────────────
+    public function rejectTrialPm(Request $request, TrialPm $trialPm)
+    {
+        $user = auth()->user();
+
+        if (! $user->hasRole('Operational Manager')) {
+            abort(403, 'Hanya Operational Manager yang dapat melakukan penolakan.');
+        }
+
+        $request->validate([
+            'rejection_notes' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $this->trialPmService->rejectOM($trialPm, $request->rejection_notes, $user->id);
+            $msg = "Trial PM {$trialPm->code} berhasil ditolak.";
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()->route('approval-center.index')->with('success', $msg);
     }
 }

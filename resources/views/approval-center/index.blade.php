@@ -63,6 +63,18 @@
                         {{ $pendingTrialRms->count() }}
                     </span>
                 </button>
+                @if(auth()->user()->hasRole('Operational Manager'))
+                <button type="button"
+                        @click="activeTab = 'trial_pms'; activeRejectItem = null"
+                        :class="activeTab === 'trial_pms' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
+                        class="px-4 py-2.5 border-b-2 text-sm transition font-medium">
+                    Catatan Trial PM
+                    <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
+                          :class="activeTab === 'trial_pms' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
+                        {{ $pendingTrialPms->count() }}
+                    </span>
+                </button>
+                @endif
             </div>
 
             {{-- ──────────────────────────────────────────────────
@@ -199,6 +211,74 @@
                 @endif
             </div>
 
+            {{-- ──────────────────────────────────────────────────
+                 TAB 3: TRIAL PM ANTREAN
+                 ────────────────────────────────────────────────── --}}
+            @if(auth()->user()->hasRole('Operational Manager'))
+            <div x-show="activeTab === 'trial_pms'" class="space-y-3">
+                @if($pendingTrialPms->isEmpty())
+                <x-empty-state icon="trial" title="Antrean Kosong" description="Tidak ada dokumen Catatan Trial PM menunggu keputusan Anda saat ini." />
+                @else
+                    @foreach($pendingTrialPms as $trial)
+                    <div class="card p-4 hover:border-gray-300 transition duration-150 relative">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $trial->code }}</code>
+                                    <span class="badge bg-purple-100 text-purple-700">Bahan Kemas: {{ $trial->packaging_material }}</span>
+                                </div>
+                                <h3 class="text-base font-bold text-ink hover:text-primary">
+                                    <a href="{{ route('trial-pms.show', $trial) }}">{{ $trial->packaging_material }}</a>
+                                </h3>
+                                <p class="text-xs text-gray-400">
+                                    Diajukan oleh {{ $trial->creator?->name }} · {{ $trial->updated_at->diffForHumans() }}
+                                </p>
+                            </div>
+
+                            {{-- Actions --}}
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <a href="{{ route('trial-pms.show', $trial) }}" class="btn-ghost btn-sm">Lihat Detail</a>
+                                
+                                <form method="POST" action="{{ route('approval-center.trial-pms.approve', $trial) }}">
+                                    @csrf
+                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-trial-pm-{{ $trial->id }}">
+                                        Setujui
+                                    </button>
+                                </form>
+                                
+                                <button type="button"
+                                        @click="activeRejectItem = activeRejectItem === 'trial_pm_{{ $trial->id }}' ? null : 'trial_pm_{{ $trial->id }}'"
+                                        class="btn-outline btn-sm text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
+                                        id="btn-reject-trial-pm-{{ $trial->id }}">
+                                    Tolak
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Inline Rejection Form Collapse --}}
+                        <div x-show="activeRejectItem === 'trial_pm_{{ $trial->id }}'"
+                             x-collapse
+                             class="mt-4 p-3 bg-red-50/50 border border-red-200 rounded-xl space-y-3 animate-fade-in">
+                            <h4 class="text-xs font-bold text-red-800 uppercase">Input Alasan Penolakan Trial PM</h4>
+                            <form method="POST" action="{{ route('approval-center.trial-pms.reject', $trial) }}" class="space-y-2">
+                                @csrf
+                                <div>
+                                    <label class="form-label text-xs text-red-700" for="rejection_notes_trial_pm_{{ $trial->id }}">Catatan Penolakan *</label>
+                                    <textarea id="rejection_notes_trial_pm_{{ $trial->id }}" name="rejection_notes" rows="2" required
+                                              placeholder="Wajib diisi! Jelaskan alasan penolakan..."
+                                              class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500 focus:border-red-500"></textarea>
+                                </div>
+                                <div class="flex justify-end gap-2">
+                                    <button type="button" @click="activeRejectItem = null" class="btn-ghost btn-sm text-xs text-red-600">Batal</button>
+                                    <button type="submit" class="btn-primary btn-sm text-xs bg-red-600 hover:bg-red-700 focus:ring-red-600">Kirim Penolakan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    @endforeach
+                @endif
+            </div>
+            @endif
         </div>
 
         {{-- ─── RIGHT COLUMN: RULES & INFO ────────────────────── --}}

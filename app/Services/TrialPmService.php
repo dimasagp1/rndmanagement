@@ -238,17 +238,45 @@ class TrialPmService
                 ->count();
 
             if ($approvedCount === count($requiredDepts)) {
-                $rdApproval = TrialPmApproval::where('trial_pm_id', $trial->id)
-                    ->where('department', 'rd')
-                    ->first();
-                $omId = $rdApproval ? $rdApproval->approved_by : $approvedBy;
-
                 $trial->update([
-                    'approval_status' => 'Approved',
-                    'approved_at'     => now(),
-                    'approved_by_om'  => $omId,
+                    'approval_status' => 'Pending Approval',
                 ]);
             }
         });
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Approval oleh Operational Manager (OM)
+    // ──────────────────────────────────────────────────────────────
+    public function approveOM(TrialPm $trial, int $approverId): void
+    {
+        if ($trial->approval_status !== 'Pending Approval') {
+            throw ValidationException::withMessages([
+                'status' => 'Trial PM tidak berada dalam status Pending Approval.',
+            ]);
+        }
+
+        $trial->update([
+            'approval_status' => 'Approved',
+            'approved_by_om'  => $approverId,
+            'approved_at'     => now(),
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Rejection oleh Operational Manager (OM)
+    // ──────────────────────────────────────────────────────────────
+    public function rejectOM(TrialPm $trial, string $notes, int $approverId): void
+    {
+        if ($trial->approval_status !== 'Pending Approval') {
+            throw ValidationException::withMessages([
+                'status' => 'Trial PM tidak berada dalam status Pending Approval.',
+            ]);
+        }
+
+        $trial->update([
+            'approval_status' => 'Rejected',
+            'rejection_notes' => "Ditolak oleh Operational Manager: " . $notes,
+        ]);
     }
 }

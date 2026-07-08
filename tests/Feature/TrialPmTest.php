@@ -58,8 +58,11 @@ class TrialPmTest extends TestCase
         $response->assertRedirect(route('trial-pms.show', $trial));
     }
 
-    public function test_all_departments_approving_auto_promotes_trial_pm_to_approved()
+    public function test_all_departments_approving_auto_promotes_trial_pm_to_pending_approval_then_om_approves()
     {
+        $manager = User::factory()->create();
+        $manager->assignRole('Operational Manager');
+
         $trial = TrialPm::create([
             'code'               => 'TPM-202607-001',
             'proposal_number'    => 'USUL-12345',
@@ -114,9 +117,17 @@ class TrialPmTest extends TestCase
             'notes'       => 'Sesuai',
         ]);
 
-        // Status should automatically become Approved
+        // Status should automatically become Pending Approval
+        $this->assertEquals('Pending Approval', $trial->fresh()->approval_status);
+
+        // Now, OM approves the Trial PM
+        $response = $this->actingAs($manager)->post(route('approval-center.trial-pms.approve', $trial));
+        $response->assertRedirect(route('approval-center.index'));
+
+        // Status should become Approved and fields updated
         $this->assertEquals('Approved', $trial->fresh()->approval_status);
         $this->assertNotNull($trial->fresh()->approved_at);
+        $this->assertEquals($manager->id, $trial->fresh()->approved_by_om);
     }
 
     public function test_any_department_rejecting_auto_sets_trial_pm_to_rejected()

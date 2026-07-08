@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Formula;
 use App\Models\TrialRm;
+use App\Models\TrialPm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,6 +20,7 @@ class ApprovalCenterTest extends TestCase
     private Formula $pendingFormulaT2;
     private TrialRm $pendingTrialT1;
     private TrialRm $pendingTrialT2;
+    private TrialPm $pendingTrialPm;
 
     protected function setUp(): void
     {
@@ -74,6 +76,21 @@ class ApprovalCenterTest extends TestCase
             'approval_status' => 'Pending Tahap 2',
             'created_by'      => $this->staff->id,
         ]);
+
+        // Create Trial PM
+        $this->pendingTrialPm = TrialPm::create([
+            'code'               => 'TPM-202607-001',
+            'proposal_number'    => 'USUL-12345',
+            'packaging_material' => 'Botol PET 250ml',
+            'supplier'           => 'PT Kemas Makmur',
+            'product_use'        => ['Jahe Merah'],
+            'product_trial'      => ['Batch A'],
+            'trial_sample_quantity' => '500 pcs',
+            'specifications'     => ['Spesifikasi detail'],
+            'risk_analysis'      => 'Resiko bocor',
+            'approval_status'    => 'Pending Approval',
+            'created_by'         => $this->staff->id,
+        ]);
     }
 
     public function test_manager_sees_only_pending_tahap_1_documents_in_approval_center()
@@ -85,6 +102,9 @@ class ApprovalCenterTest extends TestCase
         });
         $response->assertViewHas('pendingTrialRms', function ($trials) {
             return $trials->contains($this->pendingTrialT1) && !$trials->contains($this->pendingTrialT2);
+        });
+        $response->assertViewHas('pendingTrialPms', function ($trials) {
+            return $trials->contains($this->pendingTrialPm);
         });
     }
 
@@ -158,5 +178,33 @@ class ApprovalCenterTest extends TestCase
     {
         $response = $this->actingAs($this->staff)->get(route('approval-center.index'));
         $response->assertStatus(403);
+    }
+
+    public function test_manager_can_approve_trial_pm_final()
+    {
+        $response = $this->actingAs($this->manager)->post(route('approval-center.trial-pms.approve', $this->pendingTrialPm));
+        $this->assertEquals('Approved', $this->pendingTrialPm->fresh()->approval_status);
+        $this->assertEquals($this->manager->id, $this->pendingTrialPm->fresh()->approved_by_om);
+        $this->assertNotNull($this->pendingTrialPm->fresh()->approved_at);
+        $response->assertRedirect(route('approval-center.index'));
+    }
+
+    public function test_manager_can_reject_trial_pm_with_notes()
+    {
+        $response = $this->actingAs($this->manager)->post(route('approval-center.trial-pms.reject', $this->pendingTrialPm), [
+            'rejection_notes' => 'Bahan tipis dan mudah bocor',
+        ]);
+        $this->assertEquals('Rejected', $this->pendingTrialPm->fresh()->approval_status);
+        $this->assertEquals('Ditolak oleh Operational Manager: Bahan tipis dan mudah bocor', $this->pendingTrialPm->fresh()->rejection_notes);
+        $response->assertRedirect(route('approval-center.index'));
+    }
+
+    public function test_gm_does_not_see_trial_pm_in_approval_center()
+    {
+        $response = $this->actingAs($this->gm)->get(route('approval-center.index'));
+        $response->assertStatus(200);
+        $response->assertViewHas('pendingTrialPms', function ($trials) {
+            return !$trials->contains($this->pendingTrialPm);
+        });
     }
 }

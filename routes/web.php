@@ -98,6 +98,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/approval-center/trial-rms/{trialRm}/reject', [ApprovalCenterController::class, 'rejectTrialRm'])
          ->name('approval-center.trial-rms.reject')
          ->middleware('can:approval_center.access');
+    Route::post('/approval-center/trial-pms/{trialPm}/approve', [ApprovalCenterController::class, 'approveTrialPm'])
+         ->name('approval-center.trial-pms.approve')
+         ->middleware('can:approval_center.access');
+    Route::post('/approval-center/trial-pms/{trialPm}/reject', [ApprovalCenterController::class, 'rejectTrialPm'])
+         ->name('approval-center.trial-pms.reject')
+         ->middleware('can:approval_center.access');
 
     // ── User Management (Superadmin Only) ───────────────────
     Route::resource('users', UserController::class)->middleware('role:Superadmin');
