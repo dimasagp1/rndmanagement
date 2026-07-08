@@ -83,20 +83,50 @@
                            class="form-input" required>
                 </div>
 
-                <div>
-                    <label class="form-label" for="product_use">Digunakan Untuk Produk <span class="text-red-500">*</span></label>
-                    <input type="text" id="product_use" name="product_use"
-                           value="{{ old('product_use', $trialPm->product_use) }}"
-                           placeholder="mis. Jahe Merah Hangat 250ml"
-                           class="form-input" required>
+                <div x-data="{
+                    products: {{ json_encode(old('product_use', (!empty($trialPm->product_use) ? $trialPm->product_use : ['']))) }},
+                    addProduct() { this.products.push('') },
+                    removeProduct(idx) { if (this.products.length > 1) { this.products.splice(idx, 1); } else { this.products[0] = ''; } }
+                }">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="form-label mb-0">Digunakan Untuk Produk <span class="text-red-500">*</span></label>
+                        <button type="button" @click="addProduct()" class="text-xs text-primary hover:underline font-semibold">+ Tambah Produk</button>
+                    </div>
+                    <div class="space-y-2">
+                        <template x-for="(prod, index) in products" :key="index">
+                            <div class="flex items-center gap-1.5 animate-fade-in">
+                                <input type="text" :name="'product_use[' + index + ']'" x-model="products[index]"
+                                       placeholder="mis. Jahe Merah Hangat 250ml"
+                                       class="form-input text-sm py-1.5" required>
+                                <button type="button" @click="removeProduct(index)" class="btn-ghost btn-sm text-red-500 p-1 hover:bg-red-50 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="form-label" for="product_trial">Ditrial Pada Produk <span class="text-red-500">*</span></label>
-                    <input type="text" id="product_trial" name="product_trial"
-                           value="{{ old('product_trial', $trialPm->product_trial) }}"
-                           placeholder="mis. Jahe Merah Hangat Batch A"
-                           class="form-input" required>
+                <div x-data="{
+                    products: {{ json_encode(old('product_trial', (!empty($trialPm->product_trial) ? $trialPm->product_trial : ['']))) }},
+                    addProduct() { this.products.push('') },
+                    removeProduct(idx) { if (this.products.length > 1) { this.products.splice(idx, 1); } else { this.products[0] = ''; } }
+                }">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="form-label mb-0">Ditrial Pada Produk <span class="text-red-500">*</span></label>
+                        <button type="button" @click="addProduct()" class="text-xs text-primary hover:underline font-semibold">+ Tambah Produk</button>
+                    </div>
+                    <div class="space-y-2">
+                        <template x-for="(prod, index) in products" :key="index">
+                            <div class="flex items-center gap-1.5 animate-fade-in">
+                                <input type="text" :name="'product_trial[' + index + ']'" x-model="products[index]"
+                                       placeholder="mis. Jahe Merah Hangat Batch A"
+                                       class="form-input text-sm py-1.5" required>
+                                <button type="button" @click="removeProduct(index)" class="btn-ghost btn-sm text-red-500 p-1 hover:bg-red-50 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
                 <div>

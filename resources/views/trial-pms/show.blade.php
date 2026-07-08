@@ -126,11 +126,11 @@
                         </div>
                         <div class="flex border-b border-gray-100 py-1">
                             <span class="text-gray-400 w-44 flex-shrink-0 font-medium">Digunakan Untuk Produk</span>
-                            <span class="text-ink">{{ $trialPm->product_use }}</span>
+                            <span class="text-ink">{{ is_array($trialPm->product_use) ? implode(', ', $trialPm->product_use) : $trialPm->product_use }}</span>
                         </div>
                         <div class="flex border-b border-gray-100 py-1">
                             <span class="text-gray-400 w-44 flex-shrink-0 font-medium">Ditrial Pada Produk</span>
-                            <span class="text-ink">{{ $trialPm->product_trial }}</span>
+                            <span class="text-ink">{{ is_array($trialPm->product_trial) ? implode(', ', $trialPm->product_trial) : $trialPm->product_trial }}</span>
                         </div>
                         <div class="flex border-b border-gray-100 py-1">
                             <span class="text-gray-400 w-44 flex-shrink-0 font-medium">Jumlah Sampel Ditrial</span>

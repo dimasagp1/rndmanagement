@@ -384,13 +384,13 @@
                 <span class="num">1.</span>
                 <span class="item-label">Digunakan untuk produk</span>
                 <span class="item-sep">:</span>
-                <span class="item-value">{{ $trialPm->product_use }}</span>
+                <span class="item-value">{{ is_array($trialPm->product_use) ? implode(', ', $trialPm->product_use) : $trialPm->product_use }}</span>
             </li>
             <li>
                 <span class="num">2.</span>
                 <span class="item-label">Ditrial pada produk</span>
                 <span class="item-sep">:</span>
-                <span class="item-value">{{ $trialPm->product_trial }}</span>
+                <span class="item-value">{{ is_array($trialPm->product_trial) ? implode(', ', $trialPm->product_trial) : $trialPm->product_trial }}</span>
             </li>
             <li>
                 <span class="num">3.</span>

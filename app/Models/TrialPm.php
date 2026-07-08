@@ -35,6 +35,8 @@ class TrialPm extends Model
     ];
 
     protected $casts = [
+        'product_use'     => 'array',
+        'product_trial'   => 'array',
         'specifications'  => 'array',
         'executions'      => 'array',
         'discussion_rows' => 'array',
