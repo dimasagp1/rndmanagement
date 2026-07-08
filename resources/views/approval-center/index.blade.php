@@ -31,7 +31,15 @@
             <h1 class="page-title">Approval Center</h1>
             <p class="page-subtitle">
                 Antrean dokumen menunggu persetujuan Anda sebagai
-                <strong class="text-primary">{{ auth()->user()->hasRole('Operational Manager') ? 'Operational Manager (Tahap 1)' : 'General Manager (Tahap 2 - Final)' }}</strong>
+                <strong class="text-primary">
+                    @if(auth()->user()->hasRole('Superadmin'))
+                        Super Administrator (Semua Antrean)
+                    @elseif(auth()->user()->hasRole('Operational Manager'))
+                        Operational Manager (Tahap 1)
+                    @else
+                        General Manager (Tahap 2 - Final)
+                    @endif
+                </strong>
             </p>
         </div>
     </div>
@@ -63,7 +71,7 @@
                         {{ $pendingTrialRms->count() }}
                     </span>
                 </button>
-                @if(auth()->user()->hasRole('Operational Manager'))
+                @if(auth()->user()->hasRole('Operational Manager') || auth()->user()->hasRole('Superadmin'))
                 <button type="button"
                         @click="activeTab = 'trial_pms'; activeRejectItem = null"
                         :class="activeTab === 'trial_pms' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
@@ -214,7 +222,7 @@
             {{-- ──────────────────────────────────────────────────
                  TAB 3: TRIAL PM ANTREAN
                  ────────────────────────────────────────────────── --}}
-            @if(auth()->user()->hasRole('Operational Manager'))
+            @if(auth()->user()->hasRole('Operational Manager') || auth()->user()->hasRole('Superadmin'))
             <div x-show="activeTab === 'trial_pms'" class="space-y-3">
                 @if($pendingTrialPms->isEmpty())
                 <x-empty-state icon="trial" title="Antrean Kosong" description="Tidak ada dokumen Catatan Trial PM menunggu keputusan Anda saat ini." />

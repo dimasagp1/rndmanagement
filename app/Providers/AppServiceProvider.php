@@ -58,10 +58,17 @@ class AppServiceProvider extends ServiceProvider
             $user = Auth::user();
             $notifCount = 0;
 
-            if ($user->hasRole('Operational Manager')) {
-                $notifCount = Formula::where('approval_status', 'Pending Tahap 1')->count();
+            if ($user->hasRole('Superadmin')) {
+                $notifCount = Formula::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
+                    + TrialRm::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
+                    + TrialPm::where('approval_status', 'Pending Approval')->count();
+            } elseif ($user->hasRole('Operational Manager')) {
+                $notifCount = Formula::where('approval_status', 'Pending Tahap 1')->count()
+                    + TrialRm::where('approval_status', 'Pending Tahap 1')->count()
+                    + TrialPm::where('approval_status', 'Pending Approval')->count();
             } elseif ($user->hasRole('General Manager')) {
-                $notifCount = Formula::where('approval_status', 'Pending Tahap 2')->count();
+                $notifCount = Formula::where('approval_status', 'Pending Tahap 2')->count()
+                    + TrialRm::where('approval_status', 'Pending Tahap 2')->count();
             }
 
             $view->with('navNotifCount', $notifCount);

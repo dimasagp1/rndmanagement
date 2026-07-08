@@ -35,8 +35,25 @@ class ApprovalCenterController extends Controller
         $pendingTrialRms = collect();
         $pendingTrialPms = collect();
 
+        // Antrean Superadmin (Melihat semua)
+        if ($user->hasRole('Superadmin')) {
+            $pendingFormulas = Formula::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])
+                ->with('creator')
+                ->latest()
+                ->get();
+
+            $pendingTrialRms = TrialRm::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])
+                ->with('creator')
+                ->latest()
+                ->get();
+
+            $pendingTrialPms = TrialPm::where('approval_status', 'Pending Approval')
+                ->with('creator')
+                ->latest()
+                ->get();
+        }
         // Antrean Operational Manager (Tahap 1)
-        if ($user->hasRole('Operational Manager')) {
+        elseif ($user->hasRole('Operational Manager')) {
             $pendingFormulas = Formula::where('approval_status', 'Pending Tahap 1')
                 ->with('creator')
                 ->latest()
@@ -52,7 +69,6 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
         } 
-        
         // Antrean General Manager (Tahap 2)
         elseif ($user->hasRole('General Manager')) {
             $pendingFormulas = Formula::where('approval_status', 'Pending Tahap 2')
@@ -77,10 +93,10 @@ class ApprovalCenterController extends Controller
         $user = auth()->user();
 
         try {
-            if ($user->hasRole('Operational Manager')) {
+            if ($user->hasRole('Operational Manager') || ($user->hasRole('Superadmin') && $formula->approval_status === 'Pending Tahap 1')) {
                 $this->formulaService->approveTahap1($formula, $user->id);
                 $msg = "Formula {$formula->code} berhasil disetujui (Tahap 1) dan diteruskan ke GM.";
-            } elseif ($user->hasRole('General Manager')) {
+            } elseif ($user->hasRole('General Manager') || ($user->hasRole('Superadmin') && $formula->approval_status === 'Pending Tahap 2')) {
                 $this->formulaService->approveTahap2($formula, $user->id);
                 $msg = "Formula {$formula->code} telah disetujui secara final (Approved).";
             } else {
@@ -121,10 +137,10 @@ class ApprovalCenterController extends Controller
         $user = auth()->user();
 
         try {
-            if ($user->hasRole('Operational Manager')) {
+            if ($user->hasRole('Operational Manager') || ($user->hasRole('Superadmin') && $trialRm->approval_status === 'Pending Tahap 1')) {
                 $this->trialRmService->approveTahap1($trialRm, $user->id);
                 $msg = "Trial RM {$trialRm->code} berhasil disetujui (Tahap 1) dan diteruskan ke GM.";
-            } elseif ($user->hasRole('General Manager')) {
+            } elseif ($user->hasRole('General Manager') || ($user->hasRole('Superadmin') && $trialRm->approval_status === 'Pending Tahap 2')) {
                 $this->trialRmService->approveTahap2($trialRm, $user->id);
                 $msg = "Trial RM {$trialRm->code} telah disetujui secara final (Approved).";
             } else {
@@ -164,8 +180,8 @@ class ApprovalCenterController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user->hasRole('Operational Manager')) {
-            abort(403, 'Hanya Operational Manager yang dapat melakukan persetujuan.');
+        if (! $user->hasRole('Operational Manager') && ! $user->hasRole('Superadmin')) {
+            abort(403, 'Hanya Operational Manager atau Superadmin yang dapat melakukan persetujuan.');
         }
 
         try {
@@ -185,8 +201,8 @@ class ApprovalCenterController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user->hasRole('Operational Manager')) {
-            abort(403, 'Hanya Operational Manager yang dapat melakukan penolakan.');
+        if (! $user->hasRole('Operational Manager') && ! $user->hasRole('Superadmin')) {
+            abort(403, 'Hanya Operational Manager atau Superadmin yang dapat melakukan penolakan.');
         }
 
         $request->validate([
