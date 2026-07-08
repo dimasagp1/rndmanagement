@@ -42,42 +42,46 @@
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             {{-- Staff actions --}}
-            @can('edit', $formula)
-            <a href="{{ route('formulas.edit', $formula) }}" class="btn-outline" id="btn-edit-formula">Edit</a>
-            @endcan
+            @if(in_array($formula->approval_status, ['Draft', 'Rejected']))
+                @can('edit', $formula)
+                <a href="{{ route('formulas.edit', $formula) }}" class="btn-outline" id="btn-edit-formula">Edit</a>
+                @endcan
 
-            @can('submit', $formula)
-            @if($formula->is_valid_composition)
-            <form method="POST" action="{{ route('formulas.submit', $formula) }}" id="form-submit-formula">
-                @csrf
-                <button type="submit"
-                        onclick="return confirm('Ajukan formula {{ $formula->code }} untuk approval? Anda tidak akan bisa mengedit setelah diajukan.')"
-                        class="btn-primary" id="btn-submit-formula">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    Ajukan untuk Approval
+                @can('submit', $formula)
+                @if($formula->is_valid_composition)
+                <form method="POST" action="{{ route('formulas.submit', $formula) }}" id="form-submit-formula">
+                    @csrf
+                    <button type="submit"
+                            onclick="return confirm('Ajukan formula {{ $formula->code }} untuk approval? Anda tidak akan bisa mengedit setelah diajukan.')"
+                            class="btn-primary" id="btn-submit-formula">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Ajukan untuk Approval
+                    </button>
+                </form>
+                @else
+                <button class="btn-primary opacity-50 cursor-not-allowed"
+                        title="Total komposisi harus 100% (saat ini {{ $formula->total_percentage }}%)" disabled>
+                    Ajukan (Komposisi Belum 100%)
                 </button>
-            </form>
-            @else
-            <button class="btn-primary opacity-50 cursor-not-allowed"
-                    title="Total komposisi harus 100% (saat ini {{ $formula->total_percentage }}%)" disabled>
-                Ajukan (Komposisi Belum 100%)
-            </button>
+                @endif
+                @endcan
             @endif
-            @endcan
 
-            @can('reformulate', $formula)
-            <form method="POST" action="{{ route('formulas.reformulate', $formula) }}" id="form-reformulate">
-                @csrf
-                <button type="submit"
-                        onclick="return confirm('Buat versi baru (V{{ $formula->version + 1 }}) dari formula ini?')"
-                        class="btn-outline" id="btn-reformulate">
-                    ↻ Reformulasi (V{{ $formula->version + 1 }})
-                </button>
-            </form>
-            @endcan
+            @if($formula->approval_status === 'Approved')
+                @can('reformulate', $formula)
+                <form method="POST" action="{{ route('formulas.reformulate', $formula) }}" id="form-reformulate">
+                    @csrf
+                    <button type="submit"
+                            onclick="return confirm('Buat versi baru (V{{ $formula->version + 1 }}) dari formula ini?')"
+                            class="btn-outline" id="btn-reformulate">
+                        ↻ Reformulasi (V{{ $formula->version + 1 }})
+                    </button>
+                </form>
+                @endcan
+            @endif
 
             <button type="button" x-on:click="showPrintModal = true; document.getElementById('printPreviewFrame').src = '{{ route('formulas.print', $formula) }}'" class="btn-outline text-gray-700 hover:bg-gray-100">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>

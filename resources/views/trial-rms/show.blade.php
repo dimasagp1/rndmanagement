@@ -36,24 +36,26 @@
             <p class="page-subtitle">Oleh PIC {{ $trialRm->creator?->name ?? '—' }} · {{ $trialRm->created_at->isoFormat('D MMM Y, HH:mm') }}</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-            @can('edit', $trialRm)
-            <a href="{{ route('trial-rms.edit', $trialRm) }}" class="btn-outline" id="btn-edit-trial-rm">Edit Uji Coba</a>
-            @endcan
+            @if(in_array($trialRm->approval_status, ['Draft', 'Rejected']))
+                @can('edit', $trialRm)
+                <a href="{{ route('trial-rms.edit', $trialRm) }}" class="btn-outline" id="btn-edit-trial-rm">Edit Uji Coba</a>
+                @endcan
 
-            @can('submit', $trialRm)
-            <form method="POST" action="{{ route('trial-rms.submit', $trialRm) }}" id="form-submit-trial-rm">
-                @csrf
-                <button type="submit"
-                        onclick="return confirm('Ajukan trial RM ini untuk approval? Anda tidak akan bisa mengedit setelah diajukan.')"
-                        class="btn-primary" id="btn-submit-trial-rm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    Ajukan Approval
-                </button>
-            </form>
-            @endcan
+                @can('submit', $trialRm)
+                <form method="POST" action="{{ route('trial-rms.submit', $trialRm) }}" id="form-submit-trial-rm">
+                    @csrf
+                    <button type="submit"
+                            onclick="return confirm('Ajukan trial RM ini untuk approval? Anda tidak akan bisa mengedit setelah diajukan.')"
+                            class="btn-primary" id="btn-submit-trial-rm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Ajukan Approval
+                    </button>
+                </form>
+                @endcan
+            @endif
             <button type="button" x-on:click="showPrintModal = true; document.getElementById('printPreviewFrame').src = '{{ route('trial-rms.print', $trialRm) }}'" class="btn-outline text-gray-700 hover:bg-gray-100">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Cetak Form
