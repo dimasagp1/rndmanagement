@@ -18,6 +18,16 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        // Clean up existing demo data to prevent duplicate key errors
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+        TrialPm::whereIn('code', ['TPM-202606-001', 'TPM-202607-001'])->delete();
+        TrialRm::whereIn('code', ['TRM-202606-001-A', 'TRM-202607-001-A'])->delete();
+        Formula::whereIn('code', [
+            'FRM-202606-001', 'FRM-202606-002', 'FRM-202607-001',
+            'FRM-202607-002', 'FRM-202607-003', 'FRM-202607-004'
+        ])->delete();
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+
         $staff   = User::where('email', 'staff@herbatech.com')->first();
         $siti    = User::where('email', 'siti@herbatech.com')->first();
         $manager = User::where('email', 'manager@herbatech.com')->first();

@@ -28,7 +28,7 @@ class MaterialSupplierSeeder extends Seeder
         ];
 
         foreach ($materials as $material) {
-            Material::create($material);
+            Material::updateOrCreate(['name' => $material['name']], $material);
         }
 
         $this->command->info('✅ ' . count($materials) . ' Materials seeded');
@@ -73,7 +73,7 @@ class MaterialSupplierSeeder extends Seeder
         ];
 
         foreach ($suppliers as $supplier) {
-            Supplier::create($supplier);
+            Supplier::updateOrCreate(['name' => $supplier['name']], $supplier);
         }
 
         $this->command->info('✅ ' . count($suppliers) . ' Suppliers seeded');
