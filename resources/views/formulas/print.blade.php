@@ -1,6 +1,7 @@
 @php
-    $resolveSigUrl = function($path) {
-        if (!$path) return null;
+    $resolveSigUrl = function ($path) {
+        if (!$path)
+            return null;
         $path = str_starts_with($path, '/storage/') ? substr($path, 9) : $path;
         return asset('storage/' . $path);
     };
@@ -18,7 +19,7 @@
         /* Standard A4 Portrait Page Setup */
         @page {
             size: A4 portrait;
-            margin: 14mm 12mm 20mm 12mm;
+            margin: 18mm 12mm 20mm 12mm;
         }
 
         body {
@@ -31,12 +32,32 @@
             position: relative;
         }
 
-        /* ── Fixed Header & Footer (Root Level) ───────────────── */
+        /* ── Master Print Layout Table ─────────────────────── */
+        table.print-layout-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        table.print-layout-table > thead {
+            display: table-header-group;
+        }
+        table.print-layout-table > tfoot {
+            display: table-footer-group;
+        }
+        table.print-layout-table > tbody > tr > td {
+            border: none;
+            padding: 0;
+        }
+
+        /* ── Fixed Header ─────────────────────────────────── */
         .print-header {
             position: fixed; top: 0; left: 0; right: 0; height: 14mm;
             display: flex; align-items: center;
             border-bottom: 2px solid #000;
-            background: #fff; z-index: 100;
+            background: #fff;
+            z-index: 100;
         }
         .print-header .logo-area { display: flex; align-items: center; gap: 3mm; width: 35%; }
         .print-header .logo-icon {
@@ -48,14 +69,15 @@
         .print-header .title-area { flex: 1; text-align: center; font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3pt; }
         .print-header .form-number { width: 35%; text-align: right; font-size: 9pt; font-weight: 400; }
 
+        /* ── Fixed Footer ─────────────────────────────────── */
         .print-footer {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 16mm;
+            position: fixed; bottom: 0; left: 0; right: 0; height: 12mm;
             display: flex; align-items: flex-end; justify-content: space-between;
-            background: #fff; z-index: 100;
+            padding: 0 2mm 2mm 2mm;
+            background: #fff;
+            z-index: 100;
         }
         .print-footer .lamp-text { font-size: 8pt; color: #333; }
-        .print-footer .page-number { font-size: 8pt; color: #333; }
-        .page-num-val::after { content: counter(page); }
 
         /* ── Watermark ────────────────────────────── */
         .watermark {
@@ -106,8 +128,8 @@
         /* Page Layouts */
         .page-1, .page-2 {
             width: 100%;
-            margin-top: 18mm;
-            margin-bottom: 18mm;
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
         .page-2 {
@@ -147,14 +169,31 @@
 
     <div class="print-footer">
         <span class="lamp-text">LAMP. A PR-04/RD/001.01</span>
-        <span class="page-number">Halaman <span class="page-num-val"></span> dari 2</span>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         PAGE 1: COST & HPP FORMULA SHEET (PORTRAIT)
-    ════════════════════════════════════════════════════════ -->
-    <div class="page-1">
-        <div class="form-container">
+    <table class="print-layout-table">
+        <thead>
+            <tr>
+                <td>
+                    <div style="height: 16mm;"></div>
+                </td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>
+                    <div style="height: 14mm;"></div>
+                </td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td>
+                    <!-- ═══════════════════════════════════════════════════════
+                         PAGE 1: COST & HPP FORMULA SHEET (PORTRAIT)
+                    ════════════════════════════════════════════════════════ -->
+                    <div class="page-1">
+                        <div class="form-container">
             {{-- INFORMATION --}}
             <div class="section-title">INFORMATION</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6mm;">
@@ -201,26 +240,26 @@
                         <th>Harga/kg</th>
                         <th>Harga/g</th>
                         <th>Persentase</th>
-                        <th>{{ (float)$formula->target_dose_a }} {{ $formula->target_dose_a_unit ?? 'g' }}</th>
-                        <th>{{ (float)$formula->target_dose_b }} {{ $formula->target_dose_b_unit ?? 'g' }}</th>
+                        <th>{{ (float) $formula->target_dose_a }} {{ $formula->target_dose_a_unit ?? 'g' }}</th>
+                        <th>{{ (float) $formula->target_dose_b }} {{ $formula->target_dose_b_unit ?? 'g' }}</th>
                         <th>{{ $formula->target_sachet }} {{ $formula->target_sachet_unit ?? 'sachet' }}</th>
                         <th>HPP RM</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($formula->materials->sortByDesc('percentage') as $i => $fm)
-                    <tr>
-                        <td class="text-center">{{ $i + 1 }}</td>
-                        <td>{{ $fm->material?->name ?? '' }}</td>
-                        <td>{{ $fm->supplier?->name ?? '' }}</td>
-                        <td class="text-right">{{ $fm->price_per_kg ? number_format($fm->price_per_kg, 0) : '' }}</td>
-                        <td class="text-right">{{ $fm->price_per_gram ? 'Rp' . number_format($fm->price_per_gram, 2) : '' }}</td>
-                        <td class="text-right">{{ number_format($fm->percentage, 3) }}%</td>
-                        <td class="text-right">{{ $fm->dose_2g ? number_format($fm->dose_2g, 3) : '' }}</td>
-                        <td class="text-right">{{ $fm->dose_05g ? number_format($fm->dose_05g, 3) : '' }}</td>
-                        <td class="text-right">{{ $fm->sachet_30 ?? '' }}</td>
-                        <td class="text-right">{{ $fm->hpp_rm ? 'Rp' . number_format($fm->hpp_rm, 2) : '' }}</td>
-                    </tr>
+                        <tr>
+                            <td class="text-center">{{ $i + 1 }}</td>
+                            <td>{{ $fm->material?->name ?? '' }}</td>
+                            <td>{{ $fm->supplier?->name ?? '' }}</td>
+                            <td class="text-right">{{ $fm->price_per_kg ? number_format($fm->price_per_kg, 0) : '' }}</td>
+                            <td class="text-right">{{ $fm->price_per_gram ? 'Rp' . number_format($fm->price_per_gram, 2) : '' }}</td>
+                            <td class="text-right">{{ number_format($fm->percentage, 3) }}%</td>
+                            <td class="text-right">{{ $fm->dose_2g ? number_format($fm->dose_2g, 3) : '' }}</td>
+                            <td class="text-right">{{ $fm->dose_05g ? number_format($fm->dose_05g, 3) : '' }}</td>
+                            <td class="text-right">{{ $fm->sachet_30 ?? '' }}</td>
+                            <td class="text-right">{{ $fm->hpp_rm ? 'Rp' . number_format($fm->hpp_rm, 2) : '' }}</td>
+                        </tr>
                     @endforeach
                     <tr style="background: #f0f0f0; font-weight: 700;">
                         <td colspan="5" class="text-right" style="padding-right: 3mm;">Total Komposisi</td>
@@ -231,7 +270,7 @@
             </table>
 
             @if($formula->preparation_method)
-            <p style="font-size: 8pt; margin-top: 1.5mm;"><em>Cara Penyajian: {{ $formula->preparation_method }}</em></p>
+                <p style="font-size: 8pt; margin-top: 1.5mm;"><em>Cara Penyajian: {{ $formula->preparation_method }}</em></p>
             @endif
 
             <div class="mt-3"></div>
@@ -250,10 +289,10 @@
                         </thead>
                         <tbody>
                             @foreach(['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'] as $stage)
-                            <tr>
-                                <td>{{ $stage }}</td>
-                                <td class="text-center">{{ $formula->development_stage === $stage ? 'X' : '' }}</td>
-                            </tr>
+                                <tr>
+                                    <td>{{ $stage }}</td>
+                                    <td class="text-center">{{ $formula->development_stage === $stage ? 'X' : '' }}</td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -310,7 +349,7 @@
                         </td>
                         <td style="vertical-align: middle; font-size: 8pt;">
                             @if($formula->creator?->signature_path)
-                            <img src="{{ $resolveSigUrl($formula->creator->signature_path) }}" class="sig-image" alt="Signature"><br>
+                                <img src="{{ $resolveSigUrl($formula->creator->signature_path) }}" class="sig-image" alt="Signature"><br>
                             @endif
                             Tanggal: {{ $formula->created_at->format('d M Y') }}
                         </td>
@@ -323,7 +362,7 @@
                         </td>
                         <td style="vertical-align: middle; font-size: 8pt;">
                             @if($formula->operationalManager?->signature_path)
-                            <img src="{{ $resolveSigUrl($formula->operationalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
+                                <img src="{{ $resolveSigUrl($formula->operationalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
                             @endif
                             Tanggal: {{ in_array($formula->approval_status, ['Pending Tahap 2', 'Approved', 'Rejected']) ? $formula->updated_at->format('d M Y') : '—' }}
                         </td>
@@ -336,7 +375,7 @@
                         </td>
                         <td style="vertical-align: middle; font-size: 8pt;">
                             @if($formula->generalManager?->signature_path)
-                            <img src="{{ $resolveSigUrl($formula->generalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
+                                <img src="{{ $resolveSigUrl($formula->generalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
                             @endif
                             Tanggal: {{ $formula->approved_at?->format('d M Y') ?? '—' }}
                         </td>
@@ -411,14 +450,14 @@
                         $totalPct = $formula->total_percentage;
                     @endphp
                     @foreach($materials as $i => $fm)
-                    <tr>
-                        <td class="text-center">{{ $i + 1 }}</td>
-                        <td>{{ $fm->material?->name ?? '' }}</td>
-                        <td>{{ $fm->material?->description ?? '' }}</td>
-                        <td>{{ $fm->supplier?->name ?? '' }}</td>
-                        <td>{{ $fm->material?->type ?? '' }}</td>
-                        <td class="text-center">{{ number_format($fm->percentage, 2) }}%</td>
-                    </tr>
+                        <tr>
+                            <td class="text-center">{{ $i + 1 }}</td>
+                            <td>{{ $fm->material?->name ?? '' }}</td>
+                            <td>{{ $fm->material?->description ?? '' }}</td>
+                            <td>{{ $fm->supplier?->name ?? '' }}</td>
+                            <td>{{ $fm->material?->type ?? '' }}</td>
+                            <td class="text-center">{{ number_format($fm->percentage, 2) }}%</td>
+                        </tr>
                     @endforeach
                     {{-- Total row --}}
                     <tr style="background: #f0f0f0; font-weight: 700;">
@@ -438,18 +477,18 @@
                 <span class="field-value">{{ $formula->approval_status }}</span>
             </div>
             @if($formula->approval_status === 'Approved')
-            <div class="field-row">
-                <span class="field-label">Tanggal Disetujui</span>
-                <span class="field-sep">:</span>
-                <span class="field-value">{{ $formula->approved_at?->isoFormat('D MMM Y') ?? '—' }}</span>
-            </div>
+                <div class="field-row">
+                    <span class="field-label">Tanggal Disetujui</span>
+                    <span class="field-sep">:</span>
+                    <span class="field-value">{{ $formula->approved_at?->isoFormat('D MMM Y') ?? '—' }}</span>
+                </div>
             @endif
             @if($formula->rejection_notes)
-            <div class="field-row">
-                <span class="field-label">Catatan Penolakan</span>
-                <span class="field-sep">:</span>
-                <span class="field-value">{{ $formula->rejection_notes }}</span>
-            </div>
+                <div class="field-row">
+                    <span class="field-label">Catatan Penolakan</span>
+                    <span class="field-sep">:</span>
+                    <span class="field-value">{{ $formula->rejection_notes }}</span>
+                </div>
             @endif
 
             <div class="mt-3 mb-3"></div>
@@ -474,7 +513,7 @@
                         </td>
                         <td style="vertical-align: middle; font-size: 8pt;">
                             @if($formula->creator?->signature_path)
-                            <img src="{{ $resolveSigUrl($formula->creator->signature_path) }}" class="sig-image" alt="Signature"><br>
+                                <img src="{{ $resolveSigUrl($formula->creator->signature_path) }}" class="sig-image" alt="Signature"><br>
                             @endif
                             Tanggal: {{ $formula->created_at->isoFormat('D MMM Y') }}
                         </td>
@@ -488,7 +527,7 @@
                         </td>
                         <td style="vertical-align: middle; font-size: 8pt;">
                             @if($formula->operationalManager?->signature_path)
-                            <img src="{{ $resolveSigUrl($formula->operationalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
+                                <img src="{{ $resolveSigUrl($formula->operationalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
                             @endif
                             Tanggal: {{ in_array($formula->approval_status, ['Pending Tahap 2', 'Approved', 'Rejected']) ? $formula->updated_at->isoFormat('D MMM Y') : '—' }}
                         </td>
@@ -502,7 +541,7 @@
                         </td>
                         <td style="vertical-align: middle; font-size: 8pt;">
                             @if($formula->generalManager?->signature_path)
-                            <img src="{{ $resolveSigUrl($formula->generalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
+                                <img src="{{ $resolveSigUrl($formula->generalManager->signature_path) }}" class="sig-image" alt="Signature"><br>
                             @endif
                             Tanggal: {{ $formula->approved_at?->isoFormat('D MMM Y') ?? '—' }}
                         </td>
@@ -511,6 +550,10 @@
             </table>
         </div>
     </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
 </body>
 </html>

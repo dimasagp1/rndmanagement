@@ -1,6 +1,7 @@
 @php
-    $resolveSigUrl = function($path) {
-        if (!$path) return null;
+    $resolveSigUrl = function ($path) {
+        if (!$path)
+            return null;
         $path = str_starts_with($path, '/storage/') ? substr($path, 9) : $path;
         return asset('storage/' . $path);
     };
@@ -18,7 +19,7 @@
 
         @page {
             size: A4 portrait;
-            margin: 14mm 12mm 20mm 12mm;
+            margin: 18mm 12mm 20mm 12mm;
         }
 
         body {
@@ -46,6 +47,25 @@
             white-space: nowrap;
             letter-spacing: 6px;
             text-transform: uppercase;
+        }
+
+        /* ── Master Print Layout Table ─────────────────────── */
+        table.print-layout-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        table.print-layout-table > thead {
+            display: table-header-group;
+        }
+        table.print-layout-table > tfoot {
+            display: table-footer-group;
+        }
+        table.print-layout-table > tbody > tr > td {
+            border: none;
+            padding: 0;
         }
 
         /* ── Fixed Header (repeats on every page) ─────────── */
@@ -108,7 +128,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 16mm;
+            height: 12mm;
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
@@ -128,17 +148,14 @@
             letter-spacing: 1pt;
             text-transform: uppercase;
         }
-        .print-footer .page-number {
-            font-size: 8pt;
-            color: #333;
-        }
+
 
         /* ── Outer Border ─────────────────────────────────── */
         .form-container {
             border: 1.5px solid #000;
             padding: 5mm 5mm;
-            margin-top: 18mm;
-            margin-bottom: 18mm;
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
         .page-break {
@@ -351,11 +368,28 @@
     <div class="print-footer">
         <span class="lamp-text">LAMP. D PR-06/RD/002.02</span>
         <span class="master-copy">MASTER COPY</span>
-        <span class="page-number"></span>
     </div>
 
-    {{-- Fluid Document Container --}}
-    <div class="form-container">
+    <table class="print-layout-table">
+        <thead>
+            <tr>
+                <td>
+                    <div style="height: 16mm;"></div>
+                </td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>
+                    <div style="height: 14mm;"></div>
+                </td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <tr>
+                <td>
+                    {{-- Fluid Document Container --}}
+                    <div class="form-container">
 
         {{-- No. Usulan --}}
         <div class="field-row mb-3">
@@ -424,12 +458,12 @@
             <tbody>
                 @if(is_array($trialPm->specifications) && count($trialPm->specifications) > 0)
                     @foreach($trialPm->specifications as $index => $spec)
-                    @if(!empty(trim($spec)))
-                    <tr>
-                        <td class="col-center">{{ $index + 1 }}</td>
-                        <td>{{ $spec }}</td>
-                    </tr>
-                    @endif
+                        @if(!empty(trim($spec)))
+                            <tr>
+                                <td class="col-center">{{ $index + 1 }}</td>
+                                <td>{{ $spec }}</td>
+                            </tr>
+                        @endif
                     @endforeach
                 @else
                     <tr>
@@ -465,7 +499,7 @@
             </thead>
             <tbody>
                 @php 
-                    $executions = is_array($trialPm->executions) ? array_filter($trialPm->executions, function($item) {
+                                        $executions = is_array($trialPm->executions) ? array_filter($trialPm->executions, function ($item) {
                         return !empty(trim($item['machine'] ?? ''));
                     }) : [];
                     $exeCount = count($executions);
@@ -473,49 +507,49 @@
                 @if($exeCount > 0)
                     @php $rowNo = 1; @endphp
                     @foreach($executions as $exe)
-                    <tr>
-                        <td class="col-center">{{ $rowNo++ }}</td>
-                        <td>{{ $exe['machine'] ?? '' }}</td>
-                        <td>{{ $exe['setting'] ?? '' }}</td>
-                        <td>{{ $exe['actual'] ?? '' }}</td>
-                        <td class="col-center">{{ $exe['start_time'] ?? '' }}</td>
-                        <td class="col-center">{{ $exe['end_time'] ?? '' }}</td>
-                        <td class="col-center">{{ $exe['reject'] ?? '0' }}</td>
-                        <td class="col-center">{{ $exe['good'] ?? '0' }}</td>
-                        <td class="col-center">
-                            @if(!empty($exe['paraf_prod']))
-                                @if(!empty($exe['paraf_prod_signature']))
-                                    <img src="{{ $resolveSigUrl($exe['paraf_prod_signature']) }}" class="sig-image" alt="Paraf">
-                                @elseif(!empty($exe['paraf_prod_signed_name']))
-                                    <span class="font-signature" style="font-size: 10pt;">{{ $exe['paraf_prod_signed_name'] }}</span>
-                                @else
-                                    &#10003;
+                        <tr>
+                            <td class="col-center">{{ $rowNo++ }}</td>
+                            <td>{{ $exe['machine'] ?? '' }}</td>
+                            <td>{{ $exe['setting'] ?? '' }}</td>
+                            <td>{{ $exe['actual'] ?? '' }}</td>
+                            <td class="col-center">{{ $exe['start_time'] ?? '' }}</td>
+                            <td class="col-center">{{ $exe['end_time'] ?? '' }}</td>
+                            <td class="col-center">{{ $exe['reject'] ?? '0' }}</td>
+                            <td class="col-center">{{ $exe['good'] ?? '0' }}</td>
+                            <td class="col-center">
+                                @if(!empty($exe['paraf_prod']))
+                                    @if(!empty($exe['paraf_prod_signature']))
+                                        <img src="{{ $resolveSigUrl($exe['paraf_prod_signature']) }}" class="sig-image" alt="Paraf">
+                                    @elseif(!empty($exe['paraf_prod_signed_name']))
+                                        <span class="font-signature" style="font-size: 10pt;">{{ $exe['paraf_prod_signed_name'] }}</span>
+                                    @else
+                                        &#10003;
+                                    @endif
                                 @endif
-                            @endif
-                        </td>
-                        <td class="col-center">
-                            @if(!empty($exe['paraf_eng']))
-                                @if(!empty($exe['paraf_eng_signature']))
-                                    <img src="{{ $resolveSigUrl($exe['paraf_eng_signature']) }}" class="sig-image" alt="Paraf">
-                                @elseif(!empty($exe['paraf_eng_signed_name']))
-                                    <span class="font-signature" style="font-size: 10pt;">{{ $exe['paraf_eng_signed_name'] }}</span>
-                                @else
-                                    &#10003;
+                            </td>
+                            <td class="col-center">
+                                @if(!empty($exe['paraf_eng']))
+                                    @if(!empty($exe['paraf_eng_signature']))
+                                        <img src="{{ $resolveSigUrl($exe['paraf_eng_signature']) }}" class="sig-image" alt="Paraf">
+                                    @elseif(!empty($exe['paraf_eng_signed_name']))
+                                        <span class="font-signature" style="font-size: 10pt;">{{ $exe['paraf_eng_signed_name'] }}</span>
+                                    @else
+                                        &#10003;
+                                    @endif
                                 @endif
-                            @endif
-                        </td>
-                        <td class="col-center">
-                            @if(!empty($exe['paraf_qc']))
-                                @if(!empty($exe['paraf_qc_signature']))
-                                    <img src="{{ $resolveSigUrl($exe['paraf_qc_signature']) }}" class="sig-image" alt="Paraf">
-                                @elseif(!empty($exe['paraf_qc_signed_name']))
-                                    <span class="font-signature" style="font-size: 10pt;">{{ $exe['paraf_qc_signed_name'] }}</span>
-                                @else
-                                    &#10003;
+                            </td>
+                            <td class="col-center">
+                                @if(!empty($exe['paraf_qc']))
+                                    @if(!empty($exe['paraf_qc_signature']))
+                                        <img src="{{ $resolveSigUrl($exe['paraf_qc_signature']) }}" class="sig-image" alt="Paraf">
+                                    @elseif(!empty($exe['paraf_qc_signed_name']))
+                                        <span class="font-signature" style="font-size: 10pt;">{{ $exe['paraf_qc_signed_name'] }}</span>
+                                    @else
+                                        &#10003;
+                                    @endif
                                 @endif
-                            @endif
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
                     @endforeach
                 @else
                     <tr>
@@ -540,7 +574,7 @@
             </thead>
             <tbody>
                 @php 
-                    $discussions = is_array($trialPm->discussion_rows) ? array_filter($trialPm->discussion_rows, function($item) {
+                                        $discussions = is_array($trialPm->discussion_rows) ? array_filter($trialPm->discussion_rows, function ($item) {
                         return !empty(trim($item['evaluation'] ?? ''));
                     }) : [];
                     $discCount = count($discussions);
@@ -548,12 +582,12 @@
                 @if($discCount > 0)
                     @php $rowNo = 1; @endphp
                     @foreach($discussions as $disc)
-                    <tr>
-                        <td class="col-center">{{ $rowNo++ }}</td>
-                        <td>{{ $disc['evaluation'] ?? '' }}</td>
-                        <td>{{ $disc['risk_analysis'] ?? '' }}</td>
-                        <td>{{ $disc['recommendation'] ?? '' }}</td>
-                    </tr>
+                        <tr>
+                            <td class="col-center">{{ $rowNo++ }}</td>
+                            <td>{{ $disc['evaluation'] ?? '' }}</td>
+                            <td>{{ $disc['risk_analysis'] ?? '' }}</td>
+                            <td>{{ $disc['recommendation'] ?? '' }}</td>
+                        </tr>
                     @endforeach
                 @else
                     <tr>
@@ -586,31 +620,31 @@
                     $approvals = $trialPm->departmentApprovals->keyBy('department');
                 @endphp
                 @foreach($deptOrder as $dept)
-                @if($trialPm->hasParafChecked($dept))
-                <tr>
-                    <td><span class="text-italic">{{ $deptLabels[$dept] }}</span></td>
-                    <td>
-                        @php $app = $approvals[$dept] ?? null; @endphp
-                        @if($app && $app->approved_by)
-                            @if($app->is_approved)
-                                <strong>Bisa digunakan</strong> / Tidak bisa digunakan**
-                            @else
-                                Bisa digunakan / <strong>Tidak bisa digunakan**</strong>
-                            @endif
-                        @else
-                            Bisa digunakan / Tidak bisa digunakan**
-                        @endif
-                    </td>
-                    <td>
-                        @if($app && $app->notes)
-                            {{ $app->notes }}
-                            @if($app->approver)
-                                <br><span style="font-size: 8pt; color: #555;">{{ $app->approver->name }} &middot; {{ $app->approved_at?->format('d/m/Y') }}</span>
-                            @endif
-                        @endif
-                    </td>
-                </tr>
-                @endif
+                    @if($trialPm->hasParafChecked($dept))
+                        <tr>
+                            <td><span class="text-italic">{{ $deptLabels[$dept] }}</span></td>
+                            <td>
+                                @php $app = $approvals[$dept] ?? null; @endphp
+                                @if($app && $app->approved_by)
+                                    @if($app->is_approved)
+                                        <strong>Bisa digunakan</strong> / Tidak bisa digunakan**
+                                    @else
+                                        Bisa digunakan / <strong>Tidak bisa digunakan**</strong>
+                                    @endif
+                                @else
+                                    Bisa digunakan / Tidak bisa digunakan**
+                                @endif
+                            </td>
+                            <td>
+                                @if($app && $app->notes)
+                                    {{ $app->notes }}
+                                    @if($app->approver)
+                                        <br><span style="font-size: 8pt; color: #555;">{{ $app->approver->name }} &middot; {{ $app->approved_at?->format('d/m/Y') }}</span>
+                                    @endif
+                                @endif
+                            </td>
+                        </tr>
+                    @endif
                 @endforeach
             </tbody>
         </table>
@@ -664,7 +698,11 @@
             </tbody>
         </table>
 
-    </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     {{-- Per-page footer overrides using CSS counters --}}
     <style>
