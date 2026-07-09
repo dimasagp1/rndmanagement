@@ -139,8 +139,6 @@
             color: #333;
         }
 
-        }
-
         /* ── Watermark ────────────────────────────── */
         .watermark {
             position: fixed;
@@ -238,7 +236,8 @@
         .form-container {
             border: 1.5px solid #000;
             padding: 4mm 4mm 3mm 4mm;
-            min-height: 220mm;
+            min-height: 229mm;
+            box-sizing: border-box;
             margin-top: 0;
             margin-bottom: 0;
         }

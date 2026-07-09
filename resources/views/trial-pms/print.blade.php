@@ -154,6 +154,8 @@
         .form-container {
             border: 1.5px solid #000;
             padding: 5mm 5mm;
+            min-height: 229mm;
+            box-sizing: border-box;
             margin-top: 0;
             margin-bottom: 0;
         }
