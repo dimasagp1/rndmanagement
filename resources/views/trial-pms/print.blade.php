@@ -33,7 +33,7 @@
 
         /* ── Confidential Watermark ────────────────────────── */
         body::before {
-            content: "CONFIDENTIAL";
+            content: " ";
             position: fixed;
             top: 50%;
             left: 50%;
