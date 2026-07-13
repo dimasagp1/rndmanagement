@@ -99,25 +99,4 @@
         </button>
     </form>
 
-    <!-- Demo credentials hint -->
-    <div class="mt-6 p-3 bg-surface rounded-lg border border-gray-200">
-        <p class="text-xs font-semibold text-gray-500 mb-2">Akun demo:</p>
-        <div class="space-y-1 text-xs text-gray-500">
-            <div class="flex justify-between">
-                <span>Staff R&D:</span>
-                <code class="text-primary">staff@herbatech.com</code>
-            </div>
-            <div class="flex justify-between">
-                <span>Op. Manager:</span>
-                <code class="text-primary">manager@herbatech.com</code>
-            </div>
-            <div class="flex justify-between">
-                <span>General Manager:</span>
-                <code class="text-primary">lisa@herbatech.com</code>
-            </div>
-            <div class="mt-1.5 pt-1.5 border-t border-gray-200 text-center">
-                Password: <code class="text-ink font-semibold">password</code>
-            </div>
-        </div>
-    </div>
 </x-guest-layout>
