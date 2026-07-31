@@ -16,10 +16,19 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         // ── Stat Cards ───────────────────────────────────
-        $totalFormulas = Formula::where('approval_status', 'Approved')->count();
+        $formulaQuery = Formula::where('approval_status', 'Approved');
+        $trialRmQuery = TrialRm::query();
+        $trialPmQuery = TrialPm::query();
 
-        $trialRmCount  = TrialRm::count();
-        $trialPmCount  = TrialPm::count();
+        if ($user->hasRole('Staff R&D')) {
+            $formulaQuery->where('created_by', $user->id);
+            $trialRmQuery->where('created_by', $user->id);
+            $trialPmQuery->where('created_by', $user->id);
+        }
+
+        $totalFormulas = $formulaQuery->count();
+        $trialRmCount  = $trialRmQuery->count();
+        $trialPmCount  = $trialPmQuery->count();
 
         // Pending approvals (role-aware)
         $pendingCount = 0;
@@ -46,8 +55,13 @@ class DashboardController extends Controller
         }
 
         // ── Recent Activity (Activity Log) ────────────────
-        $recentActivity = Activity::with('causer', 'subject')
-            ->latest()
+        $activityQuery = Activity::with('causer', 'subject')->latest();
+
+        if ($user->hasRole('Staff R&D')) {
+            $activityQuery->where('causer_id', $user->id);
+        }
+
+        $recentActivity = $activityQuery
             ->take(8)
             ->get()
             ->map(function ($log) {
@@ -56,20 +70,23 @@ class DashboardController extends Controller
                     'Formula'   => 'Formulasi RM',
                     'TrialRm'   => 'Trial RM',
                     'TrialPm'   => 'Trial PM',
+                    'LogbookPm' => 'Logbook PM',
                     default     => $subjectType ?: 'Sistem',
                 };
                 return [
                     'module'    => $module,
                     'code'      => $log->subject?->code ?? '—',
                     'name'      => match ($subjectType) {
-                        'Formula'  => $log->subject?->name ?? '—',
-                        'TrialRm'  => $log->subject?->sample_identity ?? '—',
-                        'TrialPm'  => $log->subject?->packaging_material ?? '—',
-                        default    => '—',
+                        'Formula'   => $log->subject?->name ?? '—',
+                        'TrialRm'   => $log->subject?->sample_identity ?? '—',
+                        'TrialPm'   => $log->subject?->packaging_material ?? '—',
+                        'LogbookPm' => $log->subject?->nama_material ?? '—',
+                        default     => '—',
                     },
                     'event'     => $log->event,
                     'status'    => $log->properties['attributes']['approval_status']
                                    ?? $log->subject?->approval_status
+                                   ?? $log->subject?->status_pengujian
                                    ?? 'Draft',
                     'causer'    => $log->causer?->name ?? 'Sistem',
                     'updated'   => $log->created_at,
@@ -79,7 +96,7 @@ class DashboardController extends Controller
 
         // Fallback: jika belum ada activity log, tampilkan data langsung dari model
         if ($recentActivity->isEmpty()) {
-            $recentActivity = $this->getFallbackActivity();
+            $recentActivity = $this->getFallbackActivity($user);
         }
 
         // ── My Items (Staff) ─────────────────────────────
@@ -107,16 +124,27 @@ class DashboardController extends Controller
         if (! $subject) return null;
 
         return match ($type) {
-            'Formula' => route('formulas.show', $subject),
-            'TrialRm' => route('trial-rms.show', $subject),
-            'TrialPm' => route('trial-pms.show', $subject),
-            default   => null,
+            'Formula'   => route('formulas.show', $subject),
+            'TrialRm'   => route('trial-rms.show', $subject),
+            'TrialPm'   => route('trial-pms.show', $subject),
+            'LogbookPm' => route('logbook-pm.show', $subject),
+            default     => null,
         };
     }
 
-    private function getFallbackActivity()
+    private function getFallbackActivity($user = null)
     {
-        $formulas = Formula::with('creator')->latest()->take(4)->get()
+        $formulaQuery = Formula::with('creator')->latest();
+        $trialRmQuery = TrialRm::with(['creator', 'formula'])->latest();
+        $trialPmQuery = TrialPm::with('creator')->latest();
+
+        if ($user && $user->hasRole('Staff R&D')) {
+            $formulaQuery->where('created_by', $user->id);
+            $trialRmQuery->where('created_by', $user->id);
+            $trialPmQuery->where('created_by', $user->id);
+        }
+
+        $formulas = $formulaQuery->take(4)->get()
             ->map(fn($f) => [
                 'module'  => 'Formulasi RM',
                 'code'    => $f->code,
@@ -128,7 +156,7 @@ class DashboardController extends Controller
                 'route'   => route('formulas.show', $f),
             ]);
 
-        $trials = TrialRm::with(['creator', 'formula'])->latest()->take(2)->get()
+        $trials = $trialRmQuery->take(2)->get()
             ->map(fn($t) => [
                 'module'  => 'Trial RM',
                 'code'    => $t->code,
@@ -140,9 +168,21 @@ class DashboardController extends Controller
                 'route'   => route('trial-rms.show', $t),
             ]);
 
-        return $formulas->merge($trials)
+        $trialPms = $trialPmQuery->take(2)->get()
+            ->map(fn($tp) => [
+                'module'  => 'Trial PM',
+                'code'    => $tp->code,
+                'name'    => $tp->packaging_material,
+                'event'   => 'created',
+                'status'  => $tp->approval_status ?? 'Draft',
+                'causer'  => $tp->creator?->name ?? '—',
+                'updated' => $tp->updated_at,
+                'route'   => route('trial-pms.show', $tp),
+            ]);
+
+        return $formulas->concat($trials)->concat($trialPms)
             ->sortByDesc('updated')
-            ->take(5)
+            ->take(8)
             ->values();
     }
 }
