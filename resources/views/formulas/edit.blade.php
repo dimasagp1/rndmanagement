@@ -101,18 +101,21 @@
                             <div class="flex flex-wrap items-center gap-4 mt-1">
                                 <label class="inline-flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="formula_type" value="existing"
+                                           x-model="formType"
                                            {{ old('formula_type', $formula->formula_type) === 'existing' ? 'checked' : '' }}
                                            class="text-primary focus:ring-primary">
                                     <span class="text-sm">Existing</span>
                                 </label>
                                 <label class="inline-flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="formula_type" value="new_product"
+                                           x-model="formType"
                                            {{ old('formula_type', $formula->formula_type) === 'new_product' ? 'checked' : '' }}
                                            class="text-primary focus:ring-primary">
                                     <span class="text-sm">New Product / Reformulation</span>
                                 </label>
                                 <label class="inline-flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="formula_type" value="substitution"
+                                           x-model="formType"
                                            {{ old('formula_type', $formula->formula_type) === 'substitution' ? 'checked' : '' }}
                                            class="text-primary focus:ring-primary">
                                     <span class="text-sm">Substitution</span>
@@ -298,7 +301,7 @@
             <div class="space-y-4">
 
                 {{-- PRODUCT DEVELOPMENT STAGE --}}
-                <div class="card">
+                <div class="card" x-show="formType !== 'existing'" x-transition>
                     <div class="card-header">
                         <h3 class="text-sm font-heading font-semibold text-ink">PRODUCT DEVELOPMENT STAGE</h3>
                     </div>
@@ -409,6 +412,7 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
         : [{ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' }];
 
     return {
+        formType: '{{ old('formula_type', $formula->formula_type ?? 'new_product') }}',
         rows,
         totalPercentage: rows.reduce((s, r) => s + (parseFloat(r.percentage) || 0), 0),
         targetDoseA: parseFloat(targetDoseA) || 2.0000,

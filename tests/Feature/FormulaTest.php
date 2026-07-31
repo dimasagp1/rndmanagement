@@ -195,4 +195,25 @@ class FormulaTest extends TestCase
 
         $response->assertRedirect(route('formulas.edit', $newFormula));
     }
+
+    public function test_can_create_existing_formula_without_development_stage()
+    {
+        $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
+            'code' => 'FRM-202607-EX1',
+            'name' => 'Existing Product Formula',
+            'formula_type' => 'existing',
+            'materials' => [
+                [
+                    'material_id' => $this->material1->id,
+                    'supplier_id' => $this->supplier->id,
+                    'percentage' => 100.00,
+                ],
+            ],
+        ]);
+
+        $formula = Formula::where('code', 'FRM-202607-EX1')->first();
+        $this->assertNotNull($formula);
+        $this->assertEquals('existing', $formula->formula_type);
+        $this->assertNull($formula->development_stage);
+    }
 }

@@ -38,7 +38,7 @@
                 @endif
             </div>
             <h1 class="page-title">{{ $formula->name }}</h1>
-            <p class="page-subtitle">{{ $formula->development_stage }} · Dibuat oleh {{ $formula->creator?->name ?? '—' }}</p>
+            <p class="page-subtitle">{{ $formula->development_stage ? $formula->development_stage . ' · ' : '' }}Dibuat oleh {{ $formula->creator?->name ?? '—' }}</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             {{-- Staff actions --}}
@@ -138,7 +138,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Tahapan</p>
-                        <p>{{ $formula->development_stage }}</p>
+                        <p>{{ $formula->development_stage ?? '—' }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Status</p>

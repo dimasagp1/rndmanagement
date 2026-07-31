@@ -79,7 +79,7 @@ class FormulaController extends Controller
             'name'              => 'required|string|max:255',
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
-            'development_stage' => 'required|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
+            'development_stage' => 'required_unless:formula_type,existing|nullable|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
             'preparation_method' => 'nullable|string|max:10000',
             'notes'             => 'nullable|string|max:10000',
             'result'            => 'nullable|in:Approved,Need Improvement,Rejected',
@@ -100,6 +100,10 @@ class FormulaController extends Controller
             'materials.*.sachet_30' => 'nullable|numeric|min:0',
             'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
         ]);
+
+        if (($validated['formula_type'] ?? null) === 'existing') {
+            $validated['development_stage'] = null;
+        }
 
         try {
             $formula = $this->service->create($validated, auth()->id());
@@ -152,7 +156,7 @@ class FormulaController extends Controller
             'name'              => 'required|string|max:255',
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
-            'development_stage' => 'required|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
+            'development_stage' => 'required_unless:formula_type,existing|nullable|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
             'preparation_method' => 'nullable|string|max:10000',
             'notes'             => 'nullable|string|max:10000',
             'result'            => 'nullable|in:Approved,Need Improvement,Rejected',
@@ -173,6 +177,10 @@ class FormulaController extends Controller
             'materials.*.sachet_30' => 'nullable|numeric|min:0',
             'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
         ]);
+
+        if (($validated['formula_type'] ?? null) === 'existing') {
+            $validated['development_stage'] = null;
+        }
 
         try {
             $this->service->update($formula, $validated);

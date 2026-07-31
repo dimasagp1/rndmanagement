@@ -117,7 +117,7 @@
                             @endif
                         </td>
                         <td class="text-sm text-gray-500 font-mono">V{{ $formula->version }}</td>
-                        <td class="text-xs text-gray-500">{{ $formula->development_stage }}</td>
+                        <td class="text-xs text-gray-500">{{ $formula->development_stage ?? '—' }}</td>
                         <td>
                             @php $pct = $formula->total_percentage; @endphp
                             <div class="flex items-center gap-1.5">
