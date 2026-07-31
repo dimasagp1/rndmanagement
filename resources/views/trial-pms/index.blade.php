@@ -143,6 +143,13 @@
                                 @can('edit', $trial)
                                 <a href="{{ route('trial-pms.edit', $trial) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 @endcan
+                                @can('delete', $trial)
+                                <form method="POST" action="{{ route('trial-pms.destroy', $trial) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus trial PM {{ $trial->code }}?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-ghost btn-sm text-red-600 hover:text-red-700">Hapus</button>
+                                </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

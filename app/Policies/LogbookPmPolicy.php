@@ -29,6 +29,11 @@ class LogbookPmPolicy
             && $user->can('trial_pm.edit');
     }
 
+    public function edit(User $user, LogbookPm $logbook): bool
+    {
+        return $this->update($user, $logbook);
+    }
+
     public function delete(User $user, LogbookPm $logbook): bool
     {
         return ($logbook->created_by === $user->id || $user->hasRole('Superadmin'))

@@ -47,6 +47,14 @@
                 <a href="{{ route('formulas.edit', $formula) }}" class="btn-outline" id="btn-edit-formula">Edit</a>
                 @endcan
 
+                @can('delete', $formula)
+                <form method="POST" action="{{ route('formulas.destroy', $formula) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus formula {{ $formula->code }}?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-outline text-red-600 border-red-200 hover:bg-red-50" id="btn-delete-formula">Hapus</button>
+                </form>
+                @endcan
+
                 @can('submit', $formula)
                 @if($formula->is_valid_composition)
                 <form method="POST" action="{{ route('formulas.submit', $formula) }}" id="form-submit-formula">

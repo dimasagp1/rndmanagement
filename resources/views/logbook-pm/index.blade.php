@@ -213,8 +213,20 @@
                         <td class="px-3 py-2.5 text-gray-600">{{ $entry->lokasi_penyimpanan ?? '—' }}</td>
                         <td class="px-3 py-2.5 font-medium text-ink">{{ $entry->nama_penerima }}</td>
                         <td class="px-3 py-2.5 text-gray-400 leading-relaxed">{{ Str::limit($entry->keterangan, 50) }}</td>
-                        <td class="px-3 py-2.5 text-center">
-                            <a href="{{ route('logbook-pm.show', $entry) }}" class="text-primary hover:underline text-[10px] font-semibold">Detail</a>
+                        <td class="px-3 py-2.5 text-center whitespace-nowrap" onclick="event.stopPropagation()">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <a href="{{ route('logbook-pm.show', $entry) }}" class="text-gray-600 hover:text-primary text-[11px] font-medium">Lihat</a>
+                                @can('update', $entry)
+                                <a href="{{ route('logbook-pm.edit', $entry) }}" class="text-primary hover:underline text-[11px] font-medium">Edit</a>
+                                @endcan
+                                @can('delete', $entry)
+                                <form method="POST" action="{{ route('logbook-pm.destroy', $entry) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus entri Log Book PM ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-700 hover:underline text-[11px] font-medium">Hapus</button>
+                                </form>
+                                @endcan
+                            </div>
                         </td>
                     </tr>
                     @empty

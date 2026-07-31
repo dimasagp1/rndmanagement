@@ -140,6 +140,13 @@
                                 @can('edit', $formula)
                                 <a href="{{ route('formulas.edit', $formula) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 @endcan
+                                @can('delete', $formula)
+                                <form method="POST" action="{{ route('formulas.destroy', $formula) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus formula {{ $formula->code }}?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-ghost btn-sm text-red-600 hover:text-red-700">Hapus</button>
+                                </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

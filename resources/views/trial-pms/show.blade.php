@@ -56,6 +56,14 @@
                 <a href="{{ route('trial-pms.edit', $trialPm) }}" class="btn-outline" id="btn-edit-trial-pm">Edit</a>
                 @endcan
 
+                @can('delete', $trialPm)
+                <form method="POST" action="{{ route('trial-pms.destroy', $trialPm) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus trial PM ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-outline text-red-600 border-red-200 hover:bg-red-50" id="btn-delete-trial-pm">Hapus</button>
+                </form>
+                @endcan
+
                 @can('submit', $trialPm)
                 <form method="POST" action="{{ route('trial-pms.submit', $trialPm) }}" id="form-submit-trial-pm">
                     @csrf

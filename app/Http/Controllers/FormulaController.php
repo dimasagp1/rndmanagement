@@ -103,6 +103,7 @@ class FormulaController extends Controller
 
         if (($validated['formula_type'] ?? null) === 'existing') {
             $validated['development_stage'] = null;
+            $validated['result'] = null;
         }
 
         try {
@@ -180,6 +181,7 @@ class FormulaController extends Controller
 
         if (($validated['formula_type'] ?? null) === 'existing') {
             $validated['development_stage'] = null;
+            $validated['result'] = null;
         }
 
         try {

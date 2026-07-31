@@ -299,7 +299,7 @@
                 </div>
 
                 {{-- RESULT --}}
-                <div class="card">
+                <div class="card" x-show="formType !== 'existing'" x-transition>
                     <div class="card-header">
                         <h3 class="text-sm font-heading font-semibold text-ink">Result</h3>
                     </div>
