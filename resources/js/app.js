@@ -9,12 +9,23 @@ window.TomSelect = TomSelect;
 
 // Function to safely initialize Tom Select
 function initTomSelect(el) {
-    if (!el.tomselect) {
-        new TomSelect(el, {
+    if (!el || el.tomselect || el.dataset.tomselectInitialized) return;
+    el.dataset.tomselectInitialized = 'true';
+
+    try {
+        const ts = new TomSelect(el, {
             create: false,
             placeholder: el.getAttribute('placeholder') || 'Select an option',
             searchField: ['text']
         });
+
+        ts.on('change', (value) => {
+            el.value = value;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    } catch (e) {
+        console.error('TomSelect init error:', e);
     }
 }
 
@@ -28,10 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.classList.contains('ts-wrapper') || node.classList.contains('ts-control')) {
+                        return;
+                    }
                     if (node.classList.contains('tom-select')) {
                         initTomSelect(node);
+                    } else {
+                        node.querySelectorAll('.tom-select').forEach(initTomSelect);
                     }
-                    node.querySelectorAll('.tom-select').forEach(initTomSelect);
                 }
             });
         });
