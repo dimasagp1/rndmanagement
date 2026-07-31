@@ -19,7 +19,12 @@ class TrialPmController extends Controller
     {
         Gate::authorize('viewAny', TrialPm::class);
 
+        $user = auth()->user();
         $query = TrialPm::with(['creator', 'departmentApprovals.approver'])->latest();
+
+        if ($user->hasRole('Staff R&D')) {
+            $query->where('created_by', $user->id);
+        }
 
         // Search
         if ($search = $request->get('search')) {

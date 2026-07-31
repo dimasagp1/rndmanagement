@@ -14,6 +14,10 @@ class TrialRmPolicy
 
     public function view(User $user, TrialRm $trial): bool
     {
+        if ($user->hasRole('Staff R&D')) {
+            return $trial->created_by === $user->id;
+        }
+
         return $user->can('trial_rm.view');
     }
 

@@ -20,7 +20,12 @@ class TrialRmController extends Controller
     {
         Gate::authorize('viewAny', TrialRm::class);
 
+        $user = auth()->user();
         $query = TrialRm::with(['formula', 'creator'])->latest();
+
+        if ($user->hasRole('Staff R&D')) {
+            $query->where('created_by', $user->id);
+        }
 
         // Search
         if ($search = $request->get('search')) {

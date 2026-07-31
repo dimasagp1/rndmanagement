@@ -14,6 +14,10 @@ class TrialPmPolicy
 
     public function view(User $user, TrialPm $trial): bool
     {
+        if ($user->hasRole('Staff R&D')) {
+            return $trial->created_by === $user->id;
+        }
+
         return $user->can('trial_pm.view');
     }
 

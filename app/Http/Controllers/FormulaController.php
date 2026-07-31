@@ -19,7 +19,12 @@ class FormulaController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = Formula::with('creator')->latest();
+
+        if ($user->hasRole('Staff R&D')) {
+            $query->where('created_by', $user->id);
+        }
 
         // Search
         if ($search = $request->get('search')) {
@@ -42,11 +47,16 @@ class FormulaController extends Controller
         $formulas = $query->paginate(15)->withQueryString();
 
         // Summary counts for filter badges
+        $countQuery = Formula::query();
+        if ($user->hasRole('Staff R&D')) {
+            $countQuery->where('created_by', $user->id);
+        }
+
         $counts = [
-            'all'      => Formula::count(),
-            'draft'    => Formula::where('approval_status', 'Draft')->count(),
-            'pending'  => Formula::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count(),
-            'approved' => Formula::where('approval_status', 'Approved')->count(),
+            'all'      => (clone $countQuery)->count(),
+            'draft'    => (clone $countQuery)->where('approval_status', 'Draft')->count(),
+            'pending'  => (clone $countQuery)->whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count(),
+            'approved' => (clone $countQuery)->where('approval_status', 'Approved')->count(),
         ];
 
         return view('formulas.index', compact('formulas', 'counts'));

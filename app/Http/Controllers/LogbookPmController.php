@@ -18,7 +18,12 @@ class LogbookPmController extends Controller
     {
         Gate::authorize('viewAny', LogbookPm::class);
 
+        $user = auth()->user();
         $query = LogbookPm::with(['supplier', 'trialPm', 'creator', 'omApprover'])->latest('tanggal_terima');
+
+        if ($user->hasRole('Staff R&D')) {
+            $query->where('created_by', $user->id);
+        }
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -52,11 +57,16 @@ class LogbookPmController extends Controller
 
         $entries = $query->paginate(20)->withQueryString();
 
+        $statQuery = LogbookPm::query();
+        if ($user->hasRole('Staff R&D')) {
+            $statQuery->where('created_by', $user->id);
+        }
+
         $stats = [
-            'total'       => LogbookPm::count(),
-            'pending'     => LogbookPm::where('status_pengujian', 'Pending')->count(),
-            'lulus'       => LogbookPm::where('status_pengujian', 'Lulus')->count(),
-            'tidak_lulus' => LogbookPm::where('status_pengujian', 'Tidak Lulus')->count(),
+            'total'       => (clone $statQuery)->count(),
+            'pending'     => (clone $statQuery)->where('status_pengujian', 'Pending')->count(),
+            'lulus'       => (clone $statQuery)->where('status_pengujian', 'Lulus')->count(),
+            'tidak_lulus' => (clone $statQuery)->where('status_pengujian', 'Tidak Lulus')->count(),
         ];
 
         return view('logbook-pm.index', compact('entries', 'stats'));

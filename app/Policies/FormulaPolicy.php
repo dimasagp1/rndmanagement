@@ -20,6 +20,10 @@ class FormulaPolicy
      */
     public function view(User $user, Formula $formula): bool
     {
+        if ($user->hasRole('Staff R&D')) {
+            return $formula->created_by === $user->id;
+        }
+
         return $user->can('formula.view');
     }
 

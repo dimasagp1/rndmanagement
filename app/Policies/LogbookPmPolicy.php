@@ -14,6 +14,10 @@ class LogbookPmPolicy
 
     public function view(User $user, LogbookPm $logbook): bool
     {
+        if ($user->hasRole('Staff R&D')) {
+            return $logbook->created_by === $user->id;
+        }
+
         return $user->can('trial_pm.view');
     }
 
