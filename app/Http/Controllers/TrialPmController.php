@@ -36,7 +36,12 @@ class TrialPmController extends Controller
 
         // Filter status
         if ($status = $request->get('status')) {
-            $query->where('approval_status', $status);
+            if (str_contains($status, ',')) {
+                $statuses = array_map('trim', explode(',', $status));
+                $query->whereIn('approval_status', $statuses);
+            } else {
+                $query->where('approval_status', $status);
+            }
         }
 
         $trials = $query->paginate(15)->withQueryString();
