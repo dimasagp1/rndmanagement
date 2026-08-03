@@ -8,16 +8,6 @@
             <span class="text-ink font-medium">Bahan Baku (Materials)</span>
         </div>
     </x-slot>
-
-    @if(session('success'))
-    <div class="alert-success mb-4 flash-success" role="alert">
-        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p>{{ session('success') }}</p>
-    </div>
-    @endif
-
     <div x-data="{
         previewOpen: false,
         previewUrl: '',
