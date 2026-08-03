@@ -113,6 +113,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update')->middleware('role:Superadmin');
 
     // ── Data Master (Superadmin & Staff R&D) ─────────────
+    Route::delete('materials/documents/{document}', [MaterialController::class, 'destroyDocument'])->name('materials.documents.destroy')->middleware('role:Superadmin|Staff R&D');
     Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
 });

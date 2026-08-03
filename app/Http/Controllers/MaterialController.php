@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Material;
+use App\Models\MaterialDocument;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialController extends Controller
 {
     public function index()
     {
-        $materials = Material::paginate(15);
+        $materials = Material::with('documents')->paginate(15);
         return view('materials.index', compact('materials'));
     }
 
@@ -25,6 +27,9 @@ class MaterialController extends Controller
             'type' => ['nullable', 'string', 'max:50'],
             'unit' => ['required', 'string', 'max:20'],
             'description' => ['nullable', 'string'],
+            'documents' => ['nullable', 'array'],
+            'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:10240'],
+            'documents.*.type' => ['nullable', 'string', 'max:100'],
         ]);
 
         $material = Material::create([
@@ -34,6 +39,24 @@ class MaterialController extends Controller
             'description' => $request->description,
         ]);
 
+        if ($request->has('documents')) {
+            foreach ($request->documents as $docItem) {
+                if (isset($docItem['file']) && $docItem['file']->isValid()) {
+                    $file = $docItem['file'];
+                    $originalName = $file->getClientOriginalName();
+                    $size = $file->getSize();
+                    $path = $file->store('materials/documents', 'public');
+
+                    $material->documents()->create([
+                        'document_type' => $docItem['type'] ?? 'Lainnya',
+                        'file_name' => $originalName,
+                        'file_path' => $path,
+                        'file_size' => $size,
+                    ]);
+                }
+            }
+        }
+
         return redirect()
             ->route('materials.index')
             ->with('success', "Bahan baku {$material->name} berhasil ditambahkan.");
@@ -41,6 +64,7 @@ class MaterialController extends Controller
 
     public function edit(Material $material)
     {
+        $material->load('documents');
         return view('materials.edit', compact('material'));
     }
 
@@ -51,6 +75,9 @@ class MaterialController extends Controller
             'type' => ['nullable', 'string', 'max:50'],
             'unit' => ['required', 'string', 'max:20'],
             'description' => ['nullable', 'string'],
+            'documents' => ['nullable', 'array'],
+            'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:10240'],
+            'documents.*.type' => ['nullable', 'string', 'max:100'],
         ]);
 
         $material->update([
@@ -60,9 +87,37 @@ class MaterialController extends Controller
             'description' => $request->description,
         ]);
 
+        if ($request->has('documents')) {
+            foreach ($request->documents as $docItem) {
+                if (isset($docItem['file']) && $docItem['file']->isValid()) {
+                    $file = $docItem['file'];
+                    $originalName = $file->getClientOriginalName();
+                    $size = $file->getSize();
+                    $path = $file->store('materials/documents', 'public');
+
+                    $material->documents()->create([
+                        'document_type' => $docItem['type'] ?? 'Lainnya',
+                        'file_name' => $originalName,
+                        'file_path' => $path,
+                        'file_size' => $size,
+                    ]);
+                }
+            }
+        }
+
         return redirect()
             ->route('materials.index')
             ->with('success', "Bahan baku {$material->name} berhasil diperbarui.");
+    }
+
+    public function destroyDocument(MaterialDocument $document)
+    {
+        if (Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
+        }
+        $document->delete();
+
+        return redirect()->back()->with('success', 'Dokumen berhasil dihapus.');
     }
 
     public function destroy(Material $material)

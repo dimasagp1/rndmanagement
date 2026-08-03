@@ -29,4 +29,22 @@ class Material extends Model
     {
         return $this->hasMany(FormulaMaterial::class);
     }
+
+    // Relasi ke MaterialDocument
+    public function documents()
+    {
+        return $this->hasMany(MaterialDocument::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($material) {
+            foreach ($material->documents as $doc) {
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($doc->file_path)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($doc->file_path);
+                }
+            }
+        });
+    }
 }
+
