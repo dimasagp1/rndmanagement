@@ -104,9 +104,13 @@
                                             </svg>
                                             Unduh
                                         </a>
-                                        <button type="button" onclick="if(confirm('Hapus dokumen {{ $doc->file_name }}?')) document.getElementById('delete-doc-{{ $doc->id }}').submit();" class="btn-ghost btn-sm text-xs text-red-500 hover:bg-red-50">
-                                            Hapus
-                                        </button>
+                                        <form method="POST" action="{{ route('materials.documents.destroy', $doc) }}" class="inline" onsubmit="return confirm('Hapus dokumen {{ addslashes($doc->file_name) }}?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-ghost btn-sm text-xs text-red-500 hover:bg-red-50">
+                                                Hapus
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                                 @endforeach
@@ -141,14 +145,6 @@
                             <button type="submit" class="btn-primary" id="btn-update-material">Simpan Perubahan</button>
                         </div>
                     </form>
-
-                    {{-- Hidden forms for document deletion --}}
-                    @foreach($material->documents as $doc)
-                    <form id="delete-doc-{{ $doc->id }}" action="{{ route('materials.documents.destroy', $doc) }}" method="POST" class="hidden">
-                        @csrf
-                        @method('DELETE')
-                    </form>
-                    @endforeach
                 </div>
             </div>
         </div>
