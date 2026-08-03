@@ -18,17 +18,34 @@
     </div>
     @endif
 
-    <div class="page-header">
+    <div class="page-header flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="page-title">Kelola Data Master</h1>
             <p class="page-subtitle">Input data bahan baku laboratorium R&D dan data rekanan supplier resmi PT Herbatech.</p>
         </div>
-        <a href="{{ route('suppliers.create') }}" class="btn-primary" id="btn-create-supplier">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah Pemasok
-        </a>
+        <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+            <form method="GET" action="{{ route('suppliers.index') }}" class="relative flex items-center">
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari pemasok..."
+                       class="form-input text-xs pl-8 pr-8 py-2 w-48 sm:w-64 rounded-lg border-gray-300 focus:border-primary focus:ring-primary shadow-xs">
+                <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                @if(request('search'))
+                <a href="{{ route('suppliers.index') }}" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="Bersihkan Pencarian">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </a>
+                @endif
+            </form>
+            <a href="{{ route('suppliers.create') }}" class="btn-primary flex-shrink-0" id="btn-create-supplier">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah Pemasok
+            </a>
+        </div>
     </div>
 
     {{-- Tabs --}}
