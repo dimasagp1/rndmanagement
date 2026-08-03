@@ -104,13 +104,9 @@
                                             </svg>
                                             Unduh
                                         </a>
-                                        <form method="POST" action="{{ route('materials.documents.destroy', $doc) }}" class="inline" onsubmit="return confirm('Hapus dokumen {{ addslashes($doc->file_name) }}?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-ghost btn-sm text-xs text-red-500 hover:bg-red-50">
-                                                Hapus
-                                            </button>
-                                        </form>
+                                        <button type="submit" form="delete-doc-{{ $doc->id }}" onclick="return confirm('Hapus dokumen {{ addslashes($doc->file_name) }}?')" class="btn-ghost btn-sm text-xs text-red-500 hover:bg-red-50">
+                                            Hapus
+                                        </button>
                                     </div>
                                 </div>
                                 @endforeach
@@ -145,6 +141,14 @@
                             <button type="submit" class="btn-primary" id="btn-update-material">Simpan Perubahan</button>
                         </div>
                     </form>
+
+                    {{-- Form terpisah untuk hapus dokumen (menggunakan atribut HTML5 form="delete-doc-ID") --}}
+                    @foreach($material->documents as $doc)
+                    <form id="delete-doc-{{ $doc->id }}" action="{{ route('materials.documents.destroy', $doc) }}" method="POST" class="hidden">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                    @endforeach
                 </div>
             </div>
         </div>
