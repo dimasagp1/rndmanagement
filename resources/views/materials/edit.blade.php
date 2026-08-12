@@ -144,7 +144,7 @@
         </div>
 
         {{-- Modal Preview Dokumen Popup --}}
-        <div x-show="previewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs" @keydown.escape.window="previewOpen = false">
+        <div x-show="previewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="previewOpen = false">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100" @click.away="previewOpen = false">
                 {{-- Header Modal --}}
                 <div class="px-5 py-3.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">

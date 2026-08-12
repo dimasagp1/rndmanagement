@@ -6,6 +6,11 @@
 
 /* ─── Base Layer ─────────────────────────────────────── */
 @layer base {
+    /* Sembunyikan elemen Alpine yang belum diinisialisasi (fallback jika JS gagal load) */
+    [x-cloak] {
+        display: none !important;
+    }
+
     html {
         scroll-behavior: smooth;
     }

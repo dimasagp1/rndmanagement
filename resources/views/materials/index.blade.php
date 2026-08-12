@@ -102,7 +102,7 @@
                                         {{ $material->documents->count() }} Dokumen
                                         <svg class="w-3 h-3 text-emerald-600 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
-                                    <div x-show="open" x-cloak class="origin-top-left absolute left-0 mt-1 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 p-2 text-xs">
+                                    <div x-show="open" x-cloak class="origin-top-left absolute left-0 mt-1 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 p-2 text-xs" style="display: none;">
                                         <p class="font-bold text-gray-700 px-2 py-1 border-b border-gray-100">Dokumen {{ $material->name }}</p>
                                         <div class="max-h-48 overflow-y-auto divide-y divide-gray-100 mt-1">
                                             @foreach($material->documents as $doc)
@@ -146,7 +146,7 @@
         </div>
 
         {{-- Modal Preview Dokumen Popup --}}
-        <div x-show="previewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs" @keydown.escape.window="previewOpen = false">
+        <div x-show="previewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs" style="display: none;" @keydown.escape.window="previewOpen = false">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100" @click.away="previewOpen = false">
                 {{-- Header Modal --}}
                 <div class="px-5 py-3.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
