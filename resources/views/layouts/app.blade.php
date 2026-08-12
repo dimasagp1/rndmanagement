@@ -195,34 +195,25 @@
 
             <!-- Sidebar Footer (User Info) -->
             <div class="p-3 border-t border-white/10">
-                <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group" x-data="{ open: false }" @click="open = !open" x-on:click.away="open = false">
-                    <div class="w-8 h-8 rounded-full bg-accent/80 flex items-center justify-center flex-shrink-0">
-                        <span class="text-white font-semibold text-sm">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        </span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-white text-sm font-medium truncate leading-tight">{{ Auth::user()->name }}</p>
-                        <p class="text-white/50 text-xs truncate leading-tight">{{ Auth::user()->getRoleNames()->first() }}</p>
-                    </div>
-                    <svg class="w-4 h-4 text-white/40 transition-transform group-hover:text-white/70 flex-shrink-0"
-                         :class="open ? 'rotate-180' : ''"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                    </svg>
+                <details class="group relative">
+                    <summary class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                        <div class="w-8 h-8 rounded-full bg-accent/80 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-semibold text-sm">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white text-sm font-medium truncate leading-tight">{{ Auth::user()->name }}</p>
+                            <p class="text-white/50 text-xs truncate leading-tight">{{ Auth::user()->getRoleNames()->first() }}</p>
+                        </div>
+                        <svg class="w-4 h-4 text-white/40 transition-transform group-hover:text-white/70 group-open:rotate-180 flex-shrink-0"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                        </svg>
+                    </summary>
 
                     <!-- User Dropdown (pops upward) -->
-                    <div
-                        x-show="open"
-                        x-transition:enter="transition ease-out duration-100"
-                        x-transition:enter-start="opacity-0 scale-95 translate-y-1"
-                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-75"
-                        x-transition:leave-start="opacity-100 scale-100"
-                        x-transition:leave-end="opacity-0 scale-95"
-                        class="absolute bottom-16 left-3 right-3 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50"
-                        style="display:none;"
-                    >
+                    <div class="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
                         <a href="{{ route('profile.edit') }}"
                            class="flex items-center gap-2 px-3 py-2 text-sm text-ink hover:bg-surface transition-colors">
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +233,7 @@
                             </button>
                         </form>
                     </div>
-                </div>
+                </details>
             </div>
         </aside>
 
