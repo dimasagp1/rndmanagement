@@ -94,23 +94,23 @@
                             <td class="text-xs text-gray-500 max-w-xs truncate" title="{{ $material->description }}">{{ $material->description ?? '—' }}</td>
                             <td>
                                 @if($material->documents->count() > 0)
-                                <div class="relative inline-block text-left" x-data="{ open: false }">
-                                    <button @click="open = !open" @click.away="open = false" type="button" class="badge bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold cursor-pointer flex items-center gap-1 border border-emerald-200 transition text-xs py-1 px-2">
+                                <details class="relative inline-block text-left group select-none">
+                                    <summary class="badge bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold cursor-pointer flex items-center gap-1 border border-emerald-200 transition text-xs py-1 px-2 list-none [&::-webkit-details-marker]:hidden">
                                         <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                         </svg>
                                         {{ $material->documents->count() }} Dokumen
-                                        <svg class="w-3 h-3 text-emerald-600 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    </button>
-                                    <div x-show="open" x-cloak class="origin-top-left absolute left-0 mt-1 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 p-2 text-xs" style="display: none;">
+                                        <svg class="w-3 h-3 text-emerald-600 ml-0.5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </summary>
+                                    <div class="origin-top-left absolute left-0 mt-1 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 p-2 text-xs">
                                         <p class="font-bold text-gray-700 px-2 py-1 border-b border-gray-100">Dokumen {{ $material->name }}</p>
                                         <div class="max-h-48 overflow-y-auto divide-y divide-gray-100 mt-1">
                                             @foreach($material->documents as $doc)
                                             <div class="flex items-center justify-between p-2 hover:bg-emerald-50 rounded transition group">
-                                                <button type="button" @click="openPreview('{{ Storage::url($doc->file_path) }}', '{{ addslashes($doc->file_name) }}', '{{ addslashes($doc->document_type) }}'); open = false;" class="text-left flex-1 min-w-0 pr-2">
+                                                <a href="{{ Storage::url($doc->file_path) }}" target="_blank" rel="noopener" @click.prevent="openPreview('{{ Storage::url($doc->file_path) }}', '{{ addslashes($doc->file_name) }}', '{{ addslashes($doc->document_type) }}')" class="text-left flex-1 min-w-0 pr-2 block">
                                                     <span class="font-semibold text-gray-800 group-hover:text-emerald-700 block text-xs">{{ $doc->document_type }}</span>
                                                     <span class="text-[10px] text-gray-400 block truncate" title="{{ $doc->file_name }}">{{ $doc->file_name }}</span>
-                                                </button>
+                                                </a>
                                                 <a href="{{ Storage::url($doc->file_path) }}" download="{{ $doc->file_name }}" title="Unduh File" class="text-gray-400 hover:text-emerald-600 p-1 flex-shrink-0">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -120,7 +120,7 @@
                                             @endforeach
                                         </div>
                                     </div>
-                                </div>
+                                </details>
                                 @else
                                 <span class="text-xs text-gray-400">—</span>
                                 @endif
