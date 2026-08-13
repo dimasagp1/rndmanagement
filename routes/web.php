@@ -11,6 +11,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\LogbookPmController;
+use App\Http\Controllers\TimelineController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    // Timeline View (landing page setelah login)
+    Route::get('/timeline', [TimelineController::class, 'index'])->name('timeline.index');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -41,6 +45,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:formula.view');
     Route::post('formulas/{formula}/reformulate',[FormulaController::class, 'reformulate'])
          ->name('formulas.reformulate')
+         ->middleware('can:formula.view');
+    Route::post('formulas/{formula}/complete', [FormulaController::class, 'complete'])
+         ->name('formulas.complete')
          ->middleware('can:formula.view');
 
     // ── Trial RM ──────────────────────────────────────────

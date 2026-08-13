@@ -79,6 +79,17 @@
             @endif
 
             @if($formula->approval_status === 'Approved')
+                @can('complete', $formula)
+                <form method="POST" action="{{ route('formulas.complete', $formula) }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                            onclick="return confirm('Tandai formula {{ $formula->code }} sebagai selesai (Completed)?')"
+                            class="btn-primary" id="btn-complete-formula">
+                        ✓ Tandai Selesai
+                    </button>
+                </form>
+                @endcan
+
                 @can('reformulate', $formula)
                 <form method="POST" action="{{ route('formulas.reformulate', $formula) }}" id="form-reformulate">
                     @csrf

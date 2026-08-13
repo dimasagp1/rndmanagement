@@ -86,4 +86,14 @@ class FormulaPolicy
             && $formula->approval_status === 'Draft'
             && $user->can('formula.delete');
     }
+
+    /**
+     * Tandai selesai — creator dengan permission edit, hanya dari Approved
+     */
+    public function complete(User $user, Formula $formula): bool
+    {
+        return $formula->approval_status === 'Approved'
+            && ($user->hasRole('Superadmin') || $formula->created_by === $user->id)
+            && $user->can('formula.edit');
+    }
 }

@@ -243,6 +243,20 @@ class FormulaController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────
+    // COMPLETE (tandai selesai setelah Approved)
+    // ──────────────────────────────────────────────────────────────
+    public function complete(Formula $formula)
+    {
+        Gate::authorize('complete', $formula);
+
+        $formula->update(['approval_status' => 'Completed']);
+
+        return redirect()
+            ->route('formulas.show', $formula)
+            ->with('success', "Formula {$formula->code} ditandai sebagai selesai (Completed).");
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // REFORMULATE (buat versi baru)
     // ──────────────────────────────────────────────────────────────
     public function reformulate(Formula $formula)

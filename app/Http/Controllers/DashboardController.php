@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         // ── Stat Cards ───────────────────────────────────
-        $formulaQuery = Formula::where('approval_status', 'Approved');
+        $formulaQuery = Formula::whereIn('approval_status', ['Approved', 'Completed']);
         $trialRmQuery = TrialRm::query();
         $trialPmQuery = TrialPm::query();
 

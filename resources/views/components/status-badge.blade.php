@@ -9,6 +9,7 @@
         'pending review'  => ['label' => 'Pending Review',    'cls' => 'bg-amber-100 text-amber-800 ring-amber-200'],
         'pending'         => ['label' => 'Pending',           'cls' => 'bg-amber-100 text-amber-800 ring-amber-200'],
         'approved'        => ['label' => 'Approved',          'cls' => 'bg-emerald-100 text-emerald-800 ring-emerald-200'],
+        'completed'       => ['label' => 'Completed',         'cls' => 'bg-sky-100 text-sky-800 ring-sky-200'],
         'rejected'        => ['label' => 'Ditolak',           'cls' => 'bg-red-100 text-red-700 ring-red-200'],
         'reformulasi'     => ['label' => 'Reformulasi',       'cls' => 'bg-orange-100 text-orange-700 ring-orange-200'],
         'reformulate'     => ['label' => 'Reformulasi',       'cls' => 'bg-orange-100 text-orange-700 ring-orange-200'],
