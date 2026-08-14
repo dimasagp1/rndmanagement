@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Formula;
 use App\Models\TrialRm;
 use App\Models\TrialPm;
+use App\Models\Prf;
 use App\Services\FormulaService;
 use App\Services\TrialRmService;
 use App\Services\TrialPmService;
+use App\Services\PrfService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -17,7 +19,8 @@ class ApprovalCenterController extends Controller
     public function __construct(
         private FormulaService $formulaService,
         private TrialRmService $trialRmService,
-        private TrialPmService $trialPmService
+        private TrialPmService $trialPmService,
+        private PrfService $prfService
     ) {}
 
     // ──────────────────────────────────────────────────────────────
@@ -34,6 +37,7 @@ class ApprovalCenterController extends Controller
         $pendingFormulas = collect();
         $pendingTrialRms = collect();
         $pendingTrialPms = collect();
+        $pendingPrfs = collect();
 
         // Antrean Superadmin (Melihat semua)
         if ($user->hasRole('Superadmin')) {
@@ -48,6 +52,11 @@ class ApprovalCenterController extends Controller
                 ->get();
 
             $pendingTrialPms = TrialPm::where('approval_status', 'Pending Approval')
+                ->with('creator')
+                ->latest()
+                ->get();
+
+            $pendingPrfs = Prf::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])
                 ->with('creator')
                 ->latest()
                 ->get();
@@ -68,6 +77,11 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
+
+            $pendingPrfs = Prf::where('approval_status', 'Pending Tahap 1')
+                ->with('creator')
+                ->latest()
+                ->get();
         } 
         // Antrean General Manager (Tahap 2)
         elseif ($user->hasRole('General Manager')) {
@@ -80,9 +94,14 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
+
+            $pendingPrfs = Prf::where('approval_status', 'Pending Tahap 2')
+                ->with('creator')
+                ->latest()
+                ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPrfs'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -217,5 +236,49 @@ class ApprovalCenterController extends Controller
         }
 
         return redirect()->route('approval-center.index')->with('success', $msg);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // APPROVE PRF
+    // ──────────────────────────────────────────────────────────────
+    public function approvePrf(Prf $prf)
+    {
+        $user = auth()->user();
+
+        try {
+            if ($user->hasRole('Operational Manager') || ($user->hasRole('Superadmin') && $prf->approval_status === 'Pending Tahap 1')) {
+                $this->prfService->approveTahap1($prf, $user->id);
+                $msg = "PRF {$prf->code} berhasil disetujui (Tahap 1) dan diteruskan ke GM.";
+            } elseif ($user->hasRole('General Manager') || ($user->hasRole('Superadmin') && $prf->approval_status === 'Pending Tahap 2')) {
+                $this->prfService->approveTahap2($prf, $user->id);
+                $msg = "PRF {$prf->code} telah disetujui secara final (Approved).";
+            } else {
+                abort(403);
+            }
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()->route('approval-center.index')->with('success', $msg);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // REJECT PRF
+    // ──────────────────────────────────────────────────────────────
+    public function rejectPrf(Request $request, Prf $prf)
+    {
+        $request->validate([
+            'rejection_notes' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $this->prfService->reject($prf, $request->rejection_notes);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()
+            ->route('approval-center.index')
+            ->with('success', "PRF {$prf->code} berhasil ditolak.");
     }
 }

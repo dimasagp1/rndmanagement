@@ -18,6 +18,9 @@ use App\Policies\TrialPmPolicy;
 use App\Services\TrialPmService;
 use App\Models\LogbookPm;
 use App\Policies\LogbookPmPolicy;
+use App\Models\Prf;
+use App\Policies\PrfPolicy;
+use App\Services\PrfService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(FormulaService::class);
         $this->app->singleton(TrialRmService::class);
         $this->app->singleton(TrialPmService::class);
+        $this->app->singleton(PrfService::class);
     }
 
     public function boot(): void
@@ -43,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(TrialRm::class, TrialRmPolicy::class);
         Gate::policy(TrialPm::class, TrialPmPolicy::class);
         Gate::policy(LogbookPm::class, LogbookPmPolicy::class);
+        Gate::policy(Prf::class, PrfPolicy::class);
 
         // Implicitly grant "Superadmin" role all permission checks
         Gate::before(function ($user, $ability) {
@@ -61,14 +66,17 @@ class AppServiceProvider extends ServiceProvider
             if ($user->hasRole('Superadmin')) {
                 $notifCount = Formula::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
                     + TrialRm::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
-                    + TrialPm::where('approval_status', 'Pending Approval')->count();
+                    + TrialPm::where('approval_status', 'Pending Approval')->count()
+                    + Prf::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count();
             } elseif ($user->hasRole('Operational Manager')) {
                 $notifCount = Formula::where('approval_status', 'Pending Tahap 1')->count()
                     + TrialRm::where('approval_status', 'Pending Tahap 1')->count()
-                    + TrialPm::where('approval_status', 'Pending Approval')->count();
+                    + TrialPm::where('approval_status', 'Pending Approval')->count()
+                    + Prf::where('approval_status', 'Pending Tahap 1')->count();
             } elseif ($user->hasRole('General Manager')) {
                 $notifCount = Formula::where('approval_status', 'Pending Tahap 2')->count()
-                    + TrialRm::where('approval_status', 'Pending Tahap 2')->count();
+                    + TrialRm::where('approval_status', 'Pending Tahap 2')->count()
+                    + Prf::where('approval_status', 'Pending Tahap 2')->count();
             }
 
             $view->with('navNotifCount', $notifCount);

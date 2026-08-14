@@ -12,6 +12,8 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\LogbookPmController;
 use App\Http\Controllers\TimelineController;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\PrfController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +31,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Timeline View (landing page setelah login)
     Route::get('/timeline', [TimelineController::class, 'index'])->name('timeline.index');
+
+    // General NPD Workflow (Coming Soon)
+    Route::get('/general', [GeneralController::class, 'index'])->name('general.index');
+    Route::get('/general/{tab}', [GeneralController::class, 'show'])
+         ->name('general.show')
+         ->whereIn('tab', array_keys(GeneralController::TABS));
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -49,6 +57,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('formulas/{formula}/complete', [FormulaController::class, 'complete'])
          ->name('formulas.complete')
          ->middleware('can:formula.view');
+
+    // ── PRF (Product Request Form) ──────────────────────────
+    Route::resource('prfs', PrfController::class)->middleware('can:prf.view');
+    Route::post('prfs/{prf}/submit', [PrfController::class, 'submit'])
+         ->name('prfs.submit')
+         ->middleware('can:prf.view');
+    Route::post('prfs/{prf}/approve-tahap1', [PrfController::class, 'approveTahap1'])
+         ->name('prfs.approve-tahap1')
+         ->middleware('can:prf.view');
+    Route::post('prfs/{prf}/approve-tahap2', [PrfController::class, 'approveTahap2'])
+         ->name('prfs.approve-tahap2')
+         ->middleware('can:prf.view');
+    Route::post('prfs/{prf}/reject', [PrfController::class, 'reject'])
+         ->name('prfs.reject')
+         ->middleware('can:prf.view');
 
     // ── Trial RM ──────────────────────────────────────────
     Route::resource('trial-rms', TrialRmController::class)
@@ -110,6 +133,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:approval_center.access');
     Route::post('/approval-center/trial-pms/{trialPm}/reject', [ApprovalCenterController::class, 'rejectTrialPm'])
          ->name('approval-center.trial-pms.reject')
+         ->middleware('can:approval_center.access');
+    Route::post('/approval-center/prfs/{prf}/approve', [ApprovalCenterController::class, 'approvePrf'])
+         ->name('approval-center.prfs.approve')
+         ->middleware('can:approval_center.access');
+    Route::post('/approval-center/prfs/{prf}/reject', [ApprovalCenterController::class, 'rejectPrf'])
+         ->name('approval-center.prfs.reject')
          ->middleware('can:approval_center.access');
 
     // ── User Management (Superadmin Only) ───────────────────

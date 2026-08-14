@@ -144,6 +144,44 @@
                 </a>
                 @endcan
 
+                <!-- NPD Workflow (per grup) -->
+                @php($general = \App\Http\Controllers\GeneralController::class)
+                @php($prfsActive = request()->routeIs('prfs.*'))
+                @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)
+                <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || ($prfsActive && in_array('prf', $slugs))) ? 'true' : 'false' }} }">
+                    <button type="button" @click="open = !open"
+                            class="sidebar-link w-full justify-between {{ (in_array(request()->route('tab'), $slugs) || ($prfsActive && in_array('prf', $slugs))) ? 'active' : '' }}">
+                        <span class="flex items-center gap-3 min-w-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                            <span class="flex-1">{{ $group }}</span>
+                        </span>
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                             :class="open ? 'rotate-180' : ''"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0">
+                        @foreach($slugs as $slug)
+                        @if($slug === 'prf' && ! auth()->user()->can('prf.view'))
+                            @continue
+                        @endif
+                        <a href="{{ $slug === 'prf' ? route('prfs.index') : route('general.show', $slug) }}"
+                           class="sidebar-sub-link {{ $slug === 'prf'
+                               ? ($prfsActive ? 'active' : '')
+                               : (request()->route('tab') === $slug ? 'active' : '') }}">
+                            <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endforeach
+
                 <!-- Approval Center (Manager & GM only) -->
                 @can('approval_center.access')
                 <div class="my-3 border-t border-white/10"></div>

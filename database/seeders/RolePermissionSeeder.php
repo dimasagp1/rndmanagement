@@ -62,6 +62,20 @@ class RolePermissionSeeder extends Seeder
         // Create permissions untuk Approval Center
         Permission::findOrCreate('approval_center.access');
 
+        // Create permissions untuk PRF
+        $prfPermissions = [
+            'prf.create',
+            'prf.view',
+            'prf.edit',
+            'prf.delete',
+            'prf.approve_tahap1',  // Operational Manager
+            'prf.approve_tahap2',  // General Manager
+        ];
+
+        foreach ($prfPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
         // Create roles
         $superadmin = Role::findOrCreate('Superadmin');
         $staffRnd = Role::findOrCreate('Staff R&D');
@@ -80,6 +94,10 @@ class RolePermissionSeeder extends Seeder
             'trial_pm.view',
             'trial_pm.edit',
             'trial_pm.department_approve', // bisa approve sebagai perwakilan departemen
+            'prf.create',
+            'prf.view',
+            'prf.edit',
+            'prf.delete',
         ]);
 
         // Assign permissions to Operational Manager
@@ -91,6 +109,8 @@ class RolePermissionSeeder extends Seeder
             'trial_pm.view',
             'trial_pm.approve_tahap1',
             'approval_center.access',
+            'prf.view',
+            'prf.approve_tahap1',
         ]);
 
         // Assign permissions to General Manager
@@ -102,6 +122,8 @@ class RolePermissionSeeder extends Seeder
             'trial_pm.view',
             'trial_pm.approve_tahap2',
             'approval_center.access',
+            'prf.view',
+            'prf.approve_tahap2',
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');
