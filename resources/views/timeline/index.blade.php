@@ -130,7 +130,7 @@
         </section>
 
              {{-- ─── Summary Cards ─────────────────────────────── --}}
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <section id="summary-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div class="card card-body shadow-sm">
                 <h3 class="text-sm font-semibold text-gray-700 mb-2">Total initiatives</h3>
                 <div class="text-4xl font-bold text-gray-900 mb-2">{{ $total }}</div>
@@ -175,12 +175,14 @@
                         </div>
                         <p class="text-sm text-gray-500 mb-6">Status terkini per tahapan, owner, dan target selesai.</p>
 
-                        <form method="GET" action="{{ route('timeline.index') }}" class="flex gap-4 flex-wrap">
+                        <form method="GET" action="{{ route('timeline.index') }}"
+                      class="flex gap-4 flex-wrap"
+                      x-on:submit.prevent="timelineFetch($el, view)">
                             <input type="text" name="search" value="{{ request('search') }}"
                                    placeholder="Cari tahapan, kode, atau owner..."
-                                   x-on:input.debounce.500ms="$el.closest('form').submit()"
+                                   x-on:input.debounce.500ms="timelineFetch($el.closest('form'), view)"
                                    class="flex-1 min-w-40 rounded-lg border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:border-primary focus:ring-primary">
-                            <select name="status" onchange="this.form.submit()"
+                            <select name="status" x-on:change="timelineFetch($el.closest('form'), view)"
                                     class="custom-select rounded-lg border-gray-300 bg-gray-50 px-4 py-2 text-sm w-40 focus:border-primary focus:ring-primary font-medium">
                                 <option value="">Semua status</option>
                                 <option value="on-track" {{ request('status') === 'on-track' ? 'selected' : '' }}>On track</option>
@@ -188,7 +190,7 @@
                                 <option value="in-review" {{ request('status') === 'in-review' ? 'selected' : '' }}>In review</option>
                                 <option value="blocked" {{ request('status') === 'blocked' ? 'selected' : '' }}>Blocked</option>
                             </select>
-                            <select name="owner" onchange="this.form.submit()"
+                            <select name="owner" x-on:change="timelineFetch($el.closest('form'), view)"
                                     class="custom-select rounded-lg border-primary bg-primary/5 text-primary px-4 py-2 text-sm w-40 focus:border-primary focus:ring-primary font-medium border-2">
                                 <option value="">Semua owner</option>
                                 @foreach($ownerOptions as $o)
@@ -208,7 +210,7 @@
                                     <th class="px-6 py-4" scope="col">Target</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white">
+                            <tbody id="flow-rows" class="divide-y divide-gray-200 bg-white">
                                 @forelse($rows as $i => $row)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4">
@@ -255,7 +257,7 @@
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Next decision points</h3>
                         <p class="text-sm text-gray-500">Urutan momen yang paling berpengaruh ke launch.</p>
                     </div>
-                    <div class="relative">
+                    <div id="decision-list" class="relative">
                         @forelse($decisionPoints as $i => $dp)
                         <div class="timeline-item relative pl-12 {{ $loop->last ? '' : 'pb-8' }}">
                             <div class="timeline-line"></div>
@@ -291,6 +293,7 @@
                                 class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors bg-white shadow-sm">
                         </button>
                     </div>
+                    <div id="pipeline-health-body">
                     <div class="text-2xl font-bold text-gray-900 mb-4">{{ $pipelinePercent }}% through the flow</div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                         <div class="bg-primary h-2.5 rounded-full transition-all duration-500" style="width: {{ $pipelinePercent }}%"></div>
@@ -317,6 +320,7 @@
                             <span class="font-bold">{{ $blocked }}</span>
                         </li>
                     </ul>
+                    </div>
                 </div>
 
                 {{-- Workload by Owner --}}
@@ -343,4 +347,38 @@
             </div>
         </div>
     </div>
+
+    {{-- Filter tanpa reload: fetch HTML dan swap region dinamis --}}
+    <script>
+        window.timelineFetch = function (form, view) {
+            const url = new URL(form.action, window.location.origin);
+            url.searchParams.set('search', form.elements.search.value);
+            url.searchParams.set('status', form.elements.status.value || '');
+            url.searchParams.set('owner', form.elements.owner.value || '');
+            if (view) url.searchParams.set('view', view);
+
+            fetch(url.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('fetch failed');
+                return r.text();
+            })
+            .then(html => {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                ['#summary-cards', '#flow-rows', '#decision-list', '#pipeline-health-body'].forEach(sel => {
+                    const cur = document.querySelector(sel);
+                    const nxt = doc.querySelector(sel);
+                    if (cur && nxt && cur.innerHTML !== nxt.innerHTML) {
+                        cur.innerHTML = nxt.innerHTML;
+                    }
+                });
+                history.pushState({}, '', url.pathname + url.search);
+            })
+            .catch(() => {
+                window.location.href = url.toString();
+            });
+        };
+    </script>
 </x-app-layout>
