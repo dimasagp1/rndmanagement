@@ -43,41 +43,9 @@
                         Satu sumber kebenaran untuk memantau progres pengembangan produk, keputusan lintas fungsi, dan titik yang butuh dorongan.
                     </p>
                 </div>
-                <button @click="view = view === 'flow' ? 'timeline' : 'flow'"
-                        x-text="view === 'flow' ? 'Timeline view' : 'Table view'"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors bg-white shadow-sm">
-                </button>
             </div>
         </section>
 
-        {{-- ─── Summary Cards ─────────────────────────────── --}}
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Total initiatives</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $total }}</div>
-                <p class="text-sm text-primary font-medium">formulasi &amp; trial aktif</p>
-            </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">On track</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $onTrack }}</div>
-                <p class="text-sm text-primary font-medium">{{ $pipelinePercent }}% of pipeline</p>
-            </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Completed</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $completed }}</div>
-                <p class="text-sm text-sky-600 font-medium">selesai &amp; siap launch</p>
-            </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">In review</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $inReview }}</div>
-                <p class="text-sm text-primary font-medium">needs decision</p>
-            </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Blocked</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $blocked }}</div>
-                <p class="text-sm text-primary font-medium">needs escalation</p>
-            </div>
-        </section>
 
         {{-- ─── Modul Stats (dari dashboard) ───────────────── --}}
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -161,16 +129,45 @@
             </a>
         </section>
 
+             {{-- ─── Summary Cards ─────────────────────────────── --}}
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="card card-body shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Total initiatives</h3>
+                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $total }}</div>
+                <p class="text-sm text-primary font-medium">formulasi &amp; trial aktif</p>
+            </div>
+            <div class="card card-body shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">On track</h3>
+                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $onTrack }}</div>
+                <p class="text-sm text-primary font-medium">{{ $pipelinePercent }}% of pipeline</p>
+            </div>
+            <div class="card card-body shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Completed</h3>
+                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $completed }}</div>
+                <p class="text-sm text-sky-600 font-medium">selesai &amp; siap launch</p>
+            </div>
+            <div class="card card-body shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">In review</h3>
+                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $inReview }}</div>
+                <p class="text-sm text-primary font-medium">needs decision</p>
+            </div>
+            <div class="card card-body shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Blocked</h3>
+                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $blocked }}</div>
+                <p class="text-sm text-primary font-medium">needs escalation</p>
+            </div>
+        </section>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- ─── Left Column: Flow / Decision Points ─── --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2">
 
                 {{-- Product Development Flow (Table view) --}}
                 <div x-show="view === 'flow'" x-transition:enter="transition ease-out duration-200"
                      x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                      x-transition:leave="transition ease-in duration-150"
                      x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                     class="card shadow-sm overflow-hidden flex flex-col">
+                     class="card shadow-sm overflow-hidden flex flex-col mb-6">
                     <div class="p-6 border-b border-gray-200">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-xl font-bold text-gray-900">Product development flow</h3>
@@ -287,7 +284,13 @@
             <div class="space-y-6">
                 {{-- Pipeline Health --}}
                 <div class="card card-body shadow-sm">
-                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-4">Pipeline Health</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Pipeline Health</h3>
+                        <button @click="view = view === 'flow' ? 'timeline' : 'flow'"
+                                x-text="view === 'flow' ? 'Timeline view' : 'Table view'"
+                                class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors bg-white shadow-sm">
+                        </button>
+                    </div>
                     <div class="text-2xl font-bold text-gray-900 mb-4">{{ $pipelinePercent }}% through the flow</div>
                     <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                         <div class="bg-primary h-2.5 rounded-full transition-all duration-500" style="width: {{ $pipelinePercent }}%"></div>
