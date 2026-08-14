@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+use App\Models\NpdProposal;
 
 class Prf extends Model
 {
@@ -14,8 +17,6 @@ class Prf extends Model
 
     protected $fillable = [
         'code',
-        'requestor',
-        'department',
         'product_concept',
         'target_market',
         'product_category',
@@ -50,5 +51,15 @@ class Prf extends Model
     public function generalManager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_gm');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(PrfDocument::class);
+    }
+
+    public function npdProposals(): HasMany
+    {
+        return $this->hasMany(NpdProposal::class);
     }
 }

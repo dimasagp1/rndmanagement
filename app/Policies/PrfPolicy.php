@@ -32,8 +32,9 @@ class PrfPolicy
             return false;
         }
 
-        return $prf->created_by === $user->id
-            && in_array($prf->approval_status, ['Draft', 'Rejected']);
+        // PRF tidak memerlukan approval, sehingga tetap bisa diedit
+        // oleh pembuatnya kapan saja.
+        return $prf->created_by === $user->id;
     }
 
     public function update(User $user, Prf $prf): bool
@@ -41,40 +42,10 @@ class PrfPolicy
         return $this->edit($user, $prf);
     }
 
-    public function submit(User $user, Prf $prf): bool
-    {
-        return $prf->created_by === $user->id
-            && in_array($prf->approval_status, ['Draft', 'Rejected'])
-            && $user->can('prf.edit');
-    }
-
     public function delete(User $user, Prf $prf): bool
     {
         return $prf->created_by === $user->id
-            && $prf->approval_status === 'Draft'
-            && $user->can('prf.delete');
-    }
-
-    public function approveTahap1(User $user, Prf $prf): bool
-    {
-        return $prf->approval_status === 'Pending Tahap 1'
-            && ($user->hasRole('Operational Manager') || $user->hasRole('Superadmin'))
-            && $user->can('prf.approve_tahap1');
-    }
-
-    public function approveTahap2(User $user, Prf $prf): bool
-    {
-        return $prf->approval_status === 'Approval by OM'
-            && ($user->hasRole('General Manager') || $user->hasRole('Superadmin'))
-            && $user->can('prf.approve_tahap2');
-    }
-
-    public function reject(User $user, Prf $prf): bool
-    {
-        if (! in_array($prf->approval_status, ['Pending Tahap 1', 'Approval by OM'])) {
-            return false;
-        }
-
-        return $user->can('prf.approve_tahap1') || $user->can('prf.approve_tahap2');
+            && $user->can('prf.delete')
+            && ! $prf->npdProposals()->exists();
     }
 }

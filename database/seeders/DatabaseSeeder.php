@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             MaterialSupplierSeeder::class,
             DemoDataSeeder::class,
+            PrfNpdProposalSeeder::class,
         ]);
 
         $this->command->info('');

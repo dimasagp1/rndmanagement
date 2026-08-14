@@ -146,11 +146,13 @@
 
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
-                @php($prfsActive = request()->routeIs('prfs.*'))
+                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view'])
+                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index'])
+                @php($moduleActive = collect($moduleRoutes)->filter(fn($r) => request()->routeIs(str($r)->before('.') . '.*'))->keys()->all())
                 @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)
-                <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || ($prfsActive && in_array('prf', $slugs))) ? 'true' : 'false' }} }">
+                <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'true' : 'false' }} }">
                     <button type="button" @click="open = !open"
-                            class="sidebar-link w-full justify-between {{ (in_array(request()->route('tab'), $slugs) || ($prfsActive && in_array('prf', $slugs))) ? 'active' : '' }}">
+                            class="sidebar-link w-full justify-between {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'active' : '' }}">
                         <span class="flex items-center gap-3 min-w-0">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -168,12 +170,12 @@
                          x-transition:enter-start="opacity-0 -translate-y-1"
                          x-transition:enter-end="opacity-100 translate-y-0">
                         @foreach($slugs as $slug)
-                        @if($slug === 'prf' && ! auth()->user()->can('prf.view'))
+                        @if(isset($modulePerms[$slug]) && ! auth()->user()->can($modulePerms[$slug]))
                             @continue
                         @endif
-                        <a href="{{ $slug === 'prf' ? route('prfs.index') : route('general.show', $slug) }}"
-                           class="sidebar-sub-link {{ $slug === 'prf'
-                               ? ($prfsActive ? 'active' : '')
+                        <a href="{{ isset($moduleRoutes[$slug]) ? route($moduleRoutes[$slug]) : route('general.show', $slug) }}"
+                           class="sidebar-sub-link {{ isset($moduleRoutes[$slug])
+                               ? (request()->routeIs(str($moduleRoutes[$slug])->before('.') . '.*') ? 'active' : '')
                                : (request()->route('tab') === $slug ? 'active' : '') }}">
                             <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
                         </a>

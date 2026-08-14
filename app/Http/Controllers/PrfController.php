@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Prf;
+use App\Models\PrfDocument;
 use App\Services\PrfService;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 
 class PrfController extends Controller
 {
@@ -27,7 +27,6 @@ class PrfController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('requestor', 'like', "%{$search}%")
                   ->orWhere('product_concept', 'like', "%{$search}%")
                   ->orWhere('product_name', 'like', "%{$search}%");
             });
@@ -49,11 +48,8 @@ class PrfController extends Controller
         }
 
         $counts = [
-            'all'      => (clone $countQuery)->count(),
-            'draft'    => (clone $countQuery)->where('approval_status', 'Draft')->count(),
-            'pending'  => (clone $countQuery)->whereIn('approval_status', ['Pending Tahap 1', 'Approval by OM'])->count(),
-            'approved' => (clone $countQuery)->where('approval_status', 'Completed by GM')->count(),
-            'rejected' => (clone $countQuery)->where('approval_status', 'Rejected')->count(),
+            'all'       => (clone $countQuery)->count(),
+            'submitted' => (clone $countQuery)->where('approval_status', 'Submitted')->count(),
         ];
 
         return view('prfs.index', compact('prfs', 'counts'));
@@ -67,9 +63,8 @@ class PrfController extends Controller
         Gate::authorize('create', Prf::class);
 
         $autoCode = $this->service->generateCode();
-        $departments = ['R&D', 'Packaging Development', 'Marketing', 'Produksi', 'Quality Assurance', 'Lainnya'];
 
-        return view('prfs.create', compact('autoCode', 'departments'));
+        return view('prfs.create', compact('autoCode'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -81,16 +76,18 @@ class PrfController extends Controller
 
         $validated = $request->validate([
             'code'             => 'required|string|max:255|unique:prfs,code',
-            'requestor'        => 'required|string|max:255',
-            'department'       => 'required|string|max:255',
             'product_concept'  => 'required|string|max:10000',
             'target_market'    => 'nullable|string|max:255',
             'product_category' => 'nullable|string|max:255',
             'target_launch'    => 'nullable|date',
             'product_name'     => 'nullable|string|max:255',
+            'documents'        => ['nullable', 'array'],
+            'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
 
         $prf = $this->service->create($validated, auth()->id());
+
+        $this->storeDocuments($request, $prf);
 
         return redirect()
             ->route('prfs.show', $prf)
@@ -102,7 +99,7 @@ class PrfController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function show(Prf $prf)
     {
-        $prf->load(['creator', 'operationalManager', 'generalManager']);
+        $prf->load(['creator', 'documents']);
 
         return view('prfs.show', compact('prf'));
     }
@@ -114,9 +111,9 @@ class PrfController extends Controller
     {
         Gate::authorize('edit', $prf);
 
-        $departments = ['R&D', 'Packaging Development', 'Marketing', 'Produksi', 'Quality Assurance', 'Lainnya'];
+        $prf->load('documents');
 
-        return view('prfs.edit', compact('prf', 'departments'));
+        return view('prfs.edit', compact('prf'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -128,16 +125,17 @@ class PrfController extends Controller
 
         $validated = $request->validate([
             'code'             => 'required|string|max:255|unique:prfs,code,' . $prf->id,
-            'requestor'        => 'required|string|max:255',
-            'department'       => 'required|string|max:255',
             'product_concept'  => 'required|string|max:10000',
             'target_market'    => 'nullable|string|max:255',
             'product_category' => 'nullable|string|max:255',
             'target_launch'    => 'nullable|date',
             'product_name'     => 'nullable|string|max:255',
+            'documents'        => ['nullable', 'array'],
+            'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
 
         $this->service->update($prf, $validated);
+        $this->storeDocuments($request, $prf);
 
         return redirect()
             ->route('prfs.show', $prf)
@@ -149,6 +147,12 @@ class PrfController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroy(Prf $prf)
     {
+        if ($prf->npdProposals()->exists()) {
+            return back()->withErrors([
+                'delete' => "PRF {$prf->code} tidak dapat dihapus karena sudah digunakan sebagai dasar NPD Proposal.",
+            ]);
+        }
+
         Gate::authorize('delete', $prf);
         $code = $prf->code;
         $prf->delete();
@@ -159,78 +163,41 @@ class PrfController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────
-    // SUBMIT FOR APPROVAL
+    // DESTROY DOCUMENT
     // ──────────────────────────────────────────────────────────────
-    public function submit(Prf $prf)
+    public function destroyDocument(PrfDocument $document)
     {
-        Gate::authorize('submit', $prf);
+        $prf = $document->prf;
 
-        try {
-            $this->service->submitForApproval($prf);
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors());
-        }
+        Gate::authorize('edit', $prf);
+
+        $document->delete();
 
         return redirect()
             ->route('prfs.show', $prf)
-            ->with('success', "PRF {$prf->code} berhasil diajukan untuk approval.");
+            ->with('success', "Dokumen {$document->file_name} berhasil dihapus.");
     }
 
     // ──────────────────────────────────────────────────────────────
-    // APPROVE TAHAP 1
+    // HELPER
     // ──────────────────────────────────────────────────────────────
-    public function approveTahap1(Prf $prf)
+    private function storeDocuments(Request $request, Prf $prf): void
     {
-        Gate::authorize('approveTahap1', $prf);
-
-        try {
-            $this->service->approveTahap1($prf, auth()->id());
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->with('error', 'Gagal menyetujui PRF.');
+        if (! $request->has('documents')) {
+            return;
         }
 
-        return redirect()
-            ->route('prfs.show', $prf)
-            ->with('success', "PRF {$prf->code} disetujui oleh Operational Manager ({$prf->operationalManager?->name}). Menunggu approval final General Manager.");
-    }
+        foreach ($request->documents as $docItem) {
+            if (isset($docItem['file']) && $docItem['file']->isValid()) {
+                $file = $docItem['file'];
+                $path = $file->store('prfs/documents', 'public');
 
-    // ──────────────────────────────────────────────────────────────
-    // APPROVE TAHAP 2
-    // ──────────────────────────────────────────────────────────────
-    public function approveTahap2(Prf $prf)
-    {
-        Gate::authorize('approveTahap2', $prf);
-
-        try {
-            $this->service->approveTahap2($prf, auth()->id());
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->with('error', 'Gagal menyetujui PRF.');
+                $prf->documents()->create([
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'file_size' => $file->getSize(),
+                ]);
+            }
         }
-
-        return redirect()
-            ->route('prfs.show', $prf)
-            ->with('success', "PRF {$prf->code} disetujui oleh General Manager ({$prf->generalManager?->name}) — Completed by GM.");
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // REJECT
-    // ──────────────────────────────────────────────────────────────
-    public function reject(Request $request, Prf $prf)
-    {
-        Gate::authorize('reject', $prf);
-
-        $validated = $request->validate([
-            'notes' => ['required', 'string', 'max:1000'],
-        ]);
-
-        try {
-            $this->service->reject($prf, $validated['notes']);
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->with('error', 'Gagal menolak PRF.');
-        }
-
-        return redirect()
-            ->route('prfs.show', $prf)
-            ->with('success', "PRF {$prf->code} ditolak. Pembuat dapat memperbaiki dan mengajukan ulang.");
     }
 }

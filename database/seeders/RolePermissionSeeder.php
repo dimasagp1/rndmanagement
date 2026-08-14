@@ -62,19 +62,35 @@ class RolePermissionSeeder extends Seeder
         // Create permissions untuk Approval Center
         Permission::findOrCreate('approval_center.access');
 
-        // Create permissions untuk PRF
+        // Create permissions untuk PRF (tanpa approval OM/GM)
         $prfPermissions = [
             'prf.create',
             'prf.view',
             'prf.edit',
             'prf.delete',
-            'prf.approve_tahap1',  // Operational Manager
-            'prf.approve_tahap2',  // General Manager
         ];
 
         foreach ($prfPermissions as $permission) {
             Permission::findOrCreate($permission);
         }
+
+        // Hapus permission approval PRF yang tidak lagi digunakan
+        Permission::whereIn('name', ['prf.approve_tahap1', 'prf.approve_tahap2'])->delete();
+
+        // Create permissions untuk NPD Proposal (tanpa approval OM/GM)
+        $npdProposalPermissions = [
+            'npd_proposal.create',
+            'npd_proposal.view',
+            'npd_proposal.edit',
+            'npd_proposal.delete',
+        ];
+
+        foreach ($npdProposalPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
+        // Hapus permission approval NPD Proposal yang tidak lagi digunakan
+        Permission::whereIn('name', ['npd_proposal.approve_tahap1', 'npd_proposal.approve_tahap2'])->delete();
 
         // Create roles
         $superadmin = Role::findOrCreate('Superadmin');
@@ -98,6 +114,10 @@ class RolePermissionSeeder extends Seeder
             'prf.view',
             'prf.edit',
             'prf.delete',
+            'npd_proposal.create',
+            'npd_proposal.view',
+            'npd_proposal.edit',
+            'npd_proposal.delete',
         ]);
 
         // Assign permissions to Operational Manager
@@ -110,7 +130,7 @@ class RolePermissionSeeder extends Seeder
             'trial_pm.approve_tahap1',
             'approval_center.access',
             'prf.view',
-            'prf.approve_tahap1',
+            'npd_proposal.view',
         ]);
 
         // Assign permissions to General Manager
@@ -123,7 +143,7 @@ class RolePermissionSeeder extends Seeder
             'trial_pm.approve_tahap2',
             'approval_center.access',
             'prf.view',
-            'prf.approve_tahap2',
+            'npd_proposal.view',
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');

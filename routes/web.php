@@ -14,6 +14,7 @@ use App\Http\Controllers\LogbookPmController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\PrfController;
+use App\Http\Controllers\NpdProposalController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,18 +61,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── PRF (Product Request Form) ──────────────────────────
     Route::resource('prfs', PrfController::class)->middleware('can:prf.view');
-    Route::post('prfs/{prf}/submit', [PrfController::class, 'submit'])
-         ->name('prfs.submit')
+    Route::delete('prfs/documents/{document}', [PrfController::class, 'destroyDocument'])
+         ->name('prfs.documents.destroy')
          ->middleware('can:prf.view');
-    Route::post('prfs/{prf}/approve-tahap1', [PrfController::class, 'approveTahap1'])
-         ->name('prfs.approve-tahap1')
-         ->middleware('can:prf.view');
-    Route::post('prfs/{prf}/approve-tahap2', [PrfController::class, 'approveTahap2'])
-         ->name('prfs.approve-tahap2')
-         ->middleware('can:prf.view');
-    Route::post('prfs/{prf}/reject', [PrfController::class, 'reject'])
-         ->name('prfs.reject')
-         ->middleware('can:prf.view');
+
+    // ── NPD Proposal ─────────────────────────────────────
+    Route::resource('npd-proposals', NpdProposalController::class)->middleware('can:npd_proposal.view');
+    Route::post('npd-proposals/{npdProposal}/project-status', [NpdProposalController::class, 'updateProjectStatus'])
+         ->name('npd-proposals.project-status')
+         ->middleware('can:npd_proposal.view');
+    Route::delete('npd-proposals/documents/{document}', [NpdProposalController::class, 'destroyDocument'])
+         ->name('npd-proposals.documents.destroy')
+         ->middleware('can:npd_proposal.view');
 
     // ── Trial RM ──────────────────────────────────────────
     Route::resource('trial-rms', TrialRmController::class)
@@ -133,12 +134,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:approval_center.access');
     Route::post('/approval-center/trial-pms/{trialPm}/reject', [ApprovalCenterController::class, 'rejectTrialPm'])
          ->name('approval-center.trial-pms.reject')
-         ->middleware('can:approval_center.access');
-    Route::post('/approval-center/prfs/{prf}/approve', [ApprovalCenterController::class, 'approvePrf'])
-         ->name('approval-center.prfs.approve')
-         ->middleware('can:approval_center.access');
-    Route::post('/approval-center/prfs/{prf}/reject', [ApprovalCenterController::class, 'rejectPrf'])
-         ->name('approval-center.prfs.reject')
          ->middleware('can:approval_center.access');
 
     // ── User Management (Superadmin Only) ───────────────────

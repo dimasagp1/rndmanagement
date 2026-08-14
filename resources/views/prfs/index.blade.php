@@ -34,26 +34,14 @@
                    class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ !request('status') ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                     Semua ({{ $counts['all'] }})
                 </a>
-                <a href="{{ route('prfs.index', ['status' => 'Draft']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Draft' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Draft ({{ $counts['draft'] }})
-                </a>
-                <a href="{{ route('prfs.index', ['status' => 'Pending Tahap 1,Approval by OM']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Pending Tahap 1,Approval by OM' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Pending ({{ $counts['pending'] }})
-                </a>
-                <a href="{{ route('prfs.index', ['status' => 'Completed by GM']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Completed by GM' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Approved ({{ $counts['approved'] }})
-                </a>
-                <a href="{{ route('prfs.index', ['status' => 'Rejected']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Rejected' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Rejected ({{ $counts['rejected'] }})
+                <a href="{{ route('prfs.index', ['status' => 'Submitted']) }}"
+                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Submitted' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                    Submitted ({{ $counts['submitted'] }})
                 </a>
                 <div class="flex-1"></div>
                 <form method="GET" class="w-full sm:w-72">
                     <input type="text" name="search" value="{{ request('search') }}"
-                           placeholder="Cari nomor PRF, requestor, konsep produk..."
+                           placeholder="Cari nomor PRF, konsep produk..."
                            class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:border-primary focus:ring-primary">
                 </form>
             </div>
@@ -67,7 +55,7 @@
                         <tr>
                             <th class="px-6 py-4" scope="col">Nomor PRF</th>
                             <th class="px-6 py-4" scope="col">Product Concept</th>
-                            <th class="px-6 py-4" scope="col">Requestor / Dept</th>
+                            <th class="px-6 py-4" scope="col">Dibuat Oleh</th>
                             <th class="px-6 py-4" scope="col">Target Market</th>
                             <th class="px-6 py-4" scope="col">Target Launch</th>
                             <th class="px-6 py-4" scope="col">Status</th>
@@ -89,8 +77,8 @@
                                 <div class="font-medium text-gray-900 truncate">{{ $prf->product_concept }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="font-medium text-gray-700">{{ $prf->requestor }}</div>
-                                <div class="text-xs text-gray-400">{{ $prf->department }}</div>
+                                <div class="font-medium text-gray-700">{{ $prf->creator?->name ?? '—' }}</div>
+                                <div class="text-xs text-gray-400">{{ $prf->created_at->format('d M Y') }}</div>
                             </td>
                             <td class="px-6 py-4 text-gray-700">{{ $prf->target_market ?? '—' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ $prf->target_launch?->format('d M Y') ?? '—' }}</td>
