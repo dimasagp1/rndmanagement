@@ -69,7 +69,7 @@
             {{-- Approval actions --}}
             @can('approveTahap1', $prf)
             <form method="POST" action="{{ route('prfs.approve-tahap1', $prf) }}" class="inline"
-                  onsubmit="return confirm('Setujui PRF {{ $prf->code }} (Tahap 1)?')">
+                  onsubmit="return confirm('Setujui PRF {{ $prf->code }} (Tahap 1 — Operational Manager)? Status akan menjadi Approval by OM.')">
                 @csrf
                 <button type="submit" class="btn-primary">✓ Setujui Tahap 1</button>
             </form>
@@ -77,9 +77,9 @@
 
             @can('approveTahap2', $prf)
             <form method="POST" action="{{ route('prfs.approve-tahap2', $prf) }}" class="inline"
-                  onsubmit="return confirm('Setujui PRF {{ $prf->code }} (Tahap 2 — Final)?')">
+                  onsubmit="return confirm('Setujui PRF {{ $prf->code }} (Final — General Manager)? Status akan menjadi Completed by GM.')">
                 @csrf
-                <button type="submit" class="btn-primary">✓ Setujui Tahap 2 (Final)</button>
+                <button type="submit" class="btn-primary">✓ Setujui Final (GM)</button>
             </form>
             @endcan
 
@@ -153,28 +153,28 @@
             </div>
 
             {{-- Approval Status Detail --}}
-            @if($prf->approval_status === 'Approved' || $prf->approval_status === 'Pending Tahap 2')
+            @if(in_array($prf->approval_status, ['Approval by OM', 'Completed by GM']))
             <div class="card">
                 <div class="card-header"><h2 class="text-sm font-heading font-semibold text-ink">Persetujuan</h2></div>
                 <div class="card-body grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    @if($prf->approval_status === 'Approved' || $prf->approval_status === 'Pending Tahap 2')
+                    @if(in_array($prf->approval_status, ['Approval by OM', 'Completed by GM']))
                     <div class="flex items-start gap-3">
                         <span class="mt-0.5 w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         <div>
-                            <p class="font-semibold text-ink">Disetujui Tahap 1</p>
+                            <p class="font-semibold text-ink">Disetujui oleh Operational Manager</p>
                             <p class="text-xs text-gray-500">{{ $prf->operationalManager?->name ?? '—' }}</p>
                         </div>
                     </div>
                     @endif
-                    @if($prf->approval_status === 'Approved')
+                    @if($prf->approval_status === 'Completed by GM')
                     <div class="flex items-start gap-3">
                         <span class="mt-0.5 w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         </span>
                         <div>
-                            <p class="font-semibold text-ink">Disetujui Tahap 2 (Final)</p>
+                            <p class="font-semibold text-ink">Disetujui oleh General Manager (Final)</p>
                             <p class="text-xs text-gray-500">{{ $prf->generalManager?->name ?? '—' }}</p>
                             <p class="text-xs text-gray-400 mt-0.5">{{ $prf->approved_at?->isoFormat('D MMM Y, HH:mm') }}</p>
                         </div>
@@ -205,7 +205,7 @@
                         [
                             'label'    => 'Operational Manager',
                             'sublabel' => 'Review & Approval Tahap 1',
-                            'status'   => in_array($prf->approval_status, ['Pending Tahap 2', 'Approved'])
+                            'status'   => in_array($prf->approval_status, ['Approval by OM', 'Completed by GM'])
                                 ? 'completed'
                                 : ($prf->approval_status === 'Pending Tahap 1' ? 'current' : 'pending'),
                             'user'     => $prf->operationalManager?->name,
@@ -214,9 +214,9 @@
                         [
                             'label'    => 'General Manager',
                             'sublabel' => 'Final Approval',
-                            'status'   => $prf->approval_status === 'Approved'
+                            'status'   => $prf->approval_status === 'Completed by GM'
                                 ? 'completed'
-                                : ($prf->approval_status === 'Pending Tahap 2' ? 'current' : 'pending'),
+                                : ($prf->approval_status === 'Approval by OM' ? 'current' : 'pending'),
                             'user'     => $prf->generalManager?->name,
                             'date'     => $prf->approved_at?->isoFormat('D MMM Y'),
                         ],

@@ -10,6 +10,8 @@
         'pending'         => ['label' => 'Pending',           'cls' => 'bg-amber-100 text-amber-800 ring-amber-200'],
         'approved'        => ['label' => 'Approved',          'cls' => 'bg-emerald-100 text-emerald-800 ring-emerald-200'],
         'completed'       => ['label' => 'Completed',         'cls' => 'bg-sky-100 text-sky-800 ring-sky-200'],
+        'approval by om'  => ['label' => 'Approval by OM',    'cls' => 'bg-blue-100 text-blue-800 ring-blue-200'],
+        'completed by gm' => ['label' => 'Completed by GM',   'cls' => 'bg-emerald-100 text-emerald-800 ring-emerald-200'],
         'rejected'        => ['label' => 'Ditolak',           'cls' => 'bg-red-100 text-red-700 ring-red-200'],
         'reformulasi'     => ['label' => 'Reformulasi',       'cls' => 'bg-orange-100 text-orange-700 ring-orange-200'],
         'reformulate'     => ['label' => 'Reformulasi',       'cls' => 'bg-orange-100 text-orange-700 ring-orange-200'],
@@ -33,9 +35,9 @@
 <span {{ $attributes->merge(['class' => "inline-flex items-center gap-1 $sizeClass font-medium rounded-full ring-1 {$config['cls']} whitespace-nowrap"]) }}>
     {{-- Dot indicator --}}
     <span class="w-1.5 h-1.5 rounded-full
-        @if(in_array($key, ['approved', 'lulus', 'pass'])) bg-emerald-500
+        @if(in_array($key, ['approved', 'lulus', 'pass', 'completed by gm'])) bg-emerald-500
         @elseif(in_array($key, ['rejected'])) bg-red-500
-        @elseif(in_array($key, ['pending tahap 1', 'pending tahap 2', 'pending review', 'pending'])) bg-amber-500
+        @elseif(in_array($key, ['pending tahap 1', 'pending tahap 2', 'pending review', 'pending', 'approval by om'])) bg-amber-500
         @elseif(in_array($key, ['reformulasi', 'reformulate'])) bg-orange-500
         @elseif(in_array($key, ['draft', 'draf'])) bg-gray-400
         @else bg-current opacity-50

@@ -64,14 +64,14 @@ class PrfPolicy
 
     public function approveTahap2(User $user, Prf $prf): bool
     {
-        return $prf->approval_status === 'Pending Tahap 2'
+        return $prf->approval_status === 'Approval by OM'
             && ($user->hasRole('General Manager') || $user->hasRole('Superadmin'))
             && $user->can('prf.approve_tahap2');
     }
 
     public function reject(User $user, Prf $prf): bool
     {
-        if (! in_array($prf->approval_status, ['Pending Tahap 1', 'Pending Tahap 2'])) {
+        if (! in_array($prf->approval_status, ['Pending Tahap 1', 'Approval by OM'])) {
             return false;
         }
 

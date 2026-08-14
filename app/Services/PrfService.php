@@ -7,7 +7,7 @@ use Illuminate\Validation\ValidationException;
 
 class PrfService
 {
-    public const STAGES = ['Draft', 'Pending Tahap 1', 'Pending Tahap 2', 'Approved', 'Rejected'];
+    public const STAGES = ['Draft', 'Pending Tahap 1', 'Approval by OM', 'Completed by GM', 'Rejected'];
 
     public function generateCode(): string
     {
@@ -83,21 +83,21 @@ class PrfService
         }
 
         $prf->update([
-            'approval_status' => 'Pending Tahap 2',
+            'approval_status' => 'Approval by OM',
             'approved_by_om'  => $approverId,
         ]);
     }
 
     public function approveTahap2(Prf $prf, int $approverId): void
     {
-        if ($prf->approval_status !== 'Pending Tahap 2') {
+        if ($prf->approval_status !== 'Approval by OM') {
             throw ValidationException::withMessages([
-                'status' => 'PRF tidak berada dalam status Pending Tahap 2.',
+                'status' => 'PRF tidak berada dalam status Approval by OM.',
             ]);
         }
 
         $prf->update([
-            'approval_status' => 'Approved',
+            'approval_status' => 'Completed by GM',
             'approved_by_gm'  => $approverId,
             'approved_at'     => now(),
         ]);
@@ -105,7 +105,7 @@ class PrfService
 
     public function reject(Prf $prf, string $notes): void
     {
-        if (! in_array($prf->approval_status, ['Pending Tahap 1', 'Pending Tahap 2'])) {
+        if (! in_array($prf->approval_status, ['Pending Tahap 1', 'Approval by OM'])) {
             throw ValidationException::withMessages([
                 'status' => 'PRF tidak berada dalam status antrean approval.',
             ]);

@@ -56,7 +56,7 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingPrfs = Prf::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])
+            $pendingPrfs = Prf::whereIn('approval_status', ['Pending Tahap 1', 'Approval by OM'])
                 ->with('creator')
                 ->latest()
                 ->get();
@@ -95,7 +95,7 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingPrfs = Prf::where('approval_status', 'Pending Tahap 2')
+            $pendingPrfs = Prf::where('approval_status', 'Approval by OM')
                 ->with('creator')
                 ->latest()
                 ->get();
@@ -249,9 +249,9 @@ class ApprovalCenterController extends Controller
             if ($user->hasRole('Operational Manager') || ($user->hasRole('Superadmin') && $prf->approval_status === 'Pending Tahap 1')) {
                 $this->prfService->approveTahap1($prf, $user->id);
                 $msg = "PRF {$prf->code} berhasil disetujui (Tahap 1) dan diteruskan ke GM.";
-            } elseif ($user->hasRole('General Manager') || ($user->hasRole('Superadmin') && $prf->approval_status === 'Pending Tahap 2')) {
+            } elseif ($user->hasRole('General Manager') || ($user->hasRole('Superadmin') && $prf->approval_status === 'Approval by OM')) {
                 $this->prfService->approveTahap2($prf, $user->id);
-                $msg = "PRF {$prf->code} telah disetujui secara final (Approved).";
+                $msg = "PRF {$prf->code} telah disetujui secara final (Completed by GM).";
             } else {
                 abort(403);
             }

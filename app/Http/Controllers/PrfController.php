@@ -51,8 +51,8 @@ class PrfController extends Controller
         $counts = [
             'all'      => (clone $countQuery)->count(),
             'draft'    => (clone $countQuery)->where('approval_status', 'Draft')->count(),
-            'pending'  => (clone $countQuery)->whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count(),
-            'approved' => (clone $countQuery)->where('approval_status', 'Approved')->count(),
+            'pending'  => (clone $countQuery)->whereIn('approval_status', ['Pending Tahap 1', 'Approval by OM'])->count(),
+            'approved' => (clone $countQuery)->where('approval_status', 'Completed by GM')->count(),
             'rejected' => (clone $countQuery)->where('approval_status', 'Rejected')->count(),
         ];
 
@@ -191,7 +191,7 @@ class PrfController extends Controller
 
         return redirect()
             ->route('prfs.show', $prf)
-            ->with('success', "PRF {$prf->code} disetujui Tahap 1. Menunggu approval Tahap 2 (General Manager).");
+            ->with('success', "PRF {$prf->code} disetujui oleh Operational Manager ({$prf->operationalManager?->name}). Menunggu approval final General Manager.");
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ class PrfController extends Controller
 
         return redirect()
             ->route('prfs.show', $prf)
-            ->with('success', "PRF {$prf->code} disetujui Tahap 2 (Final).");
+            ->with('success', "PRF {$prf->code} disetujui oleh General Manager ({$prf->generalManager?->name}) — Completed by GM.");
     }
 
     // ──────────────────────────────────────────────────────────────

@@ -38,12 +38,12 @@
                    class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Draft' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                     Draft ({{ $counts['draft'] }})
                 </a>
-                <a href="{{ route('prfs.index', ['status' => 'Pending Tahap 1,Pending Tahap 2']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Pending Tahap 1,Pending Tahap 2' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <a href="{{ route('prfs.index', ['status' => 'Pending Tahap 1,Approval by OM']) }}"
+                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Pending Tahap 1,Approval by OM' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                     Pending ({{ $counts['pending'] }})
                 </a>
-                <a href="{{ route('prfs.index', ['status' => 'Approved']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Approved' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <a href="{{ route('prfs.index', ['status' => 'Completed by GM']) }}"
+                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Completed by GM' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                     Approved ({{ $counts['approved'] }})
                 </a>
                 <a href="{{ route('prfs.index', ['status' => 'Rejected']) }}"
