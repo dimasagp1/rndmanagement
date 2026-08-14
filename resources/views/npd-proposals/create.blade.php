@@ -55,11 +55,20 @@
                     </div>
                     <div>
                         <label for="pic" class="block text-sm font-medium text-gray-700 mb-1">PIC / Project Owner</label>
-                        <input type="text" id="pic" name="pic" value="{{ old('pic', auth()->user()->name) }}"
-                               class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
-                               placeholder="cth: Ahmad Fauzi">
+                        <select id="pic" name="pic"
+                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
+                            <option value="">— Pilih PIC / Project Owner —</option>
+                            @foreach($teamMembers as $member)
+                            <option value="{{ $member->name }}" {{ old('pic', auth()->user()->name) == $member->name ? 'selected' : '' }}>
+                                {{ $member->name }}
+                            </option>
+                            @endforeach
+                            @if(old('pic') && ! $teamMembers->pluck('name')->contains(old('pic')))
+                            <option value="{{ old('pic') }}" selected>{{ old('pic') }} (PIC lama)</option>
+                            @endif
+                        </select>
                         @error('pic') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
-                        <p class="text-xs text-gray-400 mt-1">Sementara diisi manual.</p>
+                        <p class="text-xs text-gray-400 mt-1">Daftar PIC diambil dari akun pengguna (Staff R&D / Staff Packdev).</p>
                     </div>
                 </div>
 

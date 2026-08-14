@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\NpdProposal;
 use App\Models\NpdProposalDocument;
 use App\Models\Prf;
+use App\Models\User;
 use App\Services\NpdProposalService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -73,8 +74,9 @@ class NpdProposalController extends Controller
         $prfs = Prf::where('approval_status', 'Submitted')
             ->orderBy('code')
             ->get(['id', 'code', 'product_name', 'product_concept']);
+        $teamMembers = $this->teamMembers();
 
-        return view('npd-proposals.create', compact('autoCode', 'prfs'));
+        return view('npd-proposals.create', compact('autoCode', 'prfs', 'teamMembers'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -131,8 +133,9 @@ class NpdProposalController extends Controller
         Gate::authorize('edit', $npdProposal);
 
         $npdProposal->load('documents');
+        $teamMembers = $this->teamMembers();
 
-        return view('npd-proposals.edit', ['proposal' => $npdProposal]);
+        return view('npd-proposals.edit', ['proposal' => $npdProposal, 'teamMembers' => $teamMembers]);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -218,6 +221,13 @@ class NpdProposalController extends Controller
     // ──────────────────────────────────────────────────────────────
     // HELPER
     // ──────────────────────────────────────────────────────────────
+    private function teamMembers()
+    {
+        return User::role(['Staff R&D', 'Staff Packdev'])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
     private function storeDocuments(Request $request, NpdProposal $proposal): void
     {
         if (! $request->has('documents')) {

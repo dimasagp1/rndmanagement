@@ -78,6 +78,29 @@ class UserSeeder extends Seeder
 
         $this->command->info('✅ Staff R&D 2: siti@herbatech.com (password: password)');
 
+        // Tim R&D
+        $team = [
+            ['name' => 'Eva Triyulianingrum', 'email' => 'eva@herbatech.com', 'role' => 'Staff R&D'],
+            ['name' => 'Ilmanisa Pabriyani', 'email' => 'ilmanisa@herbatech.com', 'role' => 'Staff R&D'],
+            ['name' => 'Rintika Isa Stiyani', 'email' => 'rintika@herbatech.com', 'role' => 'Staff R&D'],
+            ['name' => 'Nurani Aisyah Rahmasari', 'email' => 'nurani@herbatech.com', 'role' => 'Staff R&D'],
+            ['name' => 'Emir Faran Hermawan', 'email' => 'emir@herbatech.com', 'role' => 'Staff Packdev'],
+        ];
+
+        foreach ($team as $member) {
+            $user = User::updateOrCreate(
+                ['email' => $member['email']],
+                [
+                    'name' => $member['name'],
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ]
+            );
+            $user->syncRoles($member['role']);
+
+            $this->command->info("✅ {$member['role']}: {$member['email']} (password: password)");
+        }
+
         $this->command->info('📊 Total users created: ' . User::count());
     }
 }

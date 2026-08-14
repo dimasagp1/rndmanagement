@@ -17,9 +17,15 @@ class NpdProposalSmokeTest extends TestCase
         $this->seed(\Database\Seeders\RolePermissionSeeder::class);
 
         $staff = User::factory()->create(['email' => 'npd-staff@test.com']);
+        $staffPackdev = User::factory()->create(['email' => 'npd-packdev@test.com', 'name' => 'Emir Packdev']);
         $om = User::factory()->create(['email' => 'npd-om@test.com']);
+        $gm = User::factory()->create(['email' => 'npd-gm@test.com', 'name' => 'Lisa GM']);
+        $superadmin = User::factory()->create(['email' => 'npd-sa@test.com', 'name' => 'Admin SA']);
         $staff->assignRole('Staff R&D');
+        $staffPackdev->assignRole('Staff Packdev');
         $om->assignRole('Operational Manager');
+        $gm->assignRole('General Manager');
+        $superadmin->assignRole('Superadmin');
 
         $prf = Prf::create([
             'code' => 'PRF-SMOKE',
@@ -36,17 +42,22 @@ class NpdProposalSmokeTest extends TestCase
         ])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('prfs', ['code' => 'PRF-AUTO', 'approval_status' => 'Submitted']);
 
-        // Create page renders
+        // Create page renders; PIC select only shows Staff R&D / Staff Packdev users
         $this->actingAs($staff)->get('/npd-proposals/create')
             ->assertOk()
-            ->assertSee('PRF-SMOKE');
+            ->assertSee('PRF-SMOKE')
+            ->assertSee('Emir Packdev')
+            ->assertSee($staff->name)
+            ->assertDontSee('Lisa GM')
+            ->assertDontSee('Admin SA')
+            ->assertDontSee('Sementara diisi manual');
 
         // Store
         $this->actingAs($staff)->post('/npd-proposals', [
             'code' => 'NPD-SMOKE', 'prf_id' => $prf->id,
             'product_name' => 'Produk X', 'product_concept' => 'Konsep',
             'target_cogs' => 15000, 'target_selling_price' => 25000,
-            'pic' => 'Staff', 'development_start' => '2026-08-14', 'development_end' => '2026-12-31',
+            'pic' => $staff->name, 'development_start' => '2026-08-14', 'development_end' => '2026-12-31',
         ])->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('npd_proposals', ['code' => 'NPD-SMOKE', 'project_status' => 'Draft']);
@@ -59,6 +70,12 @@ class NpdProposalSmokeTest extends TestCase
         // Project status update (creator only)
         $this->actingAs($staff)->post("/npd-proposals/{$proposal->id}/project-status", ['project_status' => 'On Track'])->assertRedirect();
         $this->assertDatabaseHas('npd_proposals', ['code' => 'NPD-SMOKE', 'project_status' => 'On Track']);
+
+        // Edit page: PIC lama yang tidak ada di daftar tim tampil sebagai opsi fallback
+        $proposal->update(['pic' => 'Nama Lama Tidak Ada']);
+        $this->actingAs($staff)->get("/npd-proposals/{$proposal->id}/edit")
+            ->assertOk()
+            ->assertSee('Nama Lama Tidak Ada (PIC lama)');
 
         // PRF used by an NPD Proposal cannot be deleted
         $this->actingAs($staff)->delete("/prfs/{$prf->id}")->assertSessionHasErrors('delete');

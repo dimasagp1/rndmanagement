@@ -95,6 +95,7 @@ class RolePermissionSeeder extends Seeder
         // Create roles
         $superadmin = Role::findOrCreate('Superadmin');
         $staffRnd = Role::findOrCreate('Staff R&D');
+        $staffPackdev = Role::findOrCreate('Staff Packdev');
         $operationalManager = Role::findOrCreate('Operational Manager');
         $generalManager = Role::findOrCreate('General Manager');
 
@@ -110,6 +111,28 @@ class RolePermissionSeeder extends Seeder
             'trial_pm.view',
             'trial_pm.edit',
             'trial_pm.department_approve', // bisa approve sebagai perwakilan departemen
+            'prf.create',
+            'prf.view',
+            'prf.edit',
+            'prf.delete',
+            'npd_proposal.create',
+            'npd_proposal.view',
+            'npd_proposal.edit',
+            'npd_proposal.delete',
+        ]);
+
+        // Assign permissions to Staff Packdev (sama dengan Staff R&D)
+        $staffPackdev->syncPermissions([
+            'formula.create',
+            'formula.view',
+            'formula.edit',
+            'trial_rm.create',
+            'trial_rm.view',
+            'trial_rm.edit',
+            'trial_pm.create',
+            'trial_pm.view',
+            'trial_pm.edit',
+            'trial_pm.department_approve',
             'prf.create',
             'prf.view',
             'prf.edit',
@@ -147,7 +170,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');
-        $this->command->info('📋 3 Roles created/found: Staff R&D, Operational Manager, General Manager');
+        $this->command->info('📋 4 Roles created/found: Staff R&D, Staff Packdev, Operational Manager, General Manager');
         $this->command->info('🔐 ' . Permission::count() . ' Permissions created/found');
     }
 }
