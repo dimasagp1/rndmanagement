@@ -9,7 +9,7 @@ class GeneralController extends Controller
     public const TABS = [
         'prf'                  => 'PRF',
         'npd-proposal'         => 'NPD Proposal',
-        'preformulation-qbd'   => 'Preformulation Study & Quality by Design (QbD)',
+        'preformulation-qbd'   => 'QbD',
         'formulation-development' => 'Formulation Development',
         'sample-evaluation'    => 'Sample Evaluation',
         'formula-approval'     => 'Formula Approval',
