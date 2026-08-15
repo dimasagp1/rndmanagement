@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\LogbookPmController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GeneralController;
@@ -147,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('materials/documents/{document}', [MaterialController::class, 'destroyDocument'])->name('materials.documents.destroy')->middleware('role:Superadmin|Staff R&D');
     Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
+    Route::resource('product-categories', ProductCategoryController::class)->middleware('role:Superadmin|Staff R&D');
 });
 
 require __DIR__.'/auth.php';
