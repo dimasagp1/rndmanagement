@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             UserSeeder::class,
             MaterialSupplierSeeder::class,
+            ProductCategorySeeder::class,
             DemoDataSeeder::class,
             PrfNpdProposalSeeder::class,
         ]);

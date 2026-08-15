@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Prf;
 use App\Models\PrfDocument;
+use App\Models\ProductCategory;
 use App\Services\PrfService;
 use Illuminate\Support\Facades\Gate;
 
@@ -63,8 +64,9 @@ class PrfController extends Controller
         Gate::authorize('create', Prf::class);
 
         $autoCode = $this->service->generateCode();
+        $categories = $this->categories();
 
-        return view('prfs.create', compact('autoCode'));
+        return view('prfs.create', compact('autoCode', 'categories'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -112,8 +114,9 @@ class PrfController extends Controller
         Gate::authorize('edit', $prf);
 
         $prf->load('documents');
+        $categories = $this->categories();
 
-        return view('prfs.edit', compact('prf'));
+        return view('prfs.edit', compact('prf', 'categories'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -181,6 +184,11 @@ class PrfController extends Controller
     // ──────────────────────────────────────────────────────────────
     // HELPER
     // ──────────────────────────────────────────────────────────────
+    private function categories()
+    {
+        return ProductCategory::orderBy('name')->pluck('name');
+    }
+
     private function storeDocuments(Request $request, Prf $prf): void
     {
         if (! $request->has('documents')) {
