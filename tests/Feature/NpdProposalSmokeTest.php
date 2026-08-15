@@ -30,7 +30,7 @@ class NpdProposalSmokeTest extends TestCase
         $prf = Prf::create([
             'code' => 'PRF-SMOKE',
             'product_concept' => 'Konsep', 'product_name' => 'Produk X',
-            'approval_status' => 'Submitted', 'created_by' => $staff->id,
+            'created_by' => $staff->id,
         ]);
 
         // Redirect general/npd-proposal -> module
@@ -40,7 +40,7 @@ class NpdProposalSmokeTest extends TestCase
         $this->actingAs($staff)->post('/prfs', [
             'code' => 'PRF-AUTO', 'product_concept' => 'Konsep otomatis',
         ])->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('prfs', ['code' => 'PRF-AUTO', 'approval_status' => 'Submitted']);
+        $this->assertDatabaseHas('prfs', ['code' => 'PRF-AUTO']);
 
         // Create page renders; PIC select only shows Staff R&D / Staff Packdev users
         $this->actingAs($staff)->get('/npd-proposals/create')

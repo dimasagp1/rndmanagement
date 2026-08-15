@@ -13,9 +13,6 @@ class PrfController extends Controller
 {
     public function __construct(private PrfService $service) {}
 
-    // ──────────────────────────────────────────────────────────────
-    // INDEX
-    // ──────────────────────────────────────────────────────────────
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -33,14 +30,6 @@ class PrfController extends Controller
             });
         }
 
-        if ($status = $request->get('status')) {
-            if (str_contains($status, ',')) {
-                $query->whereIn('approval_status', array_map('trim', explode(',', $status)));
-            } else {
-                $query->where('approval_status', $status);
-            }
-        }
-
         $prfs = $query->paginate(15)->withQueryString();
 
         $countQuery = Prf::query();
@@ -49,16 +38,12 @@ class PrfController extends Controller
         }
 
         $counts = [
-            'all'       => (clone $countQuery)->count(),
-            'submitted' => (clone $countQuery)->where('approval_status', 'Submitted')->count(),
+            'all' => (clone $countQuery)->count(),
         ];
 
         return view('prfs.index', compact('prfs', 'counts'));
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // CREATE
-    // ──────────────────────────────────────────────────────────────
     public function create()
     {
         Gate::authorize('create', Prf::class);
@@ -69,9 +54,6 @@ class PrfController extends Controller
         return view('prfs.create', compact('autoCode', 'categories'));
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // STORE
-    // ──────────────────────────────────────────────────────────────
     public function store(Request $request)
     {
         Gate::authorize('create', Prf::class);
@@ -96,9 +78,6 @@ class PrfController extends Controller
             ->with('success', "PRF {$prf->code} berhasil dibuat.");
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // SHOW
-    // ──────────────────────────────────────────────────────────────
     public function show(Prf $prf)
     {
         $prf->load(['creator', 'documents']);
@@ -106,9 +85,6 @@ class PrfController extends Controller
         return view('prfs.show', compact('prf'));
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // EDIT
-    // ──────────────────────────────────────────────────────────────
     public function edit(Prf $prf)
     {
         Gate::authorize('edit', $prf);
@@ -119,9 +95,6 @@ class PrfController extends Controller
         return view('prfs.edit', compact('prf', 'categories'));
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // UPDATE
-    // ──────────────────────────────────────────────────────────────
     public function update(Request $request, Prf $prf)
     {
         Gate::authorize('edit', $prf);
@@ -145,9 +118,6 @@ class PrfController extends Controller
             ->with('success', "PRF {$prf->code} berhasil diperbarui.");
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // DESTROY
-    // ──────────────────────────────────────────────────────────────
     public function destroy(Prf $prf)
     {
         if ($prf->npdProposals()->exists()) {
@@ -165,9 +135,6 @@ class PrfController extends Controller
             ->with('success', "PRF {$code} berhasil dihapus.");
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // DESTROY DOCUMENT
-    // ──────────────────────────────────────────────────────────────
     public function destroyDocument(PrfDocument $document)
     {
         $prf = $document->prf;
@@ -181,9 +148,6 @@ class PrfController extends Controller
             ->with('success', "Dokumen {$document->file_name} berhasil dihapus.");
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // HELPER
-    // ──────────────────────────────────────────────────────────────
     private function categories()
     {
         return ProductCategory::orderBy('name')->pluck('name');

@@ -12,10 +12,7 @@
     {{-- Header --}}
     <div class="page-header">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <code class="text-sm bg-surface text-primary px-2 py-0.5 rounded font-mono">{{ $prf->code }}</code>
-                <x-status-badge :status="$prf->approval_status" />
-            </div>
+            <code class="text-sm bg-surface text-primary px-2 py-0.5 rounded font-mono mb-1 inline-block">{{ $prf->code }}</code>
             <h1 class="page-title">{{ $prf->product_name ?? $prf->product_concept }}</h1>
             <p class="page-subtitle">
                 Dibuat oleh {{ $prf->creator?->name ?? '—' }} · {{ $prf->created_at->isoFormat('D MMM Y') }}
@@ -61,10 +58,6 @@
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Target Launch</p>
                         <p>{{ $prf->target_launch?->format('d M Y') ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400 mb-1">Status</p>
-                        <x-status-badge :status="$prf->approval_status" />
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Dibuat Oleh</p>
@@ -131,40 +124,6 @@
 
         {{-- ─── SIDEBAR ─────────────────────────────────── --}}
         <div class="space-y-4">
-            @if($prf->approval_status === 'Draft')
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Persiapan Pengajuan</h2>
-                </div>
-                <div class="card-body text-sm text-gray-600 space-y-2">
-                    <div class="flex items-start gap-2">
-                        <svg class="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>Lengkapi informasi PRF (konsep, target market, dll).</span>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <svg class="w-4 h-4 mt-0.5 flex-shrink-0 {{ $prf->documents->count() ? 'text-emerald-600' : 'text-gray-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M{{ $prf->documents->count() ? '9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : '12 9v4m0 4h.01' }}"/>
-                        </svg>
-                        <span>
-                            Unggah minimal 1 file pendukung.
-                            @if($prf->documents->count())
-                            <span class="text-emerald-600 font-semibold">({{ $prf->documents->count() }} file ✓)</span>
-                            @else
-                            <span class="text-red-500 font-semibold">(0 file)</span>
-                            @endif
-                        </span>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <svg class="w-4 h-4 text-gray-300 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span>Ajukan PRF — tanpa approval, langsung siap dijadikan dasar NPD Proposal.</span>
-                    </div>
-                </div>
-            </div>
-            @else
             <div class="card">
                 <div class="card-body text-sm text-gray-600 flex items-start gap-3">
                     <span class="mt-0.5 w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center flex-shrink-0">
@@ -173,12 +132,11 @@
                         </svg>
                     </span>
                     <div>
-                        <p class="font-semibold text-ink">Siap lanjut ke NPD Proposal</p>
-                        <p class="text-xs text-gray-500 mt-0.5">PRF ini sudah diajukan dan dapat dipilih sebagai dasar pembuatan NPD Proposal.</p>
+                        <p class="font-semibold text-ink">Siap digunakan untuk NPD Proposal</p>
+                        <p class="text-xs text-gray-500 mt-0.5">PRF ini dapat dipilih sebagai dasar pembuatan NPD Proposal.</p>
                     </div>
                 </div>
             </div>
-            @endif
         </div>
     </div>
 </x-app-layout>

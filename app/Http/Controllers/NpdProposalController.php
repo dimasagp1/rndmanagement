@@ -71,8 +71,7 @@ class NpdProposalController extends Controller
         Gate::authorize('create', NpdProposal::class);
 
         $autoCode = $this->service->generateCode();
-        $prfs = Prf::where('approval_status', 'Submitted')
-            ->orderBy('code')
+        $prfs = Prf::orderBy('code')
             ->get(['id', 'code', 'product_name', 'product_concept']);
         $teamMembers = $this->teamMembers();
 
@@ -102,9 +101,6 @@ class NpdProposalController extends Controller
         ]);
 
         $prf = Prf::findOrFail($validated['prf_id']);
-        if ($prf->approval_status !== 'Submitted') {
-            return back()->withErrors(['prf_id' => 'PRF yang dipilih belum diajukan (Submitted).']);
-        }
 
         $proposal = $this->service->create($validated, auth()->id());
 

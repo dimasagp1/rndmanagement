@@ -30,14 +30,9 @@
         {{-- ─── Summary dan Filter ───────────────────────── --}}
         <div class="card card-body mb-6">
             <div class="flex flex-wrap gap-4 items-center">
-                <a href="{{ route('prfs.index') }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ !request('status') ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <span class="text-sm font-semibold px-3 py-1.5 rounded-lg bg-primary text-white">
                     Semua ({{ $counts['all'] }})
-                </a>
-                <a href="{{ route('prfs.index', ['status' => 'Submitted']) }}"
-                   class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Submitted' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Submitted ({{ $counts['submitted'] }})
-                </a>
+                </span>
                 <div class="flex-1"></div>
                 <form method="GET" class="w-full sm:w-72">
                     <input type="text" name="search" value="{{ request('search') }}"
@@ -58,7 +53,6 @@
                             <th class="px-6 py-4" scope="col">Dibuat Oleh</th>
                             <th class="px-6 py-4" scope="col">Target Market</th>
                             <th class="px-6 py-4" scope="col">Target Launch</th>
-                            <th class="px-6 py-4" scope="col">Status</th>
                             <th class="px-6 py-4" scope="col"></th>
                         </tr>
                     </thead>
@@ -82,9 +76,6 @@
                             </td>
                             <td class="px-6 py-4 text-gray-700">{{ $prf->target_market ?? '—' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ $prf->target_launch?->format('d M Y') ?? '—' }}</td>
-                            <td class="px-6 py-4">
-                                <x-status-badge :status="$prf->approval_status" />
-                            </td>
                             <td class="px-6 py-4 text-right">
                                 <a href="{{ route('prfs.show', $prf) }}"
                                    class="text-primary font-semibold hover:underline text-xs">Detail →</a>
@@ -92,7 +83,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-400">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
                                 Belum ada PRF. Buat PRF pertama untuk memulai proyek NPD.
                             </td>
                         </tr>

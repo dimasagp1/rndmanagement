@@ -12,7 +12,6 @@ class PrfNpdProposalSeeder extends Seeder
 {
     public function run(): void
     {
-        // Clean up data demo sebelumnya agar bisa dijalankan ulang (idempotent)
         \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         NpdProposal::whereIn('code', [
             'NPD-202606-001', 'NPD-202606-002',
@@ -34,18 +33,12 @@ class PrfNpdProposalSeeder extends Seeder
             return;
         }
 
-        // ══════════════════════════════════════════════════════
-        // PRF — PRODUCT REQUEST FORM
-        // (tanpa approval: langsung Submitted saat dibuat,
-        //  langsung siap dijadikan dasar NPD Proposal)
-        // ══════════════════════════════════════════════════════
-
         $prf1 = $this->createPrf([
             'code' => 'PRF-202606-001',
             'product_concept' => "Minuman herbal siap minum berbasis jahe merah dengan madu murni sebagai pemanis alami.\n\nDitujukan untuk konsumen yang mencari produk penghangat tubuh dengan cita rasa pedas-manis khas, tanpa bahan pengawet.\n\nKemasan botol PET 250ml dengan tutup flip-top.",
             'target_market' => 'Generik & Premium', 'product_category' => 'COD',
             'target_launch' => '2026-09-01', 'product_name' => 'Jahe Merah Hangat',
-            'approval_status' => 'Submitted', 'created_by' => $staff->id,
+            'created_by' => $staff->id,
             'created_at' => Carbon::now()->subDays(30),
         ]);
 
@@ -54,7 +47,7 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Sari kurma premium yang dikombinasikan dengan madu sebagai energi booster alami.\n\nTarget konsumen pekerja aktif dan ibu hamil yang membutuhkan asupan energi praktis.\n\nKemasan sachet 15ml, 10 sachet per box.",
             'target_market' => 'Premium', 'product_category' => 'COD',
             'target_launch' => '2026-10-15', 'product_name' => 'Sari Kurma Madu',
-            'approval_status' => 'Submitted', 'created_by' => $siti->id,
+            'created_by' => $siti->id,
             'created_at' => Carbon::now()->subDays(20),
         ]);
 
@@ -63,7 +56,7 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Minuman kunyit asam segar dengan rasa asam-manis yang menyegarkan.\n\nMenggunakan kunyit pilihan dan asam jawa, cocok untuk konsumen wanita yang menginginkan minuman kesehatan harian.\n\nKemasan botol PET 250ml.",
             'target_market' => 'Mass Market', 'product_category' => 'COD',
             'target_launch' => '2026-11-01', 'product_name' => 'Kunyit Asam Segar',
-            'approval_status' => 'Submitted', 'created_by' => $siti->id,
+            'created_by' => $siti->id,
             'created_at' => Carbon::now()->subDays(14),
         ]);
 
@@ -72,7 +65,7 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Teh celup herbal dari daun jati cina untuk membantu program diet alami.\n\nTanpa gula tambahan, dikemas dalam kotak 25 kantong teh.\n\nFile pendukung (analisa pasar & referensi BPOM) sudah dilampirkan.",
             'target_market' => 'Generik', 'product_category' => 'Serbuk',
             'target_launch' => '2026-12-01', 'product_name' => 'Teh Herbal Daun Jati Cina',
-            'approval_status' => 'Submitted', 'created_by' => $staff->id,
+            'created_by' => $staff->id,
             'created_at' => Carbon::now()->subDays(3),
         ]);
 
@@ -81,7 +74,7 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Jamu tradisional beras kencur dalam kemasan botol 200ml.\n\nKonsep masih perlu disempurnakan: target market belum jelas dan komposisi gula masih terlalu tinggi.",
             'target_market' => null, 'product_category' => 'COD',
             'target_launch' => null, 'product_name' => 'Jamu Beras Kencur Tradisional',
-            'approval_status' => 'Submitted', 'created_by' => $staff->id,
+            'created_by' => $staff->id,
             'created_at' => Carbon::now()->subDays(8),
         ]);
 
@@ -90,7 +83,7 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Susu jahe bubuk instan kemasan sachet untuk segmen keluarga.\n\nPerpaduan susu bubuk, gula aren, dan jahe merah bubuk. Cukup diseduh air panas.\n\nDiajukan untuk segera dibuatkan NPD Proposal.",
             'target_market' => 'Mass Market', 'product_category' => 'Serbuk',
             'target_launch' => '2027-01-15', 'product_name' => 'Susu Jahe Bubuk Instan',
-            'approval_status' => 'Submitted', 'created_by' => $siti->id,
+            'created_by' => $siti->id,
             'created_at' => Carbon::now()->subDays(2),
         ]);
 
@@ -99,7 +92,7 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Kapsul ekstrak temulawak untuk meningkatkan daya tahan tubuh.\n\nDosis 500mg per kapsul, 60 kapsul per botol.\n\nBasis untuk pengembangan NPD Proposal lini produk suplemen herbal.",
             'target_market' => 'Premium', 'product_category' => 'Kapsul',
             'target_launch' => '2026-12-20', 'product_name' => 'Ekstrak Temulawak Kapsul',
-            'approval_status' => 'Submitted', 'created_by' => $staff->id,
+            'created_by' => $staff->id,
             'created_at' => Carbon::now()->subDays(5),
         ]);
 
@@ -108,14 +101,9 @@ class PrfNpdProposalSeeder extends Seeder
             'product_concept' => "Sediaan herbal sirup batuk anak dengan rasa jeruk yang ramah anak.\n\nBerbasis ekstrak jahe, madu, dan jeruk nipis. Tanpa alkohol.\n\nMasih dalam penyusunan konsep awal, belum diajukan.",
             'target_market' => 'Generik', 'product_category' => 'COD',
             'target_launch' => '2027-03-01', 'product_name' => 'Sirup Herbal Batuk Anak',
-            'approval_status' => 'Submitted', 'created_by' => $staff->id,
+            'created_by' => $staff->id,
             'created_at' => Carbon::now()->subHours(6),
         ]);
-
-        // ══════════════════════════════════════════════════════
-        // NPD PROPOSAL
-        // (tanpa approval OM/GM — status hanya project_status)
-        // ══════════════════════════════════════════════════════
 
         $this->createNpdProposal([
             'code' => 'NPD-202606-001', 'prf' => $prf1,
@@ -196,8 +184,8 @@ class PrfNpdProposalSeeder extends Seeder
         ]);
 
         $this->command->info('✅ PRF & NPD Proposal demo data seeded:');
-        $this->command->info('   📝 ' . Prf::count() . ' PRF (semua langsung Submitted)');
-        $this->command->info('   🚀 ' . NpdProposal::count() . ' NPD Proposal (2 Draft, 2 In Progress, 1 On Track, 1 On Hold)');
+        $this->command->info('   📝 ' . Prf::count() . ' PRF');
+        $this->command->info('   🚀 ' . NpdProposal::count() . ' NPD Proposal');
     }
 
     private function createPrf(array $data): Prf
@@ -209,7 +197,6 @@ class PrfNpdProposalSeeder extends Seeder
             'product_category'  => $data['product_category'],
             'target_launch'     => $data['target_launch'],
             'product_name'      => $data['product_name'],
-            'approval_status'   => $data['approval_status'],
             'created_by'        => $data['created_by'],
             'created_at'        => $data['created_at'] ?? now(),
             'updated_at'        => $data['created_at'] ?? now(),

@@ -6,8 +6,6 @@ use App\Models\Prf;
 
 class PrfService
 {
-    public const STAGES = ['Submitted'];
-
     public function generateCode(): string
     {
         $prefix = 'PRF-' . now()->format('Ym') . '-';
@@ -34,7 +32,6 @@ class PrfService
             'product_category' => $data['product_category'] ?? null,
             'target_launch'    => $data['target_launch'] ?? null,
             'product_name'     => $data['product_name'] ?? null,
-            'approval_status'  => 'Submitted',
             'created_by'       => $createdBy,
         ]);
     }

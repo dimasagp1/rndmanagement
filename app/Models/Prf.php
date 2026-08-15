@@ -22,11 +22,6 @@ class Prf extends Model
         'product_category',
         'target_launch',
         'product_name',
-        'approval_status',
-        'approved_by_om',
-        'approved_by_gm',
-        'approved_at',
-        'rejection_notes',
         'created_by',
     ];
 
@@ -34,23 +29,12 @@ class Prf extends Model
     {
         return [
             'target_launch' => 'date',
-            'approved_at'   => 'datetime',
         ];
     }
 
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function operationalManager(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by_om');
-    }
-
-    public function generalManager(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by_gm');
     }
 
     public function documents(): HasMany
