@@ -47,9 +47,16 @@
                     </div>
                     <div>
                         <label for="product_category" class="block text-sm font-medium text-gray-700 mb-1">Product Category</label>
-                        <input type="text" id="product_category" name="product_category" value="{{ old('product_category') }}"
-                               class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
-                               placeholder="cth: Sediaan Cair, Tablet, Kapsul">
+                        <select id="product_category" name="product_category"
+                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
+                            <option value="">— Pilih Kategori —</option>
+                            @foreach($categories as $category)
+                            <option value="{{ $category }}" {{ old('product_category') == $category ? 'selected' : '' }}>{{ $category }}</option>
+                            @endforeach
+                            @if(old('product_category') && ! $categories->contains(old('product_category')))
+                            <option value="{{ old('product_category') }}" selected>{{ old('product_category') }} (Kategori lama)</option>
+                            @endif
+                        </select>
                         @error('product_category') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
