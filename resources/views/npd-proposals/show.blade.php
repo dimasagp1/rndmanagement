@@ -1,28 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center gap-2 text-sm text-gray-500">
-            <a href="{{ route('dashboard') }}" class="hover:text-primary">Dashboard</a>
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <a href="{{ route('npd-proposals.index') }}" class="hover:text-primary">NPD Proposal</a>
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span class="text-ink font-medium">{{ $proposal->code }}</span>
+        <div class="flex items-center gap-2 text-sm text-gray-500 min-w-0">
+            <a href="{{ route('dashboard') }}" class="hover:text-primary shrink-0">Dashboard</a>
+            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <a href="{{ route('npd-proposals.index') }}" class="hover:text-primary min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">NPD Proposal</a>
+            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <span class="text-ink font-medium min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{{ $proposal->code }}</span>
         </div>
     </x-slot>
-
-    {{-- Flash messages --}}
-    @if(session('success'))
-    <div class="alert-success mb-4 flash-success" role="alert">
-        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p>{{ session('success') }}</p>
-    </div>
-    @endif
-    @if(session('error'))
-    <div class="alert-danger mb-4" role="alert">
-        <p>{{ session('error') }}</p>
-    </div>
-    @endif
 
     {{-- Header --}}
     <div class="page-header">
