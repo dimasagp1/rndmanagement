@@ -40,11 +40,11 @@
                 </a>
                 <a href="{{ route('npd-proposals.index', ['status' => 'On Track,In Progress']) }}"
                    class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'On Track,In Progress' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Berjalan ({{ $counts['on_track'] + $counts['in_progress'] }})
+                    On Track & In Progress ({{ $counts['on_track'] + $counts['in_progress'] }})
                 </a>
                 <a href="{{ route('npd-proposals.index', ['status' => 'On Hold,Delayed']) }}"
                    class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'On Hold,Delayed' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                    Terkendala ({{ $counts['on_hold'] + $counts['delayed'] }})
+                    On Hold & Delayed ({{ $counts['on_hold'] + $counts['delayed'] }})
                 </a>
                 <a href="{{ route('npd-proposals.index', ['status' => 'Completed']) }}"
                    class="text-sm font-semibold px-3 py-1.5 rounded-lg {{ request('status') === 'Completed' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
