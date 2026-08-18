@@ -146,8 +146,8 @@
 
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
-                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view'])
-                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index'])
+                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'formula.view', 'formulation-development' => 'formula.view'])
+                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'preformulation-studies.index', 'formulation-development' => 'formulas.index'])
                 @php($moduleActive = collect($moduleRoutes)->filter(fn($r) => request()->routeIs(str($r)->before('.') . '.*'))->keys()->all())
                 @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)
                 <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'true' : 'false' }} }">

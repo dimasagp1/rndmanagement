@@ -22,6 +22,9 @@ use App\Policies\PrfPolicy;
 use App\Services\PrfService;
 use App\Policies\NpdProposalPolicy;
 use App\Services\NpdProposalService;
+use App\Models\PreformulationStudy;
+use App\Policies\PreformulationStudyPolicy;
+use App\Services\PreformulationStudyService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TrialPmService::class);
         $this->app->singleton(PrfService::class);
         $this->app->singleton(NpdProposalService::class);
+        $this->app->singleton(PreformulationStudyService::class);
     }
 
     public function boot(): void
@@ -51,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(LogbookPm::class, LogbookPmPolicy::class);
         Gate::policy(Prf::class, PrfPolicy::class);
         Gate::policy(NpdProposal::class, NpdProposalPolicy::class);
+        Gate::policy(PreformulationStudy::class, PreformulationStudyPolicy::class);
 
         // Implicitly grant "Superadmin" role all permission checks
         Gate::before(function ($user, $ability) {

@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Formula;
 use App\Models\TrialRm;
 use App\Models\TrialPm;
+use App\Models\PreformulationStudy;
 use App\Services\FormulaService;
 use App\Services\TrialRmService;
 use App\Services\TrialPmService;
+use App\Services\PreformulationStudyService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -17,7 +19,8 @@ class ApprovalCenterController extends Controller
     public function __construct(
         private FormulaService $formulaService,
         private TrialRmService $trialRmService,
-        private TrialPmService $trialPmService
+        private TrialPmService $trialPmService,
+        private PreformulationStudyService $preformulationStudyService
     ) {}
 
     // ──────────────────────────────────────────────────────────────
@@ -34,6 +37,7 @@ class ApprovalCenterController extends Controller
         $pendingFormulas = collect();
         $pendingTrialRms = collect();
         $pendingTrialPms = collect();
+        $pendingPreformulationStudies = collect();
 
         // Antrean Superadmin (Melihat semua)
         if ($user->hasRole('Superadmin')) {
@@ -48,6 +52,11 @@ class ApprovalCenterController extends Controller
                 ->get();
 
             $pendingTrialPms = TrialPm::where('approval_status', 'Pending Approval')
+                ->with('creator')
+                ->latest()
+                ->get();
+
+            $pendingPreformulationStudies = PreformulationStudy::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])
                 ->with('creator')
                 ->latest()
                 ->get();
@@ -68,6 +77,11 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
+
+            $pendingPreformulationStudies = PreformulationStudy::where('approval_status', 'Pending Tahap 1')
+                ->with('creator')
+                ->latest()
+                ->get();
         } 
         // Antrean General Manager (Tahap 2)
         elseif ($user->hasRole('General Manager')) {
@@ -80,9 +94,14 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
+
+            $pendingPreformulationStudies = PreformulationStudy::where('approval_status', 'Pending Tahap 2')
+                ->with('creator')
+                ->latest()
+                ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -217,5 +236,49 @@ class ApprovalCenterController extends Controller
         }
 
         return redirect()->route('approval-center.index')->with('success', $msg);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // APPROVE PREFORMULATION STUDY
+    // ──────────────────────────────────────────────────────────────
+    public function approvePreformulationStudy(PreformulationStudy $preformulationStudy)
+    {
+        $user = auth()->user();
+
+        try {
+            if ($user->hasRole('Operational Manager') || ($user->hasRole('Superadmin') && $preformulationStudy->approval_status === 'Pending Tahap 1')) {
+                $this->preformulationStudyService->approveTahap1($preformulationStudy, $user->id);
+                $msg = "Preformulation Study {$preformulationStudy->code} berhasil disetujui (Tahap 1) dan diteruskan ke GM.";
+            } elseif ($user->hasRole('General Manager') || ($user->hasRole('Superadmin') && $preformulationStudy->approval_status === 'Pending Tahap 2')) {
+                $this->preformulationStudyService->approveTahap2($preformulationStudy, $user->id);
+                $msg = "Preformulation Study {$preformulationStudy->code} telah disetujui secara final (Approved).";
+            } else {
+                abort(403);
+            }
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()->route('approval-center.index')->with('success', $msg);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // REJECT PREFORMULATION STUDY
+    // ──────────────────────────────────────────────────────────────
+    public function rejectPreformulationStudy(Request $request, PreformulationStudy $preformulationStudy)
+    {
+        $request->validate([
+            'rejection_notes' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $this->preformulationStudyService->reject($preformulationStudy, $request->rejection_notes);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        }
+
+        return redirect()
+            ->route('approval-center.index')
+            ->with('success', "Preformulation Study {$preformulationStudy->code} berhasil ditolak.");
     }
 }

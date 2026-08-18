@@ -56,6 +56,10 @@ class GeneralController extends Controller
             return redirect()->route('npd-proposals.index');
         }
 
+        if ($tab === 'preformulation-qbd') {
+            return redirect()->route('preformulation-studies.index');
+        }
+
         return view('general.index', [
             'activeTab' => $tab,
             'tabs'      => self::TABS,

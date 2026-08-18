@@ -9,23 +9,6 @@
         </div>
     </x-slot>
 
-    @if(session('success'))
-    <div class="alert-success mb-4 flash-success" role="alert">
-        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p>{{ session('success') }}</p>
-    </div>
-    @endif
-    @if($errors->any())
-    <div class="alert-danger mb-4" role="alert">
-        <p class="font-semibold">Terdapat kesalahan:</p>
-        <ul class="list-disc list-inside text-sm mt-1">
-            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-        </ul>
-    </div>
-    @endif
-
     <div class="page-header">
         <div>
             <h1 class="page-title">Approval Center</h1>
@@ -71,7 +54,7 @@
                         {{ $pendingTrialRms->count() }}
                     </span>
                 </button>
-                @if(auth()->user()->hasRole('Operational Manager') || auth()->user()->hasRole('Superadmin'))
+                                @if(auth()->user()->hasRole('Operational Manager') || auth()->user()->hasRole('Superadmin'))
                 <button type="button"
                         @click="activeTab = 'trial_pms'; activeRejectItem = null"
                         :class="activeTab === 'trial_pms' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
@@ -83,6 +66,16 @@
                     </span>
                 </button>
                 @endif
+                <button type="button"
+                        @click="activeTab = 'preformulation'; activeRejectItem = null"
+                        :class="activeTab === 'preformulation' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
+                        class="px-4 py-2.5 border-b-2 text-sm transition font-medium">
+                    Preformulation Study
+                    <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
+                          :class="activeTab === 'preformulation' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
+                        {{ $pendingPreformulationStudies->count() }}
+                    </span>
+                </button>
             </div>
 
                  TAB 2: FORMULA ANTREAN
@@ -285,6 +278,68 @@
                     @endforeach
                 @endif
             </div>
+            @endif
+        </div>
+
+        {{-- ─── PREFORMULATION STUDY TAB ─────────────────────── --}}
+        <div x-show="activeTab === 'preformulation'" class="space-y-3">
+            @if($pendingPreformulationStudies->isEmpty())
+            <x-empty-state icon="document" title="Antrean Kosong" description="Tidak ada Preformulation Study menunggu keputusan Anda saat ini." />
+            @else
+                @foreach($pendingPreformulationStudies as $study)
+                <div class="card p-4 hover:border-gray-300 transition duration-150 relative">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $study->code }}</code>
+                                <span class="badge bg-purple-100 text-purple-700">{{ $study->study_type }}</span>
+                            </div>
+                            <h3 class="text-base font-bold text-ink hover:text-primary">
+                                <a href="{{ route('preformulation-studies.show', $study) }}">{{ $study->product_name }}</a>
+                            </h3>
+                            <p class="text-xs text-gray-400">
+                                Diajukan oleh {{ $study->creator?->name }} · {{ $study->updated_at->diffForHumans() }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <a href="{{ route('preformulation-studies.show', $study) }}" class="btn-ghost btn-sm">Lihat Detail</a>
+                            
+                            <form method="POST" action="{{ route('approval-center.preformulation-studies.approve', $study) }}">
+                                @csrf
+                                <button type="submit" class="btn-primary btn-sm">
+                                    Setujui
+                                </button>
+                            </form>
+                            
+                            <button type="button"
+                                    @click="activeRejectItem = activeRejectItem === 'preform_{{ $study->id }}' ? null : 'preform_{{ $study->id }}'"
+                                    class="btn-outline btn-sm text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50">
+                                Tolak
+                            </button>
+                        </div>
+                    </div>
+
+                    <div x-show="activeRejectItem === 'preform_{{ $study->id }}'"
+                         x-collapse
+                         class="mt-4 p-3 bg-red-50/50 border border-red-200 rounded-xl space-y-3 animate-fade-in">
+                        <h4 class="text-xs font-bold text-red-800 uppercase">Input Alasan Penolakan Preformulation Study</h4>
+                        <form method="POST" action="{{ route('approval-center.preformulation-studies.reject', $study) }}" class="space-y-2">
+                            @csrf
+                            <div>
+                                <label class="form-label text-xs text-red-700" for="rejection_notes_preform_{{ $study->id }}">Catatan Penolakan *</label>
+                                <textarea id="rejection_notes_preform_{{ $study->id }}" name="rejection_notes" rows="2" required
+                                          placeholder="Wajib diisi! Jelaskan alasan penolakan..."
+                                          class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500 focus:border-red-500"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="activeRejectItem = null" class="btn-ghost btn-sm text-xs text-red-600">Batal</button>
+                                <button type="submit" class="btn-primary btn-sm text-xs bg-red-600 hover:bg-red-700 focus:ring-red-600">Kirim Penolakan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endforeach
             @endif
         </div>
 

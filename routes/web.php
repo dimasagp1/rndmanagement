@@ -11,6 +11,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\PreformulationStudyController;
 use App\Http\Controllers\LogbookPmController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GeneralController;
@@ -136,6 +137,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/approval-center/trial-pms/{trialPm}/reject', [ApprovalCenterController::class, 'rejectTrialPm'])
          ->name('approval-center.trial-pms.reject')
          ->middleware('can:approval_center.access');
+    Route::post('/approval-center/preformulation-studies/{preformulationStudy}/approve', [ApprovalCenterController::class, 'approvePreformulationStudy'])
+         ->name('approval-center.preformulation-studies.approve')
+         ->middleware('can:approval_center.access');
+    Route::post('/approval-center/preformulation-studies/{preformulationStudy}/reject', [ApprovalCenterController::class, 'rejectPreformulationStudy'])
+         ->name('approval-center.preformulation-studies.reject')
+         ->middleware('can:approval_center.access');
 
     // ── User Management (Superadmin Only) ───────────────────
     Route::resource('users', UserController::class)->middleware('role:Superadmin');
@@ -149,6 +156,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('product-categories', ProductCategoryController::class)->middleware('role:Superadmin|Staff R&D');
+    Route::resource('preformulation-studies', PreformulationStudyController::class)->middleware('role:Superadmin|Staff R&D|Staff Packdev');
+    Route::post('preformulation-studies/{preformulationStudy}/submit', [PreformulationStudyController::class, 'submit'])->name('preformulation-studies.submit')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
+    Route::delete('preformulation-studies/documents/{document}', [PreformulationStudyController::class, 'destroyDocument'])->name('preformulation-studies.documents.destroy')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
 });
 
 require __DIR__.'/auth.php';
