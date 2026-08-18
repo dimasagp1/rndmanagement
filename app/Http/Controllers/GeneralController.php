@@ -57,7 +57,7 @@ class GeneralController extends Controller
         }
 
         if ($tab === 'preformulation-qbd') {
-            return redirect()->route('preformulation-studies.index');
+            return redirect()->route('qbd.dashboard');
         }
 
         return view('general.index', [

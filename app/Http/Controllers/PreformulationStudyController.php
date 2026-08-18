@@ -94,7 +94,20 @@ class PreformulationStudyController extends Controller
 
     public function show(PreformulationStudy $preformulationStudy)
     {
-        $preformulationStudy->load(['creator', 'npdProposal', 'documents', 'approvedByOm', 'approvedByGm']);
+        $preformulationStudy->load([
+            'creator',
+            'npdProposal',
+            'documents',
+            'approvedByOm',
+            'approvedByGm',
+            'qtpp.attributes',
+            'cqas',
+            'cmas',
+            'cpps',
+            'riskAssessments',
+            'designSpaces',
+            'controlStrategies',
+        ]);
 
         return view('preformulation-studies.show', ['study' => $preformulationStudy]);
     }

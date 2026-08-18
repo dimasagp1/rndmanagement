@@ -267,6 +267,19 @@ class ApprovalCenterController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function rejectPreformulationStudy(Request $request, PreformulationStudy $preformulationStudy)
     {
+        $user = auth()->user();
+
+        $canReject = match (true) {
+            $user->hasRole('Operational Manager') => $preformulationStudy->approval_status === 'Pending Tahap 1',
+            $user->hasRole('General Manager')     => $preformulationStudy->approval_status === 'Pending Tahap 2',
+            $user->hasRole('Superadmin')          => in_array($preformulationStudy->approval_status, ['Pending Tahap 1', 'Pending Tahap 2']),
+            default                               => false,
+        };
+
+        if (! $canReject) {
+            abort(403);
+        }
+
         $request->validate([
             'rejection_notes' => 'required|string|max:1000',
         ]);

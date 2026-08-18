@@ -12,6 +12,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\PreformulationStudyController;
+use App\Http\Controllers\QbdController;
 use App\Http\Controllers\LogbookPmController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GeneralController;
@@ -156,9 +157,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('product-categories', ProductCategoryController::class)->middleware('role:Superadmin|Staff R&D');
-    Route::resource('preformulation-studies', PreformulationStudyController::class)->middleware('role:Superadmin|Staff R&D|Staff Packdev');
+Route::resource('preformulation-studies', PreformulationStudyController::class)->middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager');
     Route::post('preformulation-studies/{preformulationStudy}/submit', [PreformulationStudyController::class, 'submit'])->name('preformulation-studies.submit')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
     Route::delete('preformulation-studies/documents/{document}', [PreformulationStudyController::class, 'destroyDocument'])->name('preformulation-studies.documents.destroy')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
+
+    // ── QbD Modules (QTPP, CQA, CMA, CPP, Risk, Design Space, Control Strategy) ──
+    Route::get('/qbd', [QbdController::class, 'dashboard'])->name('qbd.dashboard')->middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager');
+    Route::middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager')->prefix('preformulation-studies/{study}/qbd')->group(function () {
+        Route::get('/', [QbdController::class, 'show'])->name('qbd.show');
+
+        Route::post('qtpp', [QbdController::class, 'saveQtpp'])->name('qbd.qtpp.save');
+        Route::post('qtpp-attributes', [QbdController::class, 'storeQtppAttribute'])->name('qbd.qtpp-attributes.store');
+        Route::delete('qtpp-attributes/{attribute}', [QbdController::class, 'destroyQtppAttribute'])->name('qbd.qtpp-attributes.destroy');
+
+        Route::post('cqa', [QbdController::class, 'storeCqa'])->name('qbd.cqa.store');
+        Route::delete('cqa/{cqa}', [QbdController::class, 'destroyCqa'])->name('qbd.cqa.destroy');
+
+        Route::post('cma', [QbdController::class, 'storeCma'])->name('qbd.cma.store');
+        Route::delete('cma/{cma}', [QbdController::class, 'destroyCma'])->name('qbd.cma.destroy');
+
+        Route::post('cpp', [QbdController::class, 'storeCpp'])->name('qbd.cpp.store');
+        Route::delete('cpp/{cpp}', [QbdController::class, 'destroyCpp'])->name('qbd.cpp.destroy');
+
+        Route::post('risk', [QbdController::class, 'storeRisk'])->name('qbd.risk.store');
+        Route::delete('risk/{risk}', [QbdController::class, 'destroyRisk'])->name('qbd.risk.destroy');
+
+        Route::post('design-space', [QbdController::class, 'storeDesignSpace'])->name('qbd.design-space.store');
+        Route::delete('design-space/{designSpace}', [QbdController::class, 'destroyDesignSpace'])->name('qbd.design-space.destroy');
+
+        Route::post('control-strategy', [QbdController::class, 'storeControlStrategy'])->name('qbd.control-strategy.store');
+        Route::delete('control-strategy/{controlStrategy}', [QbdController::class, 'destroyControlStrategy'])->name('qbd.control-strategy.destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

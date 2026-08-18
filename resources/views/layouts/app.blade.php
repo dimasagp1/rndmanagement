@@ -42,7 +42,7 @@
         <!-- ── Sidebar ───────────────────────────────── -->
         <aside
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 z-40 w-64 sidebar-gradient flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 shadow-sidebar"
+            class="fixed inset-y-0 left-0 z-40 w-72 sidebar-gradient flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 shadow-sidebar"
         >
             <!-- Sidebar Header (Logo) -->
             <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
@@ -95,60 +95,12 @@
                 <div class="my-3 border-t border-white/10"></div>
                 <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Modul Utama</p>
 
-                <!-- Formulasi RM -->
-                @can('formula.view')
-                <a href="{{ route('formulas.index') }}"
-                   class="sidebar-link {{ request()->routeIs('formulas.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <span class="flex-1">Formulasi RM</span>
-                    {{-- Badge pending count (will be dynamic in CP5+) --}}
-                </a>
-                @endcan
-
-                <!-- Trial RM -->
-                @can('trial_rm.view')
-                <a href="{{ route('trial-rms.index') }}"
-                   class="sidebar-link {{ request()->routeIs('trial-rms.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                    </svg>
-                    <span class="flex-1">Trial RM</span>
-                </a>
-                @endcan
-
-                <!-- Trial PM -->
-                @can('trial_pm.view')
-                <a href="{{ route('trial-pms.index') }}"
-                   class="sidebar-link {{ request()->routeIs('trial-pms.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                    <span class="flex-1">Trial PM</span>
-                </a>
-                @endcan
-
-                <!-- Log Book PM -->
-                @can('trial_pm.view')
-                <a href="{{ route('logbook-pm.index') }}"
-                   class="sidebar-link {{ request()->routeIs('logbook-pm.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <span class="flex-1">Log Book PM</span>
-                </a>
-                @endcan
-
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
                 @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'formula.view', 'formulation-development' => 'formula.view'])
-                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'preformulation-studies.index', 'formulation-development' => 'formulas.index'])
+                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbd.dashboard', 'formulation-development' => 'formulas.index'])
                 @php($moduleActive = collect($moduleRoutes)->filter(fn($r) => request()->routeIs(str($r)->before('.') . '.*'))->keys()->all())
+                @php($moduleActive = array_merge($moduleActive, request()->routeIs('trial-rms.*') || request()->routeIs('trial-pms.*') || request()->routeIs('logbook-pm.*') ? ['formulation-development'] : []))
                 @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)
                 <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'true' : 'false' }} }">
                     <button type="button" @click="open = !open"
@@ -173,6 +125,46 @@
                         @if(isset($modulePerms[$slug]) && ! auth()->user()->can($modulePerms[$slug]))
                             @continue
                         @endif
+
+                        @if($slug === 'formulation-development')
+                        <div x-data="{ subOpen: {{ request()->routeIs('formulas.*') || request()->routeIs('trial-rms.*') || request()->routeIs('trial-pms.*') || request()->routeIs('logbook-pm.*') ? 'true' : 'false' }} }">
+                            <button type="button" @click="subOpen = !subOpen"
+                                    class="sidebar-sub-link w-full justify-between {{ request()->routeIs('formulas.*') || request()->routeIs('trial-rms.*') || request()->routeIs('trial-pms.*') || request()->routeIs('logbook-pm.*') ? 'active' : '' }}">
+                                <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
+                                <svg class="w-3 h-3 flex-shrink-0 transition-transform duration-200" :class="subOpen ? 'rotate-180' : ''"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <div x-show="subOpen" x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="ml-4 pl-2 border-l border-white/10">
+                                <a href="{{ route('formulas.index') }}"
+                                   class="sidebar-sub-link {{ request()->routeIs('formulas.*') ? 'active' : '' }}">
+                                    <span class="flex-1 truncate">Formula RM</span>
+                                </a>
+                                @can('trial_rm.view')
+                                <a href="{{ route('trial-rms.index') }}"
+                                   class="sidebar-sub-link {{ request()->routeIs('trial-rms.*') ? 'active' : '' }}">
+                                    <span class="flex-1 truncate">Trial RM</span>
+                                </a>
+                                @endcan
+                                @can('trial_pm.view')
+                                <a href="{{ route('trial-pms.index') }}"
+                                   class="sidebar-sub-link {{ request()->routeIs('trial-pms.*') ? 'active' : '' }}">
+                                    <span class="flex-1 truncate">Trial PM</span>
+                                </a>
+                                <a href="{{ route('logbook-pm.index') }}"
+                                   class="sidebar-sub-link {{ request()->routeIs('logbook-pm.*') ? 'active' : '' }}">
+                                    <span class="flex-1 truncate">Log Book PM</span>
+                                </a>
+                                @endcan
+                            </div>
+                        </div>
+                        @continue
+                        @endif
+
                         <a href="{{ isset($moduleRoutes[$slug]) ? route($moduleRoutes[$slug]) : route('general.show', $slug) }}"
                            class="sidebar-sub-link {{ isset($moduleRoutes[$slug])
                                ? (request()->routeIs(str($moduleRoutes[$slug])->before('.') . '.*') ? 'active' : '')

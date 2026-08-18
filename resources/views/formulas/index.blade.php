@@ -5,13 +5,13 @@
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
-            <span class="text-ink font-medium">Formulasi RM</span>
+            <span class="text-ink font-medium">Formulation Development</span>
         </div>
     </x-slot>
 
     <div class="page-header">
         <div>
-            <h1 class="page-title">Formulasi RM</h1>
+            <h1 class="page-title">Formulation Development</h1>
             <p class="page-subtitle">Manajemen resep bahan baku produk herbal PT Herbatech</p>
         </div>
         @can('create', App\Models\Formula::class)
