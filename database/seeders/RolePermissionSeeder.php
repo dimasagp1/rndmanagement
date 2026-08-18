@@ -92,6 +92,18 @@ class RolePermissionSeeder extends Seeder
         // Hapus permission approval NPD Proposal yang tidak lagi digunakan
         Permission::whereIn('name', ['npd_proposal.approve_tahap1', 'npd_proposal.approve_tahap2'])->delete();
 
+        // Create permissions untuk Sample Evaluation (tanpa approval OM/GM)
+        $sampleEvaluationPermissions = [
+            'sample_evaluation.create',
+            'sample_evaluation.view',
+            'sample_evaluation.edit',
+            'sample_evaluation.delete',
+        ];
+
+        foreach ($sampleEvaluationPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
         // Create roles
         $superadmin = Role::findOrCreate('Superadmin');
         $staffRnd = Role::findOrCreate('Staff R&D');
@@ -119,6 +131,10 @@ class RolePermissionSeeder extends Seeder
             'npd_proposal.view',
             'npd_proposal.edit',
             'npd_proposal.delete',
+            'sample_evaluation.create',
+            'sample_evaluation.view',
+            'sample_evaluation.edit',
+            'sample_evaluation.delete',
         ]);
 
         // Assign permissions to Staff Packdev (sama dengan Staff R&D)
@@ -141,6 +157,10 @@ class RolePermissionSeeder extends Seeder
             'npd_proposal.view',
             'npd_proposal.edit',
             'npd_proposal.delete',
+            'sample_evaluation.create',
+            'sample_evaluation.view',
+            'sample_evaluation.edit',
+            'sample_evaluation.delete',
         ]);
 
         // Assign permissions to Operational Manager
@@ -154,6 +174,7 @@ class RolePermissionSeeder extends Seeder
             'approval_center.access',
             'prf.view',
             'npd_proposal.view',
+            'sample_evaluation.view',
         ]);
 
         // Assign permissions to General Manager
@@ -167,6 +188,7 @@ class RolePermissionSeeder extends Seeder
             'approval_center.access',
             'prf.view',
             'npd_proposal.view',
+            'sample_evaluation.view',
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');

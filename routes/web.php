@@ -18,6 +18,7 @@ use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\PrfController;
 use App\Http\Controllers\NpdProposalController;
+use App\Http\Controllers\SampleEvaluationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -101,6 +102,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('trial-pms/{trialPm}/print', [TrialPmController::class, 'print'])
          ->name('trial-pms.print')
          ->middleware('can:trial_pm.view');
+
+    // ── Sample Evaluation ─────────────────────────────────
+    Route::resource('sample-evaluations', SampleEvaluationController::class)
+         ->middleware('can:sample_evaluation.view')
+         ->parameters(['sample-evaluations' => 'sampleEvaluation']);
+    Route::post('sample-evaluations/{sampleEvaluation}/sessions', [SampleEvaluationController::class, 'storeSession'])
+         ->name('sample-evaluations.sessions.store')
+         ->middleware('can:sample_evaluation.view');
+    Route::delete('sample-evaluations/{sampleEvaluation}/sessions/{session}', [SampleEvaluationController::class, 'destroySession'])
+         ->name('sample-evaluations.sessions.destroy')
+         ->middleware('can:sample_evaluation.view');
+    Route::post('sample-evaluations/{sampleEvaluation}/sessions/{session}/attachments', [SampleEvaluationController::class, 'storeAttachment'])
+         ->name('sample-evaluations.sessions.attachments.store')
+         ->middleware('can:sample_evaluation.view');
+    Route::delete('sample-evaluations/{sampleEvaluation}/attachments/{attachment}', [SampleEvaluationController::class, 'destroyAttachment'])
+         ->name('sample-evaluations.attachments.destroy')
+         ->middleware('can:sample_evaluation.view');
 
     // ── Log Book PM ───────────────────────────────────────
     Route::get('logbook-pm/print-all', [LogbookPmController::class, 'printAll'])

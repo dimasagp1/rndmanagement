@@ -60,6 +60,10 @@ class GeneralController extends Controller
             return redirect()->route('qbd.dashboard');
         }
 
+        if ($tab === 'sample-evaluation') {
+            return redirect()->route('sample-evaluations.index');
+        }
+
         return view('general.index', [
             'activeTab' => $tab,
             'tabs'      => self::TABS,

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ProductCategorySeeder::class,
             DemoDataSeeder::class,
             PrfNpdProposalSeeder::class,
+            SampleEvaluationSeeder::class,
         ]);
 
         $this->command->info('');
