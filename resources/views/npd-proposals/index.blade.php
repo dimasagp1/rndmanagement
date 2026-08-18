@@ -104,7 +104,54 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
+                                @can('updateProjectStatus', $proposal)
+                                <div class="relative inline-block text-left" x-data="{ open: false, loading: false }" @click.outside="open = false">
+                                    <button type="button" @click="open = !open" class="cursor-pointer focus:outline-none" title="Klik untuk ubah status">
+                                        <x-status-badge :status="$proposal->project_status" />
+                                    </button>
+                                    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-75"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute left-0 z-30 mt-1 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1">
+                                        <p class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Ubah Status</p>
+                                        @foreach(\App\Services\NpdProposalService::PROJECT_STAGES as $stage)
+                                        <button type="button"
+                                                @click="
+                                                    if ('{{ $stage }}' !== '{{ $proposal->project_status }}' && !loading) {
+                                                        loading = true;
+                                                        fetch('{{ route('npd-proposals.project-status', $proposal) }}', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json',
+                                                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                                                'Accept': 'application/json',
+                                                            },
+                                                            body: JSON.stringify({ project_status: '{{ $stage }}' })
+                                                        })
+                                                        .then(r => {
+                                                            if (!r.ok) throw new Error('Gagal');
+                                                            return r.json();
+                                                        })
+                                                        .then(() => window.location.reload())
+                                                        .catch(() => {
+                                                            loading = false;
+                                                            alert('Gagal mengubah status. Coba lagi.');
+                                                        });
+                                                    }
+                                                    open = false;
+                                                "
+                                                class="w-full text-left px-3 py-1.5 text-xs {{ $stage === $proposal->project_status ? 'bg-primary/10 text-primary font-semibold' : 'text-gray-600 hover:bg-gray-50' }}">
+                                            {{ $stage }}
+                                        </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @else
                                 <x-status-badge :status="$proposal->project_status" />
+                                @endcan
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <a href="{{ route('npd-proposals.show', $proposal) }}"

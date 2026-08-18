@@ -190,7 +190,18 @@ class NpdProposalController extends Controller
         try {
             $this->service->updateProjectStatus($npdProposal, $validated['project_status']);
         } catch (ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Gagal memperbarui status proyek.', 'errors' => $e->errors()], 422);
+            }
+
             return back()->withErrors($e->errors())->with('error', 'Gagal memperbarui status proyek.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => "Status proyek NPD Proposal {$npdProposal->code} diperbarui menjadi {$validated['project_status']}.",
+                'status'  => $validated['project_status'],
+            ]);
         }
 
         return redirect()
