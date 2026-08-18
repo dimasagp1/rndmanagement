@@ -21,6 +21,9 @@ class ProductSeeder extends Seeder
             ['name' => 'Kunyit Asam Segar', 'description' => 'Minuman tradisional kunyit asam dengan rasa segar.'],
             ['name' => 'Ekstrak Temulawak Kapsul', 'description' => 'Suplemen kapsul ekstrak temulawak untuk menjaga daya tahan tubuh.'],
             ['name' => 'Teh Herbal Daun Jati Cina', 'description' => 'Teh herbal daun jati cina untuk kesehatan pencernaan.'],
+            ['name' => 'Temulawak Plus Imunitas', 'description' => 'Minuman temulawak untuk meningkatkan imunitas tubuh.'],
+            ['name' => 'Lidah Buaya Gel Herbal', 'description' => 'Minuman gel lidah buaya herbal menyegarkan.'],
+            ['name' => 'Jamu Beras Kencur Tradisional', 'description' => 'Jamu tradisional beras kencur untuk meredakan pegal linu.'],
         ];
 
         foreach ($products as $product) {

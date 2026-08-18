@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Formula;
 use App\Models\Material;
+use App\Models\Product;
 use App\Models\Supplier;
+use Illuminate\Validation\Rule;
 use App\Services\FormulaService;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Gate;
@@ -78,8 +80,9 @@ class FormulaController extends Controller
         $suppliers = Supplier::orderBy('name')->get();
         $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
         $autoCode  = $this->service->generateCode();
+        $products  = Product::orderBy('name')->get();
 
-        return view('formulas.create', compact('materials', 'suppliers', 'stages', 'autoCode'));
+        return view('formulas.create', compact('materials', 'suppliers', 'stages', 'autoCode', 'products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -91,7 +94,7 @@ class FormulaController extends Controller
 
         $validated = $request->validate([
             'code'              => 'required|string|max:255|unique:formulas,code',
-            'name'              => 'required|string|max:255',
+            'name'              => ['required', 'string', 'max:255', Rule::exists('products', 'name')],
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
             'development_stage' => 'required_unless:formula_type,existing|nullable|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
@@ -154,10 +157,11 @@ class FormulaController extends Controller
         $materials = Material::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
         $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
+        $products  = Product::orderBy('name')->get();
 
         $formula->load(['materials.material', 'materials.supplier']);
 
-        return view('formulas.edit', compact('formula', 'materials', 'suppliers', 'stages'));
+        return view('formulas.edit', compact('formula', 'materials', 'suppliers', 'stages', 'products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -169,7 +173,11 @@ class FormulaController extends Controller
 
         $validated = $request->validate([
             'code'              => 'required|string|max:255|unique:formulas,code,' . $formula->id,
-            'name'              => 'required|string|max:255',
+            'name'              => ['required', 'string', 'max:255', function ($attribute, $value, $fail) use ($formula) {
+                if ($value !== $formula->getOriginal('name') && !Product::where('name', $value)->exists()) {
+                    $fail('Nama produk harus dipilih dari daftar Nama Produk yang tersedia.');
+                }
+            }],
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
             'development_stage' => 'required_unless:formula_type,existing|nullable|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',

@@ -54,9 +54,13 @@
                             </div>
                             <div>
                                 <label class="form-label" for="name">Product Name <span class="text-red-500">*</span></label>
-                                <input type="text" id="name" name="name" value="{{ old('name') }}"
-                                       placeholder="mis. Jahe Merah Hangat Premium"
-                                       class="form-input @error('name') border-red-400 @enderror" required>
+                                <select id="name" name="name" required
+                                        class="form-input @error('name') border-red-400 @enderror">
+                                    <option value="">— Pilih Produk —</option>
+                                    @foreach($products as $product)
+                                    <option value="{{ $product->name }}" {{ old('name') === $product->name ? 'selected' : '' }}>{{ $product->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div>
                                 <label class="form-label" for="formula_date">Date</label>

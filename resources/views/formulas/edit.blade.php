@@ -84,9 +84,15 @@
                             </div>
                             <div>
                                 <label class="form-label" for="name">Product Name <span class="text-red-500">*</span></label>
-                                <input type="text" id="name" name="name"
-                                       value="{{ old('name', $formula->name) }}"
-                                       class="form-input @error('name') border-red-400 @enderror" required>
+                                <select id="name" name="name" required
+                                        class="form-input @error('name') border-red-400 @enderror">
+                                    @unless($products->pluck('name')->contains($formula->name))
+                                    <option value="{{ $formula->name }}" selected>{{ $formula->name }} (tidak di daftar)</option>
+                                    @endunless
+                                    @foreach($products as $product)
+                                    <option value="{{ $product->name }}" {{ old('name', $formula->name) === $product->name ? 'selected' : '' }}>{{ $product->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div>
                                 <label class="form-label" for="formula_date">Date</label>

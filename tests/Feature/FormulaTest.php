@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Formula;
 use App\Models\Material;
+use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\FormulaService;
@@ -53,6 +54,12 @@ class FormulaTest extends TestCase
             'email' => 'budi@alam.com',
             'address' => 'Jakarta',
         ]);
+
+        // Nama produk yang dipakai pada test (field Product Name = select dari tabel products)
+        foreach (['Formula Test', 'Formula Over 100', 'Formula Belum 100', 'Formula Tepat 100',
+                  'Formula Draft', 'Formula Approved', 'Existing Product Formula'] as $name) {
+            Product::create(['name' => $name]);
+        }
     }
 
     public function test_staff_rnd_can_create_formula_draft_with_any_percentage()
