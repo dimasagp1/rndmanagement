@@ -11,6 +11,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PreformulationStudyController;
 use App\Http\Controllers\QbdController;
 use App\Http\Controllers\LogbookPmController;
@@ -175,6 +176,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
     Route::resource('product-categories', ProductCategoryController::class)->middleware('role:Superadmin|Staff R&D');
+    Route::resource('products', ProductController::class)->middleware('role:Superadmin|Staff R&D');
 Route::resource('preformulation-studies', PreformulationStudyController::class)->middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager');
     Route::post('preformulation-studies/{preformulationStudy}/submit', [PreformulationStudyController::class, 'submit'])->name('preformulation-studies.submit')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
     Route::delete('preformulation-studies/documents/{document}', [PreformulationStudyController::class, 'destroyDocument'])->name('preformulation-studies.documents.destroy')->middleware('role:Superadmin|Staff R&D|Staff Packdev');

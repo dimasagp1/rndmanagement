@@ -240,6 +240,14 @@
                     </svg>
                     <span>Category</span>
                 </a>
+
+                <a href="{{ route('products.index') }}"
+                   class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>Nama Produk</span>
+                </a>
                 @endhasanyrole
             </nav>
 
