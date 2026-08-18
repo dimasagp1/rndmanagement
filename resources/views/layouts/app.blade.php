@@ -97,8 +97,8 @@
 
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
-                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'formula.view', 'formulation-development' => 'formula.view', 'sample-evaluation' => 'sample_evaluation.view'])
-                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbd.dashboard', 'formulation-development' => 'formulas.index', 'sample-evaluation' => 'sample-evaluations.index'])
+                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'formula.view', 'formulation-development' => 'formula.view', 'sample-evaluation' => 'sample_evaluation.view', 'formula-approval' => 'formula.view'])
+                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbd.dashboard', 'formulation-development' => 'formulas.index', 'sample-evaluation' => 'sample-evaluations.index', 'formula-approval' => 'formula-approvals.index'])
                 @php($moduleActive = collect($moduleRoutes)->filter(fn($r) => request()->routeIs(str($r)->before('.') . '.*'))->keys()->all())
                 @php($moduleActive = array_merge($moduleActive, request()->routeIs('trial-rms.*') || request()->routeIs('trial-pms.*') || request()->routeIs('logbook-pm.*') ? ['formulation-development'] : []))
                 @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)

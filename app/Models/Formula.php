@@ -80,6 +80,18 @@ class Formula extends Model
         return $this->hasMany(Formula::class, 'parent_formula_id');
     }
 
+    public function versionChain(): array
+    {
+        $chain = [];
+        $current = $this;
+        while ($current !== null) {
+            $chain[] = $current;
+            $current = $current->parentFormula;
+        }
+
+        return array_reverse($chain);
+    }
+
     // Relasi ke TrialRm
     public function trialRms()
     {

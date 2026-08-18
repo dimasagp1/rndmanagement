@@ -64,6 +64,10 @@ class GeneralController extends Controller
             return redirect()->route('sample-evaluations.index');
         }
 
+        if ($tab === 'formula-approval') {
+            return redirect()->route('formula-approvals.index');
+        }
+
         return view('general.index', [
             'activeTab' => $tab,
             'tabs'      => self::TABS,

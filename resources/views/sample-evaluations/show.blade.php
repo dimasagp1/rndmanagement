@@ -41,7 +41,7 @@
             <div class="flex items-center gap-3">
                 <h1 class="page-title">{{ $sampleEvaluation->sample_id }}</h1>
                 @if($sampleEvaluation->status === 'Approved')
-                <span class="badge bg-emerald-100 text-emerald-700">✅ Approved</span>
+                <span class="badge bg-emerald-100 text-emerald-700">Approved</span>
                 @elseif($sampleEvaluation->status === 'Reform')
                 <span class="badge bg-amber-100 text-amber-700">↻ Reform</span>
                 @else

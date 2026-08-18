@@ -266,6 +266,10 @@
         @apply bg-gray-100 text-gray-400;
     }
 
+    .stepper-icon.rejected {
+        @apply bg-red-100 text-red-600;
+    }
+
     /* === Flash Messages === */
     .flash-success {
         @apply alert-success animate-fade-in;

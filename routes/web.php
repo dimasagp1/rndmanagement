@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PreformulationStudyController;
 use App\Http\Controllers\QbdController;
 use App\Http\Controllers\LogbookPmController;
+use App\Http\Controllers\FormulaApprovalController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\PrfController;
@@ -134,6 +135,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('logbook-pm', LogbookPmController::class)
          ->parameters(['logbook-pm' => 'logbookPm'])
          ->middleware('can:trial_pm.view');
+
+    // ── Formula Approval ──────────────────────────────────
+    Route::get('/formula-approvals', [FormulaApprovalController::class, 'index'])
+         ->name('formula-approvals.index')
+         ->middleware('can:formula.view');
+    Route::get('/formula-approvals/create', [FormulaApprovalController::class, 'create'])
+         ->name('formula-approvals.create')
+         ->middleware('can:formula.view');
+    Route::post('/formula-approvals', [FormulaApprovalController::class, 'store'])
+         ->name('formula-approvals.store')
+         ->middleware('can:formula.view');
+    Route::get('/formula-approvals/{formApproval}', [FormulaApprovalController::class, 'show'])
+         ->name('formula-approvals.show')
+         ->middleware('can:formula.view');
+    Route::get('/formula-approvals/{formApproval}/edit', [FormulaApprovalController::class, 'edit'])
+         ->name('formula-approvals.edit')
+         ->middleware('can:formula.view');
+    Route::put('/formula-approvals/{formApproval}', [FormulaApprovalController::class, 'update'])
+         ->name('formula-approvals.update')
+         ->middleware('can:formula.view');
+    Route::delete('/formula-approvals/{formApproval}', [FormulaApprovalController::class, 'destroy'])
+         ->name('formula-approvals.destroy')
+         ->middleware('can:formula.view');
+    Route::post('/formula-approvals/{formApproval}/approve-om', [FormulaApprovalController::class, 'approveOm'])
+         ->name('formula-approvals.approve-om')
+         ->middleware('can:formula.view');
+    Route::post('/formula-approvals/{formApproval}/approve-gm', [FormulaApprovalController::class, 'approveGm'])
+         ->name('formula-approvals.approve-gm')
+         ->middleware('can:formula.view');
+    Route::post('/formula-approvals/{formApproval}/reject', [FormulaApprovalController::class, 'reject'])
+         ->name('formula-approvals.reject')
+         ->middleware('can:formula.view');
 
     // ── Approval Center ───────────────────────────────────
     Route::get('/approval-center', [ApprovalCenterController::class, 'index'])

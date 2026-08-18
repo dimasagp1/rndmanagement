@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Formula;
+use App\Models\FormulaApprovalForm;
 use App\Models\TrialRm;
 use App\Models\TrialPm;
 use App\Models\PreformulationStudy;
@@ -38,6 +39,7 @@ class ApprovalCenterController extends Controller
         $pendingTrialRms = collect();
         $pendingTrialPms = collect();
         $pendingPreformulationStudies = collect();
+        $pendingFormulaApprovals = collect();
 
         // Antrean Superadmin (Melihat semua)
         if ($user->hasRole('Superadmin')) {
@@ -58,6 +60,11 @@ class ApprovalCenterController extends Controller
 
             $pendingPreformulationStudies = PreformulationStudy::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])
                 ->with('creator')
+                ->latest()
+                ->get();
+
+            $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
+                ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
         }
@@ -82,6 +89,11 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
+
+            $pendingFormulaApprovals = FormulaApprovalForm::where('approval_status', 'Pending')
+                ->with('product.creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
         } 
         // Antrean General Manager (Tahap 2)
         elseif ($user->hasRole('General Manager')) {
@@ -99,9 +111,14 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
+
+            $pendingFormulaApprovals = FormulaApprovalForm::where('approval_status', 'Approval by OM')
+                ->with('product.creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals'));
     }
 
     // ──────────────────────────────────────────────────────────────

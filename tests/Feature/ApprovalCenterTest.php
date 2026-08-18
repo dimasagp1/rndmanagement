@@ -207,4 +207,62 @@ class ApprovalCenterTest extends TestCase
             return !$trials->contains($this->pendingTrialPm);
         });
     }
+
+    public function test_formula_approval_om_queue_only_shows_pending_forms()
+    {
+        $product = \App\Models\Product::create(['name' => 'Produk Approval']);
+
+        $pendingForm = \App\Models\FormulaApprovalForm::create([
+            'product_id'   => $product->id,
+            'product_name' => 'Produk Approval',
+        ]);
+        $gmForm = \App\Models\FormulaApprovalForm::create([
+            'product_id'   => \App\Models\Product::create(['name' => 'Produk Tahap GM'])->id,
+            'product_name' => 'Produk Tahap GM',
+            'approval_status' => 'Approval by OM',
+        ]);
+
+        $response = $this->actingAs($this->manager)->get(route('approval-center.index'));
+        $response->assertStatus(200);
+        $response->assertViewHas('pendingFormulaApprovals', function ($forms) use ($pendingForm, $gmForm) {
+            return $forms->contains('id', $pendingForm->id)
+                && ! $forms->contains('id', $gmForm->id);
+        });
+    }
+
+    public function test_formula_approval_gm_queue_only_shows_om_approved_forms()
+    {
+        $product = \App\Models\Product::create(['name' => 'Produk GM']);
+
+        $gmForm = \App\Models\FormulaApprovalForm::create([
+            'product_id'      => $product->id,
+            'product_name'    => 'Produk GM',
+            'approval_status' => 'Approval by OM',
+        ]);
+        \App\Models\FormulaApprovalForm::create([
+            'product_id'   => \App\Models\Product::create(['name' => 'Produk Pending'])->id,
+            'product_name' => 'Produk Pending',
+        ]);
+
+        $response = $this->actingAs($this->gm)->get(route('approval-center.index'));
+        $response->assertStatus(200);
+        $response->assertViewHas('pendingFormulaApprovals', function ($forms) use ($gmForm) {
+            return $forms->contains('id', $gmForm->id);
+        });
+    }
+
+    public function test_manager_can_approve_form_approval_from_approval_center()
+    {
+        $product = \App\Models\Product::create(['name' => 'Produk OM']);
+
+        $form = \App\Models\FormulaApprovalForm::create([
+            'product_id'   => $product->id,
+            'product_name' => 'Produk OM',
+        ]);
+
+        $response = $this->actingAs($this->manager)->post(route('formula-approvals.approve-om', $form));
+        $this->assertEquals('Approval by OM', $form->fresh()->approval_status);
+        $this->assertEquals($this->manager->id, $form->fresh()->approved_by_om);
+        $response->assertRedirect(route('formula-approvals.show', $form));
+    }
 }

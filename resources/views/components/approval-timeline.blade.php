@@ -17,6 +17,7 @@
     @php
         $isCompleted = $step['status'] === 'completed';
         $isCurrent   = $step['status'] === 'current';
+        $isRejected  = $step['status'] === 'rejected';
         $isLast      = $loop->last;
     @endphp
     <div class="flex items-start gap-4">
@@ -28,6 +29,12 @@
             <div class="stepper-icon completed shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            @elseif($isRejected)
+            <div class="stepper-icon rejected">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </div>
             @elseif($isCurrent)
@@ -52,18 +59,22 @@
         <div class="flex-1 pb-6">
             <div class="flex items-start justify-between gap-2">
                 <div>
-                    <p class="text-sm font-semibold {{ $isCompleted ? 'text-ink' : ($isCurrent ? 'text-accent' : 'text-gray-400') }}">
+                    <p class="text-sm font-semibold {{ $isCompleted ? 'text-ink' : ($isCurrent ? 'text-accent' : ($isRejected ? 'text-red-600' : 'text-gray-400')) }}">
                         {{ $step['label'] }}
                     </p>
                     @if(isset($step['sublabel']))
-                    <p class="text-xs {{ $isCompleted ? 'text-gray-500' : ($isCurrent ? 'text-accent/70' : 'text-gray-300') }} mt-0.5">
+                    <p class="text-xs {{ $isCompleted ? 'text-gray-500' : ($isCurrent ? 'text-accent/70' : ($isRejected ? 'text-red-500' : 'text-gray-300')) }} mt-0.5">
                         {{ $step['sublabel'] }}
                     </p>
                     @endif
                 </div>
 
-                {{-- Current badge --}}
-                @if($isCurrent)
+                {{-- Current / Rejected badge --}}
+                @if($isRejected)
+                <span class="text-[10px] font-semibold bg-red-50 text-red-600 px-2 py-0.5 rounded-full ring-1 ring-red-200 whitespace-nowrap flex-shrink-0">
+                    Ditolak
+                </span>
+                @elseif($isCurrent)
                 <span class="text-[10px] font-semibold bg-accent/10 text-accent px-2 py-0.5 rounded-full ring-1 ring-accent/20 whitespace-nowrap flex-shrink-0">
                     Menunggu
                 </span>
@@ -99,7 +110,7 @@
             @endif
 
             {{-- Pending message --}}
-            @if(!$isCompleted && !$isCurrent)
+            @if(!$isCompleted && !$isCurrent && !$isRejected)
             <p class="text-xs text-gray-300 mt-0.5">Menunggu tahap sebelumnya...</p>
             @endif
         </div>

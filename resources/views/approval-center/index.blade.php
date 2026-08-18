@@ -76,6 +76,16 @@
                         {{ $pendingPreformulationStudies->count() }}
                     </span>
                 </button>
+                <button type="button"
+                        @click="activeTab = 'formula_approvals'; activeRejectItem = null"
+                        :class="activeTab === 'formula_approvals' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
+                        class="px-4 py-2.5 border-b-2 text-sm transition font-medium">
+                    Formula Approval
+                    <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
+                          :class="activeTab === 'formula_approvals' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
+                        {{ $pendingFormulaApprovals->count() }}
+                    </span>
+                </button>
             </div>
 
                  TAB 2: FORMULA ANTREAN
@@ -279,7 +289,6 @@
                 @endif
             </div>
             @endif
-        </div>
 
         {{-- ─── PREFORMULATION STUDY TAB ─────────────────────── --}}
         <div x-show="activeTab === 'preformulation'" class="space-y-3">
@@ -341,6 +350,79 @@
                 </div>
                 @endforeach
             @endif
+        </div>
+
+        {{-- ─── FORMULA APPROVAL ANTREAN ─────────────────── --}}
+        <div x-show="activeTab === 'formula_approvals'" class="space-y-3">
+            @if($pendingFormulaApprovals->isEmpty())
+            <x-empty-state icon="approval" title="Antrean Kosong" description="Tidak ada Form Approval menunggu keputusan Anda saat ini." />
+            @else
+                @foreach($pendingFormulaApprovals as $approval)
+                <div class="card p-4 hover:border-gray-300 transition duration-150 relative">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $approval->code }}</code>
+                                @if($approval->approval_status === 'Pending')
+                                <span class="badge bg-amber-100 text-amber-700">Menunggu Approval OM</span>
+                                @elseif($approval->approval_status === 'Approval by OM')
+                                <span class="badge bg-blue-100 text-blue-700">Menunggu Approval GM</span>
+                                @else
+                                <span class="badge bg-gray-100 text-gray-600">{{ $approval->approval_status }}</span>
+                                @endif
+                            </div>
+                            <h3 class="text-base font-bold text-ink hover:text-primary">
+                                <a href="{{ route('formula-approvals.show', $approval) }}">{{ $approval->product_name }}</a>
+                            </h3>
+                            <p class="text-xs text-gray-400">
+                                Diajukan oleh {{ $approval->product?->creator?->name ?? '—' }} · {{ $approval->created_at?->diffForHumans() }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <a href="{{ route('formula-approvals.show', $approval) }}" class="btn-ghost btn-sm">Lihat Detail</a>
+
+                            <form method="POST"
+                                  action="{{ $approval->approval_status === 'Pending'
+                                      ? route('formula-approvals.approve-om', $approval)
+                                      : route('formula-approvals.approve-gm', $approval) }}">
+                                @csrf
+                                <button type="submit" class="btn-primary btn-sm" id="btn-approve-form-approval-{{ $approval->id }}">
+                                    Setujui
+                                </button>
+                            </form>
+
+                            <button type="button"
+                                    @click="activeRejectItem = activeRejectItem === 'form_approval_{{ $approval->id }}' ? null : 'form_approval_{{ $approval->id }}'"
+                                    class="btn-outline btn-sm text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
+                                    id="btn-reject-form-approval-{{ $approval->id }}">
+                                Tolak
+                            </button>
+                        </div>
+                    </div>
+
+                    <div x-show="activeRejectItem === 'form_approval_{{ $approval->id }}'"
+                         x-collapse
+                         class="mt-4 p-3 bg-red-50/50 border border-red-200 rounded-xl space-y-3 animate-fade-in">
+                        <h4 class="text-xs font-bold text-red-800 uppercase">Input Alasan Penolakan Form Approval</h4>
+                        <form method="POST" action="{{ route('formula-approvals.reject', $approval) }}" class="space-y-2">
+                            @csrf
+                            <div>
+                                <label class="form-label text-xs text-red-700" for="rejection_notes_form_approval_{{ $approval->id }}">Catatan Penolakan *</label>
+                                <textarea id="rejection_notes_form_approval_{{ $approval->id }}" name="rejection_notes" rows="2" required
+                                          placeholder="Wajib diisi! Jelaskan alasan penolakan..."
+                                          class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500 focus:border-red-500"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="activeRejectItem = null" class="btn-ghost btn-sm text-xs text-red-600">Batal</button>
+                                <button type="submit" class="btn-primary btn-sm text-xs bg-red-600 hover:bg-red-700 focus:ring-red-600">Kirim Penolakan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endforeach
+            @endif
+        </div>
         </div>
 
         {{-- ─── RIGHT COLUMN: RULES & INFO ────────────────────── --}}

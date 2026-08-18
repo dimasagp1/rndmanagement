@@ -53,7 +53,7 @@
         <a href="{{ route('sample-evaluations.index', array_merge(request()->except('status','page'), ['status' => 'Approved'])) }}"
            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap
                   {{ $currentStatus === 'Approved' ? 'bg-primary text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-surface border border-gray-200' }}">
-            Approved ✅
+            Approved
             <span class="text-xs px-1.5 py-0.5 rounded-full {{ $currentStatus === 'Approved' ? 'bg-white/20' : 'bg-gray-100' }}">{{ $counts['Approved'] }}</span>
         </a>
         <a href="{{ route('sample-evaluations.index', array_merge(request()->except('status','page'), ['status' => 'Reform'])) }}"
@@ -149,7 +149,7 @@
                         <td class="text-xs text-gray-500">{{ $evaluation->projectOwner?->name ?? '—' }}</td>
                         <td>
                             @if($evaluation->status === 'Approved')
-                            <span class="badge bg-emerald-100 text-emerald-700">✅ Approved</span>
+                            <span class="badge bg-emerald-100 text-emerald-700">Approved</span>
                             @elseif($evaluation->status === 'Reform')
                             <span class="badge bg-amber-100 text-amber-700">↻ Reform</span>
                             @else
