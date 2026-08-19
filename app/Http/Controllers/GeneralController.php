@@ -68,6 +68,10 @@ class GeneralController extends Controller
             return redirect()->route('formula-approvals.index');
         }
 
+        if ($tab === 'stability-test') {
+            return redirect()->route('stability-tests.index');
+        }
+
         return view('general.index', [
             'activeTab' => $tab,
             'tabs'      => self::TABS,

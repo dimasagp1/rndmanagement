@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             SampleEvaluationSeeder::class,
             ProductSeeder::class,
             FormulaApprovalFormSeeder::class,
+            StabilityTestSeeder::class,
         ]);
 
         $this->command->info('');

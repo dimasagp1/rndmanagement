@@ -86,6 +86,16 @@
                         {{ $pendingFormulaApprovals->count() }}
                     </span>
                 </button>
+                <button type="button"
+                        @click="activeTab = 'stability_tests'; activeRejectItem = null"
+                        :class="activeTab === 'stability_tests' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
+                        class="px-4 py-2.5 border-b-2 text-sm transition font-medium">
+                    Stability Test
+                    <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
+                          :class="activeTab === 'stability_tests' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
+                        {{ $pendingStabilityTests->count() }}
+                    </span>
+                </button>
             </div>
 
                  TAB 2: FORMULA ANTREAN
@@ -410,6 +420,76 @@
                             <div>
                                 <label class="form-label text-xs text-red-700" for="rejection_notes_form_approval_{{ $approval->id }}">Catatan Penolakan *</label>
                                 <textarea id="rejection_notes_form_approval_{{ $approval->id }}" name="rejection_notes" rows="2" required
+                                          placeholder="Wajib diisi! Jelaskan alasan penolakan..."
+                                          class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500 focus:border-red-500"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="activeRejectItem = null" class="btn-ghost btn-sm text-xs text-red-600">Batal</button>
+                                <button type="submit" class="btn-primary btn-sm text-xs bg-red-600 hover:bg-red-700 focus:ring-red-600">Kirim Penolakan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endforeach
+            @endif
+        </div>
+
+        {{-- ─── STABILITY TEST ANTREAN ─────────────────── --}}
+        <div x-show="activeTab === 'stability_tests'" class="space-y-3">
+            @if($pendingStabilityTests->isEmpty())
+            <x-empty-state icon="approval" title="Antrean Kosong" description="Tidak ada Stability Test menunggu keputusan Anda saat ini." />
+            @else
+                @foreach($pendingStabilityTests as $st)
+                <div class="card p-4 hover:border-gray-300 transition duration-150 relative">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $st->code }}</code>
+                                @if($st->approval_status === 'Pending Protokol')
+                                <span class="badge bg-amber-100 text-amber-700">Menunggu Approval Protokol (OM)</span>
+                                @else
+                                <span class="badge bg-blue-100 text-blue-700">Menunggu Approval Laporan (GM)</span>
+                                @endif
+                            </div>
+                            <h3 class="text-base font-bold text-ink hover:text-primary">
+                                <a href="{{ route('stability-tests.show', $st) }}">{{ $st->product_name }}</a>
+                            </h3>
+                            <p class="text-xs text-gray-400">
+                                Batch {{ $st->batch_number }} · Diajukan oleh {{ $st->creator?->name }} · {{ $st->submitted_at?->diffForHumans() ?? $st->report_submitted_at?->diffForHumans() }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <a href="{{ route('stability-tests.show', $st) }}" class="btn-ghost btn-sm">Lihat Detail</a>
+
+                            <form method="POST"
+                                  action="{{ $st->approval_status === 'Pending Protokol'
+                                      ? route('stability-tests.approve-protocol', $st)
+                                      : route('stability-tests.approve-report', $st) }}">
+                                @csrf
+                                <button type="submit" class="btn-primary btn-sm" id="btn-approve-stability-{{ $st->id }}">
+                                    Setujui
+                                </button>
+                            </form>
+
+                            <button type="button"
+                                    @click="activeRejectItem = activeRejectItem === 'stability_{{ $st->id }}' ? null : 'stability_{{ $st->id }}'"
+                                    class="btn-outline btn-sm text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
+                                    id="btn-reject-stability-{{ $st->id }}">
+                                Tolak
+                            </button>
+                        </div>
+                    </div>
+
+                    <div x-show="activeRejectItem === 'stability_{{ $st->id }}'"
+                         x-collapse
+                         class="mt-4 p-3 bg-red-50/50 border border-red-200 rounded-xl space-y-3 animate-fade-in">
+                        <h4 class="text-xs font-bold text-red-800 uppercase">Input Alasan Penolakan Stability Test</h4>
+                        <form method="POST" action="{{ route('stability-tests.reject', $st) }}" class="space-y-2">
+                            @csrf
+                            <div>
+                                <label class="form-label text-xs text-red-700" for="rejection_notes_stability_{{ $st->id }}">Catatan Penolakan *</label>
+                                <textarea id="rejection_notes_stability_{{ $st->id }}" name="rejection_notes" rows="2" required
                                           placeholder="Wajib diisi! Jelaskan alasan penolakan..."
                                           class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500 focus:border-red-500"></textarea>
                             </div>

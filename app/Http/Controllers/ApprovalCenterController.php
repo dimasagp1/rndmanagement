@@ -8,6 +8,7 @@ use App\Models\FormulaApprovalForm;
 use App\Models\TrialRm;
 use App\Models\TrialPm;
 use App\Models\PreformulationStudy;
+use App\Models\StabilityTest;
 use App\Services\FormulaService;
 use App\Services\TrialRmService;
 use App\Services\TrialPmService;
@@ -40,6 +41,7 @@ class ApprovalCenterController extends Controller
         $pendingTrialPms = collect();
         $pendingPreformulationStudies = collect();
         $pendingFormulaApprovals = collect();
+        $pendingStabilityTests = collect();
 
         // Antrean Superadmin (Melihat semua)
         if ($user->hasRole('Superadmin')) {
@@ -65,6 +67,11 @@ class ApprovalCenterController extends Controller
 
             $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
                 ->with('product.creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
+
+            $pendingStabilityTests = StabilityTest::whereIn('approval_status', ['Pending Protokol', 'Pending Laporan'])
+                ->with('product.creator', 'creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
         }
@@ -94,6 +101,11 @@ class ApprovalCenterController extends Controller
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
+
+            $pendingStabilityTests = StabilityTest::where('approval_status', 'Pending Protokol')
+                ->with('product.creator', 'creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
         } 
         // Antrean General Manager (Tahap 2)
         elseif ($user->hasRole('General Manager')) {
@@ -116,9 +128,14 @@ class ApprovalCenterController extends Controller
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
+
+            $pendingStabilityTests = StabilityTest::where('approval_status', 'Pending Laporan')
+                ->with('product.creator', 'creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals', 'pendingStabilityTests'));
     }
 
     // ──────────────────────────────────────────────────────────────

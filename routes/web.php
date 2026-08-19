@@ -21,6 +21,7 @@ use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\PrfController;
 use App\Http\Controllers\NpdProposalController;
 use App\Http\Controllers\SampleEvaluationController;
+use App\Http\Controllers\StabilityTestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -167,6 +168,78 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/formula-approvals/{formApproval}/reject', [FormulaApprovalController::class, 'reject'])
          ->name('formula-approvals.reject')
          ->middleware('can:formula.view');
+
+    // ── Stability Test ──────────────────────────────────────
+    Route::get('/stability-tests', [StabilityTestController::class, 'index'])
+         ->name('stability-tests.index')
+         ->middleware('can:stability_test.view');
+    Route::get('/stability-tests/create', [StabilityTestController::class, 'create'])
+         ->name('stability-tests.create')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests', [StabilityTestController::class, 'store'])
+         ->name('stability-tests.store')
+         ->middleware('can:stability_test.view');
+    Route::get('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'show'])
+         ->name('stability-tests.show')
+         ->middleware('can:stability_test.view');
+    Route::get('/stability-tests/{stabilityTest}/edit', [StabilityTestController::class, 'edit'])
+         ->name('stability-tests.edit')
+         ->middleware('can:stability_test.view');
+    Route::put('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'update'])
+         ->name('stability-tests.update')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'destroy'])
+         ->name('stability-tests.destroy')
+         ->middleware('can:stability_test.view');
+
+    // Flow approval: Protokol (OM) → Laporan (GM)
+    Route::post('/stability-tests/{stabilityTest}/submit-protocol', [StabilityTestController::class, 'submitProtocol'])
+         ->name('stability-tests.submit-protocol')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/approve-protocol', [StabilityTestController::class, 'approveProtocol'])
+         ->name('stability-tests.approve-protocol')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/submit-report', [StabilityTestController::class, 'submitReport'])
+         ->name('stability-tests.submit-report')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/approve-report', [StabilityTestController::class, 'approveReport'])
+         ->name('stability-tests.approve-report')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/reject', [StabilityTestController::class, 'reject'])
+         ->name('stability-tests.reject')
+         ->middleware('can:stability_test.view');
+
+    // Child data: jadwal, parameter, issue, lampiran
+    Route::post('/stability-tests/{stabilityTest}/schedules', [StabilityTestController::class, 'storeSchedule'])
+         ->name('stability-tests.schedules.store')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}/schedules/{schedule}', [StabilityTestController::class, 'destroySchedule'])
+         ->name('stability-tests.schedules.destroy')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/schedules/{schedule}/parameters', [StabilityTestController::class, 'storeParameter'])
+         ->name('stability-tests.parameters.store')
+         ->middleware('can:stability_test.view');
+    Route::put('/stability-tests/{stabilityTest}/schedules/{schedule}/parameters/{parameter}', [StabilityTestController::class, 'updateParameter'])
+         ->name('stability-tests.parameters.update')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}/schedules/{schedule}/parameters/{parameter}', [StabilityTestController::class, 'destroyParameter'])
+         ->name('stability-tests.parameters.destroy')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/issues', [StabilityTestController::class, 'storeIssue'])
+         ->name('stability-tests.issues.store')
+         ->middleware('can:stability_test.view');
+    Route::put('/stability-tests/{stabilityTest}/issues/{issue}', [StabilityTestController::class, 'updateIssue'])
+         ->name('stability-tests.issues.update')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}/issues/{issue}', [StabilityTestController::class, 'destroyIssue'])
+         ->name('stability-tests.issues.destroy')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/attachments', [StabilityTestController::class, 'storeAttachment'])
+         ->name('stability-tests.attachments.store')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}/attachments/{attachment}', [StabilityTestController::class, 'destroyAttachment'])
+         ->name('stability-tests.attachments.destroy')
+         ->middleware('can:stability_test.view');
 
     // ── Approval Center ───────────────────────────────────
     Route::get('/approval-center', [ApprovalCenterController::class, 'index'])

@@ -104,6 +104,18 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission);
         }
 
+        // Create permissions untuk Stability Test
+        $stabilityTestPermissions = [
+            'stability_test.create',
+            'stability_test.view',
+            'stability_test.edit',
+            'stability_test.delete',
+        ];
+
+        foreach ($stabilityTestPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
         // Create roles
         $superadmin = Role::findOrCreate('Superadmin');
         $staffRnd = Role::findOrCreate('Staff R&D');
@@ -135,6 +147,10 @@ class RolePermissionSeeder extends Seeder
             'sample_evaluation.view',
             'sample_evaluation.edit',
             'sample_evaluation.delete',
+            'stability_test.create',
+            'stability_test.view',
+            'stability_test.edit',
+            'stability_test.delete',
         ]);
 
         // Assign permissions to Staff Packdev (sama dengan Staff R&D)
@@ -161,6 +177,10 @@ class RolePermissionSeeder extends Seeder
             'sample_evaluation.view',
             'sample_evaluation.edit',
             'sample_evaluation.delete',
+            'stability_test.create',
+            'stability_test.view',
+            'stability_test.edit',
+            'stability_test.delete',
         ]);
 
         // Assign permissions to Operational Manager
@@ -175,6 +195,7 @@ class RolePermissionSeeder extends Seeder
             'prf.view',
             'npd_proposal.view',
             'sample_evaluation.view',
+            'stability_test.view',
         ]);
 
         // Assign permissions to General Manager
@@ -189,6 +210,7 @@ class RolePermissionSeeder extends Seeder
             'prf.view',
             'npd_proposal.view',
             'sample_evaluation.view',
+            'stability_test.view',
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');
