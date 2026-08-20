@@ -1,17 +1,45 @@
 @php($form = $form ?? null)
+@php($categories = $categories ?? collect())
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="md:col-span-2">
+        <label for="product_name" class="form-label">
+            Nama Produk <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="product_name" name="product_name" required
+               placeholder="Ketik nama produk..."
+               value="{{ old('product_name', $form?->product_name) }}"
+               class="form-input {{ $errors->has('product_name') ? 'border-red-400' : '' }}">
+        @error('product_name')
+        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
     <div>
         <label class="form-label" for="kategori">Kategori</label>
-        <input type="text" id="kategori" name="kategori" value="{{ old('kategori', $form?->kategori) }}" class="form-input">
+        <select id="kategori" name="kategori" class="form-select {{ $errors->has('kategori') ? 'border-red-400' : '' }}">
+            <option value="">— Pilih Kategori —</option>
+            <option value="New Product" {{ old('kategori', $form?->kategori) === 'New Product' ? 'selected' : '' }}>New Product</option>
+            <option value="Existing Product" {{ old('kategori', $form?->kategori) === 'Existing Product' ? 'selected' : '' }}>Existing Product</option>
+        </select>
+        @error('kategori')
+        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
+    <div>
+        <label class="form-label" for="bentuk_sediaan">Bentuk Sediaan</label>
+        <select id="bentuk_sediaan" name="bentuk_sediaan" class="form-select">
+            <option value="">— Pilih Bentuk Sediaan —</option>
+            @foreach($categories as $category)
+            <option value="{{ $category->name }}"
+                {{ old('bentuk_sediaan', $form?->bentuk_sediaan) === $category->name ? 'selected' : '' }}>
+                {{ $category->name }}
+            </option>
+            @endforeach
+        </select>
     </div>
     <div>
         <label class="form-label" for="komoditi">Komoditi</label>
         <input type="text" id="komoditi" name="komoditi" value="{{ old('komoditi', $form?->komoditi) }}" class="form-input">
-    </div>
-    <div>
-        <label class="form-label" for="bentuk_sediaan">Bentuk Sediaan</label>
-        <input type="text" id="bentuk_sediaan" name="bentuk_sediaan" value="{{ old('bentuk_sediaan', $form?->bentuk_sediaan) }}" class="form-input">
     </div>
     <div>
         <label class="form-label" for="manufactured">Manufactured</label>

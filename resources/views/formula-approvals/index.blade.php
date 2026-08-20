@@ -31,22 +31,12 @@
                 @endif
             </form>
             @can('formula.edit')
-            @if($canCreate)
             <a href="{{ route('formula-approvals.create') }}" class="btn-primary flex-shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 Tambah Approval
             </a>
-            @else
-            <span class="px-4 py-2.5 rounded-lg bg-gray-100 text-gray-400 text-sm font-semibold flex-shrink-0 inline-flex items-center gap-2 cursor-not-allowed"
-                  title="Semua produk sudah memiliki Form Approval">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah Approval
-            </span>
-            @endif
             @endcan
         </div>
     </div>
@@ -56,7 +46,7 @@
         <x-empty-state
             icon="approval"
             title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Form Approval' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain atau hapus pencarian.' : 'Produk yang sudah memiliki Form Approval akan tampil di sini.' }}"
+            description="{{ request('search') ? 'Coba kata kunci lain atau hapus pencarian.' : 'Form Approval yang sudah dibuat akan tampil di sini.' }}"
         />
         @else
         <div class="overflow-x-auto">
@@ -65,7 +55,6 @@
                     <tr>
                         <th class="w-20">No</th>
                         <th>Product Name</th>
-                        <th>Project Owner</th>
                         <th>Status</th>
                         <th>Date</th>
                         <th class="w-32 text-center">Aksi</th>
@@ -77,9 +66,7 @@
                         <td class="text-xs font-mono text-gray-400">{{ $index + 1 + ($forms->currentPage() - 1) * $forms->perPage() }}</td>
                         <td>
                             <div class="font-semibold text-ink">{{ $form->product_name }}</div>
-                            <div class="text-xs text-gray-400">{{ $form->product?->name ?? '—' }}</div>
                         </td>
-                        <td class="text-xs text-gray-500">{{ $form->product?->creator?->name ?? '—' }}</td>
                         <td>
                             @if($form->approval_status === 'Approved')
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
@@ -130,7 +117,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-10 text-gray-400 text-sm">Belum ada Form Approval.</td>
+                        <td colspan="5" class="text-center py-10 text-gray-400 text-sm">Belum ada Form Approval.</td>
                     </tr>
                     @endforelse
                 </tbody>

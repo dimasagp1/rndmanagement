@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Formula;
-use App\Models\StabilityTest;
+use App\Models\PackagingDevelopment;
 use App\Models\User;
 use App\Policies\FormulaPolicy;
 use App\Services\FormulaService;
@@ -76,16 +76,16 @@ class AppServiceProvider extends ServiceProvider
                 $notifCount = Formula::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
                     + TrialRm::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
                     + TrialPm::where('approval_status', 'Pending Approval')->count()
-                    + StabilityTest::whereIn('approval_status', ['Pending Protokol', 'Pending Laporan'])->count();
+                    + PackagingDevelopment::whereIn('approval_status', ['Pending OM', 'Pending GM'])->count();
             } elseif ($user->hasRole('Operational Manager')) {
                 $notifCount = Formula::where('approval_status', 'Pending Tahap 1')->count()
                     + TrialRm::where('approval_status', 'Pending Tahap 1')->count()
                     + TrialPm::where('approval_status', 'Pending Approval')->count()
-                    + StabilityTest::where('approval_status', 'Pending Protokol')->count();
+                    + PackagingDevelopment::where('approval_status', 'Pending OM')->count();
             } elseif ($user->hasRole('General Manager')) {
                 $notifCount = Formula::where('approval_status', 'Pending Tahap 2')->count()
                     + TrialRm::where('approval_status', 'Pending Tahap 2')->count()
-                    + StabilityTest::where('approval_status', 'Pending Laporan')->count();
+                    + PackagingDevelopment::where('approval_status', 'Pending GM')->count();
             }
 
             $view->with('navNotifCount', $notifCount);

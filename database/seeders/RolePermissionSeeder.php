@@ -104,7 +104,19 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission);
         }
 
-        // Create permissions untuk Stability Test
+// Create permissions untuk Packaging Development
+        $packagingDevelopmentPermissions = [
+            'packaging_development.create',
+            'packaging_development.view',
+            'packaging_development.edit',
+            'packaging_development.delete',
+        ];
+
+        foreach ($packagingDevelopmentPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
+        // Create permissions untuk Stability Test (minimal: judul + lampiran)
         $stabilityTestPermissions = [
             'stability_test.create',
             'stability_test.view',
@@ -151,6 +163,10 @@ class RolePermissionSeeder extends Seeder
             'stability_test.view',
             'stability_test.edit',
             'stability_test.delete',
+            'packaging_development.create',
+            'packaging_development.view',
+            'packaging_development.edit',
+            'packaging_development.delete',
         ]);
 
         // Assign permissions to Staff Packdev (sama dengan Staff R&D)
@@ -181,6 +197,10 @@ class RolePermissionSeeder extends Seeder
             'stability_test.view',
             'stability_test.edit',
             'stability_test.delete',
+            'packaging_development.create',
+            'packaging_development.view',
+            'packaging_development.edit',
+            'packaging_development.delete',
         ]);
 
         // Assign permissions to Operational Manager
@@ -196,6 +216,7 @@ class RolePermissionSeeder extends Seeder
             'npd_proposal.view',
             'sample_evaluation.view',
             'stability_test.view',
+            'packaging_development.view',
         ]);
 
         // Assign permissions to General Manager
@@ -211,6 +232,7 @@ class RolePermissionSeeder extends Seeder
             'npd_proposal.view',
             'sample_evaluation.view',
             'stability_test.view',
+            'packaging_development.view',
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');

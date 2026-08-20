@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FormulaApprovalAttachment;
 use App\Models\FormulaApprovalForm;
-use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class FormulaApprovalController extends Controller
 {
@@ -16,7 +17,7 @@ class FormulaApprovalController extends Controller
     {
         abort_unless(auth()->user()->can('formula.view'), 403);
 
-        $forms = FormulaApprovalForm::with(['product', 'omApprover', 'gmApprover'])
+        $forms = FormulaApprovalForm::with(['omApprover', 'gmApprover'])
             ->when($request->get('search'), function ($query, $search) {
                 $query->where('product_name', 'like', "%{$search}%");
             })
@@ -24,9 +25,7 @@ class FormulaApprovalController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $canCreate = Product::whereDoesntHave('approvalForms')->exists();
-
-        return view('formula-approvals.index', compact('forms', 'canCreate'));
+        return view('formula-approvals.index', compact('forms'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -36,7 +35,7 @@ class FormulaApprovalController extends Controller
     {
         abort_unless(auth()->user()->can('formula.view'), 403);
 
-        $formApproval->load(['product', 'omApprover', 'gmApprover']);
+        $formApproval->load(['omApprover', 'gmApprover', 'attachments']);
 
         return view('formula-approvals.show', compact('formApproval'));
     }
@@ -44,23 +43,13 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     // CREATE
     // ──────────────────────────────────────────────────────────────
-    public function create(Request $request)
+    public function create()
     {
         abort_unless(auth()->user()->can('formula.edit'), 403);
 
-        $selected = null;
+        $categories = ProductCategory::orderBy('name')->get();
 
-        if ($productId = $request->get('product')) {
-            $selected = Product::where('id', $productId)->whereDoesntHave('approvalForms')->first();
-        }
-
-        if (! $selected) {
-            $selected = Product::whereDoesntHave('approvalForms')->orderBy('name')->first();
-        }
-
-        $products = Product::whereDoesntHave('approvalForms')->orderBy('name')->get();
-
-        return view('formula-approvals.create', compact('selected', 'products'));
+        return view('formula-approvals.create', compact('categories'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -70,18 +59,25 @@ class FormulaApprovalController extends Controller
     {
         abort_unless(auth()->user()->can('formula.edit'), 403);
 
-        $validated = $request->validate($this->rules());
-
-        $product = Product::findOrFail($validated['product_id']);
-
-        FormulaApprovalForm::create([
-            ...$validated,
-            'product_name' => $product->name,
+        $validated = $request->validate([
+            ...$this->rules(),
+            'files'   => 'nullable|array',
+            'files.*' => 'file|max:10240|mimes:pdf,doc,docx',
         ]);
+
+        $form = FormulaApprovalForm::create($validated);
+
+        foreach ($request->file('files', []) as $file) {
+            $form->attachments()->create([
+                'file_path'     => $file->store('formula-approvals', 'public'),
+                'original_name' => $file->getClientOriginalName(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+        }
 
         return redirect()
             ->route('formula-approvals.index')
-            ->with('success', 'Form Approval untuk "' . $product->name . '" berhasil dibuat.');
+            ->with('success', 'Form Approval untuk "' . $validated['product_name'] . '" berhasil dibuat.');
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -91,10 +87,9 @@ class FormulaApprovalController extends Controller
     {
         abort_unless(auth()->user()->can('formula.edit'), 403);
 
-        $formApproval->load('product');
-        $products = Product::orderBy('name')->get();
+        $categories = ProductCategory::orderBy('name')->get();
 
-        return view('formula-approvals.edit', compact('formApproval', 'products'));
+        return view('formula-approvals.edit', compact('formApproval', 'categories'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -106,12 +101,7 @@ class FormulaApprovalController extends Controller
 
         $validated = $request->validate($this->rules($formApproval));
 
-        $product = Product::findOrFail($validated['product_id']);
-
-        $formApproval->update([
-            ...$validated,
-            'product_name' => $product->name,
-        ]);
+        $formApproval->update($validated);
 
         return redirect()
             ->route('formula-approvals.show', $formApproval)
@@ -126,6 +116,11 @@ class FormulaApprovalController extends Controller
         abort_unless(auth()->user()->can('formula.edit'), 403);
 
         $name = $formApproval->product_name;
+
+        foreach ($formApproval->attachments as $attachment) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+
         $formApproval->delete();
 
         return redirect()
@@ -136,14 +131,10 @@ class FormulaApprovalController extends Controller
     private function rules(?FormulaApprovalForm $formApproval = null): array
     {
         return [
-            'product_id'      => [
-                'required',
-                'exists:products,id',
-                Rule::unique('formula_approval_forms', 'product_id')->ignore($formApproval?->id),
-            ],
-            'kategori'        => 'nullable|string|max:255',
+            'product_name'    => 'required|string|max:255',
+            'kategori'        => 'required|in:New Product,Existing Product',
             'komoditi'        => 'nullable|string|max:255',
-            'bentuk_sediaan'  => 'nullable|string|max:255',
+            'bentuk_sediaan'  => 'nullable|in:' . ProductCategory::pluck('name')->implode(','),
             'manufactured'    => 'nullable|string|max:255',
             'distributor'     => 'nullable|string|max:255',
             'klaim_product'   => 'nullable|string|max:2000',
@@ -154,6 +145,23 @@ class FormulaApprovalController extends Controller
             'sensory_product' => 'nullable|string|max:2000',
             'target_launch'   => 'nullable|date',
         ];
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // ATTACHMENTS (pdf/word)
+    // ──────────────────────────────────────────────────────────────
+    public function destroyAttachment(FormulaApprovalForm $formApproval, FormulaApprovalAttachment $attachment)
+    {
+        abort_unless(auth()->user()->can('formula.edit'), 403);
+
+        if ($attachment->formula_approval_id !== $formApproval->id) {
+            abort(404);
+        }
+
+        Storage::disk('public')->delete($attachment->file_path);
+        $attachment->delete();
+
+        return back()->with('success', 'Lampiran berhasil dihapus.');
     }
 
     // ──────────────────────────────────────────────────────────────

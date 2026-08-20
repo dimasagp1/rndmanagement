@@ -72,6 +72,10 @@ class GeneralController extends Controller
             return redirect()->route('stability-tests.index');
         }
 
+        if ($tab === 'packaging-development') {
+            return redirect()->route('packaging-developments.index');
+        }
+
         return view('general.index', [
             'activeTab' => $tab,
             'tabs'      => self::TABS,

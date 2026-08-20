@@ -87,13 +87,13 @@
                     </span>
                 </button>
                 <button type="button"
-                        @click="activeTab = 'stability_tests'; activeRejectItem = null"
-                        :class="activeTab === 'stability_tests' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
+                        @click="activeTab = 'packaging'; activeRejectItem = null"
+                        :class="activeTab === 'packaging' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
                         class="px-4 py-2.5 border-b-2 text-sm transition font-medium">
-                    Stability Test
+                    Packaging Development
                     <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
-                          :class="activeTab === 'stability_tests' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
-                        {{ $pendingStabilityTests->count() }}
+                          :class="activeTab === 'packaging' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
+                        {{ $pendingPackagingDevelopments->count() }}
                     </span>
                 </button>
             </div>
@@ -434,62 +434,63 @@
             @endif
         </div>
 
-        {{-- ─── STABILITY TEST ANTREAN ─────────────────── --}}
-        <div x-show="activeTab === 'stability_tests'" class="space-y-3">
-            @if($pendingStabilityTests->isEmpty())
-            <x-empty-state icon="approval" title="Antrean Kosong" description="Tidak ada Stability Test menunggu keputusan Anda saat ini." />
+        {{-- ─── PACKAGING DEVELOPMENT ANTREAN ─────────────── --}}
+        <div x-show="activeTab === 'packaging'" class="space-y-3">
+            @if($pendingPackagingDevelopments->isEmpty())
+            <x-empty-state icon="approval" title="Antrean Kosong" description="Tidak ada Packaging Development menunggu keputusan Anda saat ini." />
             @else
-                @foreach($pendingStabilityTests as $st)
+                @foreach($pendingPackagingDevelopments as $pd)
                 <div class="card p-4 hover:border-gray-300 transition duration-150 relative">
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $st->code }}</code>
-                                @if($st->approval_status === 'Pending Protokol')
-                                <span class="badge bg-amber-100 text-amber-700">Menunggu Approval Protokol (OM)</span>
+                                <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $pd->code }}</code>
+                                @if($pd->approval_status === 'Pending OM')
+                                <span class="badge bg-amber-100 text-amber-700">Menunggu Approval OM</span>
                                 @else
-                                <span class="badge bg-blue-100 text-blue-700">Menunggu Approval Laporan (GM)</span>
+                                <span class="badge bg-blue-100 text-blue-700">Menunggu Approval GM</span>
                                 @endif
+                                <span class="badge bg-primary/10 text-primary">{{ $pd->packaging_type }}</span>
                             </div>
                             <h3 class="text-base font-bold text-ink hover:text-primary">
-                                <a href="{{ route('stability-tests.show', $st) }}">{{ $st->product_name }}</a>
+                                <a href="{{ route('packaging-developments.show', $pd) }}">{{ $pd->product_name }}</a>
                             </h3>
                             <p class="text-xs text-gray-400">
-                                Batch {{ $st->batch_number }} · Diajukan oleh {{ $st->creator?->name }} · {{ $st->submitted_at?->diffForHumans() ?? $st->report_submitted_at?->diffForHumans() }}
+                                {{ $pd->development_purpose }} · Supplier: {{ $pd->suppliers->first()?->supplier_name ?? '—' }} · Diajukan oleh {{ $pd->creator?->name }} · {{ $pd->submitted_at?->diffForHumans() }}
                             </p>
                         </div>
 
                         <div class="flex items-center gap-2 flex-shrink-0">
-                            <a href="{{ route('stability-tests.show', $st) }}" class="btn-ghost btn-sm">Lihat Detail</a>
+                            <a href="{{ route('packaging-developments.show', $pd) }}" class="btn-ghost btn-sm">Lihat Detail</a>
 
                             <form method="POST"
-                                  action="{{ $st->approval_status === 'Pending Protokol'
-                                      ? route('stability-tests.approve-protocol', $st)
-                                      : route('stability-tests.approve-report', $st) }}">
+                                  action="{{ $pd->approval_status === 'Pending OM'
+                                      ? route('packaging-developments.approve-om', $pd)
+                                      : route('packaging-developments.approve-gm', $pd) }}">
                                 @csrf
-                                <button type="submit" class="btn-primary btn-sm" id="btn-approve-stability-{{ $st->id }}">
+                                <button type="submit" class="btn-primary btn-sm" id="btn-approve-packaging-{{ $pd->id }}">
                                     Setujui
                                 </button>
                             </form>
 
                             <button type="button"
-                                    @click="activeRejectItem = activeRejectItem === 'stability_{{ $st->id }}' ? null : 'stability_{{ $st->id }}'"
+                                    @click="activeRejectItem = activeRejectItem === 'packaging_{{ $pd->id }}' ? null : 'packaging_{{ $pd->id }}'"
                                     class="btn-outline btn-sm text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
-                                    id="btn-reject-stability-{{ $st->id }}">
+                                    id="btn-reject-packaging-{{ $pd->id }}">
                                 Tolak
                             </button>
                         </div>
                     </div>
 
-                    <div x-show="activeRejectItem === 'stability_{{ $st->id }}'"
+                    <div x-show="activeRejectItem === 'packaging_{{ $pd->id }}'"
                          x-collapse
                          class="mt-4 p-3 bg-red-50/50 border border-red-200 rounded-xl space-y-3 animate-fade-in">
-                        <h4 class="text-xs font-bold text-red-800 uppercase">Input Alasan Penolakan Stability Test</h4>
-                        <form method="POST" action="{{ route('stability-tests.reject', $st) }}" class="space-y-2">
+                        <h4 class="text-xs font-bold text-red-800 uppercase">Input Alasan Penolakan Packaging Development</h4>
+                        <form method="POST" action="{{ route('packaging-developments.reject', $pd) }}" class="space-y-2">
                             @csrf
                             <div>
-                                <label class="form-label text-xs text-red-700" for="rejection_notes_stability_{{ $st->id }}">Catatan Penolakan *</label>
-                                <textarea id="rejection_notes_stability_{{ $st->id }}" name="rejection_notes" rows="2" required
+                                <label class="form-label text-xs text-red-700" for="rejection_notes_packaging_{{ $pd->id }}">Catatan Penolakan *</label>
+                                <textarea id="rejection_notes_packaging_{{ $pd->id }}" name="rejection_notes" rows="2" required
                                           placeholder="Wajib diisi! Jelaskan alasan penolakan..."
                                           class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500 focus:border-red-500"></textarea>
                             </div>

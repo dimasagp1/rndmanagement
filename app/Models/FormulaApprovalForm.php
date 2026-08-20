@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormulaApprovalForm extends Model
 {
@@ -41,6 +42,11 @@ class FormulaApprovalForm extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(FormulaApprovalAttachment::class, 'formula_approval_id');
     }
 
     public function getCodeAttribute(): string

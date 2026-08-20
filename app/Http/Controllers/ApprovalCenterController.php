@@ -8,7 +8,7 @@ use App\Models\FormulaApprovalForm;
 use App\Models\TrialRm;
 use App\Models\TrialPm;
 use App\Models\PreformulationStudy;
-use App\Models\StabilityTest;
+use App\Models\PackagingDevelopment;
 use App\Services\FormulaService;
 use App\Services\TrialRmService;
 use App\Services\TrialPmService;
@@ -41,7 +41,7 @@ class ApprovalCenterController extends Controller
         $pendingTrialPms = collect();
         $pendingPreformulationStudies = collect();
         $pendingFormulaApprovals = collect();
-        $pendingStabilityTests = collect();
+        $pendingPackagingDevelopments = collect();
 
         // Antrean Superadmin (Melihat semua)
         if ($user->hasRole('Superadmin')) {
@@ -70,8 +70,8 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingStabilityTests = StabilityTest::whereIn('approval_status', ['Pending Protokol', 'Pending Laporan'])
-                ->with('product.creator', 'creator', 'omApprover', 'gmApprover')
+            $pendingPackagingDevelopments = PackagingDevelopment::whereIn('approval_status', ['Pending OM', 'Pending GM'])
+                ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
                 ->latest()
                 ->get();
         }
@@ -102,8 +102,8 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingStabilityTests = StabilityTest::where('approval_status', 'Pending Protokol')
-                ->with('product.creator', 'creator', 'omApprover', 'gmApprover')
+            $pendingPackagingDevelopments = PackagingDevelopment::where('approval_status', 'Pending OM')
+                ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
                 ->latest()
                 ->get();
         } 
@@ -129,13 +129,13 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingStabilityTests = StabilityTest::where('approval_status', 'Pending Laporan')
-                ->with('product.creator', 'creator', 'omApprover', 'gmApprover')
+            $pendingPackagingDevelopments = PackagingDevelopment::where('approval_status', 'Pending GM')
+                ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
                 ->latest()
                 ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals', 'pendingStabilityTests'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals', 'pendingPackagingDevelopments'));
     }
 
     // ──────────────────────────────────────────────────────────────

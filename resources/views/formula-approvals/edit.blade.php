@@ -20,25 +20,7 @@
             @method('PUT')
 
             <div class="card card-body space-y-5">
-                <div>
-                    <label for="product_id" class="form-label">
-                        Nama Produk <span class="text-red-500">*</span>
-                    </label>
-                    <select name="product_id" id="product_id" required
-                            class="form-select {{ $errors->has('product_id') ? 'border-red-400' : '' }}">
-                        @foreach($products as $product)
-                        <option value="{{ $product->id }}"
-                            {{ old('product_id', $formApproval->product_id) == $product->id ? 'selected' : '' }}>
-                            {{ $product->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                    @error('product_id')
-                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                @include('formula-approvals.partials.form-fields', ['form' => $formApproval])
+                @include('formula-approvals.partials.form-fields', ['form' => $formApproval, 'categories' => $categories])
             </div>
 
             <div class="flex justify-end gap-3">

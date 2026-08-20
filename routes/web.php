@@ -22,6 +22,7 @@ use App\Http\Controllers\PrfController;
 use App\Http\Controllers\NpdProposalController;
 use App\Http\Controllers\SampleEvaluationController;
 use App\Http\Controllers\StabilityTestController;
+use App\Http\Controllers\PackagingDevelopmentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +47,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->name('general.show')
          ->whereIn('tab', array_keys(GeneralController::TABS));
 
+    // ── Stability Test ──────────────────────────────────────
+    Route::get('/stability-tests', [StabilityTestController::class, 'index'])
+         ->name('stability-tests.index')
+         ->middleware('can:stability_test.view');
+    Route::get('/stability-tests/create', [StabilityTestController::class, 'create'])
+         ->name('stability-tests.create')
+         ->middleware('can:stability_test.view');
+    Route::post('/stability-tests', [StabilityTestController::class, 'store'])
+         ->name('stability-tests.store')
+         ->middleware('can:stability_test.view');
+    Route::get('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'show'])
+         ->name('stability-tests.show')
+         ->middleware('can:stability_test.view');
+    Route::get('/stability-tests/{stabilityTest}/edit', [StabilityTestController::class, 'edit'])
+         ->name('stability-tests.edit')
+         ->middleware('can:stability_test.view');
+    Route::put('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'update'])
+         ->name('stability-tests.update')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'destroy'])
+         ->name('stability-tests.destroy')
+         ->middleware('can:stability_test.view');
+    Route::delete('/stability-tests/{stabilityTest}/attachments/{attachment}', [StabilityTestController::class, 'destroyAttachment'])
+         ->name('stability-tests.attachments.destroy')
+         ->middleware('can:stability_test.view');
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -168,78 +194,128 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/formula-approvals/{formApproval}/reject', [FormulaApprovalController::class, 'reject'])
          ->name('formula-approvals.reject')
          ->middleware('can:formula.view');
+    Route::delete('/formula-approvals/{formApproval}/attachments/{attachment}', [FormulaApprovalController::class, 'destroyAttachment'])
+         ->name('formula-approvals.attachments.destroy')
+         ->middleware('can:formula.view');
 
-    // ── Stability Test ──────────────────────────────────────
-    Route::get('/stability-tests', [StabilityTestController::class, 'index'])
-         ->name('stability-tests.index')
-         ->middleware('can:stability_test.view');
-    Route::get('/stability-tests/create', [StabilityTestController::class, 'create'])
-         ->name('stability-tests.create')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests', [StabilityTestController::class, 'store'])
-         ->name('stability-tests.store')
-         ->middleware('can:stability_test.view');
-    Route::get('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'show'])
-         ->name('stability-tests.show')
-         ->middleware('can:stability_test.view');
-    Route::get('/stability-tests/{stabilityTest}/edit', [StabilityTestController::class, 'edit'])
-         ->name('stability-tests.edit')
-         ->middleware('can:stability_test.view');
-    Route::put('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'update'])
-         ->name('stability-tests.update')
-         ->middleware('can:stability_test.view');
-    Route::delete('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'destroy'])
-         ->name('stability-tests.destroy')
-         ->middleware('can:stability_test.view');
+    // ── Packaging Development ─────────────────────────────────
+    Route::get('/packaging-developments', [PackagingDevelopmentController::class, 'index'])
+         ->name('packaging-developments.index')
+         ->middleware('can:packaging_development.view');
+    Route::get('/packaging-developments/create', [PackagingDevelopmentController::class, 'create'])
+         ->name('packaging-developments.create')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments', [PackagingDevelopmentController::class, 'store'])
+         ->name('packaging-developments.store')
+         ->middleware('can:packaging_development.view');
+    Route::get('/packaging-developments/{packagingDevelopment}', [PackagingDevelopmentController::class, 'show'])
+         ->name('packaging-developments.show')
+         ->middleware('can:packaging_development.view');
+    Route::get('/packaging-developments/{packagingDevelopment}/edit', [PackagingDevelopmentController::class, 'edit'])
+         ->name('packaging-developments.edit')
+         ->middleware('can:packaging_development.view');
+    Route::put('/packaging-developments/{packagingDevelopment}', [PackagingDevelopmentController::class, 'update'])
+         ->name('packaging-developments.update')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}', [PackagingDevelopmentController::class, 'destroy'])
+         ->name('packaging-developments.destroy')
+         ->middleware('can:packaging_development.view');
 
-    // Flow approval: Protokol (OM) → Laporan (GM)
-    Route::post('/stability-tests/{stabilityTest}/submit-protocol', [StabilityTestController::class, 'submitProtocol'])
-         ->name('stability-tests.submit-protocol')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/approve-protocol', [StabilityTestController::class, 'approveProtocol'])
-         ->name('stability-tests.approve-protocol')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/submit-report', [StabilityTestController::class, 'submitReport'])
-         ->name('stability-tests.submit-report')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/approve-report', [StabilityTestController::class, 'approveReport'])
-         ->name('stability-tests.approve-report')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/reject', [StabilityTestController::class, 'reject'])
-         ->name('stability-tests.reject')
-         ->middleware('can:stability_test.view');
+    // Flow approval: OM → GM
+    Route::post('/packaging-developments/{packagingDevelopment}/submit', [PackagingDevelopmentController::class, 'submit'])
+         ->name('packaging-developments.submit')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/approve-om', [PackagingDevelopmentController::class, 'approveOm'])
+         ->name('packaging-developments.approve-om')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/approve-gm', [PackagingDevelopmentController::class, 'approveGm'])
+         ->name('packaging-developments.approve-gm')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/reject', [PackagingDevelopmentController::class, 'reject'])
+         ->name('packaging-developments.reject')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/duplicate', [PackagingDevelopmentController::class, 'duplicate'])
+         ->name('packaging-developments.duplicate')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/stage', [PackagingDevelopmentController::class, 'updateStage'])
+         ->name('packaging-developments.stage')
+         ->middleware('can:packaging_development.view');
 
-    // Child data: jadwal, parameter, issue, lampiran
-    Route::post('/stability-tests/{stabilityTest}/schedules', [StabilityTestController::class, 'storeSchedule'])
-         ->name('stability-tests.schedules.store')
-         ->middleware('can:stability_test.view');
-    Route::delete('/stability-tests/{stabilityTest}/schedules/{schedule}', [StabilityTestController::class, 'destroySchedule'])
-         ->name('stability-tests.schedules.destroy')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/schedules/{schedule}/parameters', [StabilityTestController::class, 'storeParameter'])
-         ->name('stability-tests.parameters.store')
-         ->middleware('can:stability_test.view');
-    Route::put('/stability-tests/{stabilityTest}/schedules/{schedule}/parameters/{parameter}', [StabilityTestController::class, 'updateParameter'])
-         ->name('stability-tests.parameters.update')
-         ->middleware('can:stability_test.view');
-    Route::delete('/stability-tests/{stabilityTest}/schedules/{schedule}/parameters/{parameter}', [StabilityTestController::class, 'destroyParameter'])
-         ->name('stability-tests.parameters.destroy')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/issues', [StabilityTestController::class, 'storeIssue'])
-         ->name('stability-tests.issues.store')
-         ->middleware('can:stability_test.view');
-    Route::put('/stability-tests/{stabilityTest}/issues/{issue}', [StabilityTestController::class, 'updateIssue'])
-         ->name('stability-tests.issues.update')
-         ->middleware('can:stability_test.view');
-    Route::delete('/stability-tests/{stabilityTest}/issues/{issue}', [StabilityTestController::class, 'destroyIssue'])
-         ->name('stability-tests.issues.destroy')
-         ->middleware('can:stability_test.view');
-    Route::post('/stability-tests/{stabilityTest}/attachments', [StabilityTestController::class, 'storeAttachment'])
-         ->name('stability-tests.attachments.store')
-         ->middleware('can:stability_test.view');
-    Route::delete('/stability-tests/{stabilityTest}/attachments/{attachment}', [StabilityTestController::class, 'destroyAttachment'])
-         ->name('stability-tests.attachments.destroy')
-         ->middleware('can:stability_test.view');
+    // Child data: specification, primary, secondary
+    Route::post('/packaging-developments/{packagingDevelopment}/specifications', [PackagingDevelopmentController::class, 'saveSpecification'])
+         ->name('packaging-developments.specifications.save')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/specifications', [PackagingDevelopmentController::class, 'destroySpecification'])
+         ->name('packaging-developments.specifications.destroy')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/primary', [PackagingDevelopmentController::class, 'savePrimary'])
+         ->name('packaging-developments.primary.save')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/primary', [PackagingDevelopmentController::class, 'destroyPrimary'])
+         ->name('packaging-developments.primary.destroy')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/secondary', [PackagingDevelopmentController::class, 'saveSecondary'])
+         ->name('packaging-developments.secondary.save')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/secondary', [PackagingDevelopmentController::class, 'destroySecondary'])
+         ->name('packaging-developments.secondary.destroy')
+         ->middleware('can:packaging_development.view');
+
+    // Child data: material, supplier
+    Route::post('/packaging-developments/{packagingDevelopment}/materials', [PackagingDevelopmentController::class, 'storeMaterial'])
+         ->name('packaging-developments.materials.store')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/materials/{material}', [PackagingDevelopmentController::class, 'destroyMaterial'])
+         ->name('packaging-developments.materials.destroy')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/suppliers', [PackagingDevelopmentController::class, 'storeSupplier'])
+         ->name('packaging-developments.suppliers.store')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/suppliers/{supplier}', [PackagingDevelopmentController::class, 'destroySupplier'])
+         ->name('packaging-developments.suppliers.destroy')
+         ->middleware('can:packaging_development.view');
+
+    // Child data: trial + parameter
+    Route::post('/packaging-developments/{packagingDevelopment}/trials', [PackagingDevelopmentController::class, 'storeTrial'])
+         ->name('packaging-developments.trials.store')
+         ->middleware('can:packaging_development.view');
+    Route::put('/packaging-developments/{packagingDevelopment}/trials/{trial}', [PackagingDevelopmentController::class, 'updateTrial'])
+         ->name('packaging-developments.trials.update')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/trials/{trial}', [PackagingDevelopmentController::class, 'destroyTrial'])
+         ->name('packaging-developments.trials.destroy')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/trials/{trial}/parameters', [PackagingDevelopmentController::class, 'storeTrialParameter'])
+         ->name('packaging-developments.trials.parameters.store')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/trials/{trial}/parameters/{parameter}', [PackagingDevelopmentController::class, 'destroyTrialParameter'])
+         ->name('packaging-developments.trials.parameters.destroy')
+         ->middleware('can:packaging_development.view');
+
+    // Child data: compatibility + parameter
+    Route::post('/packaging-developments/{packagingDevelopment}/compatibilities', [PackagingDevelopmentController::class, 'storeCompatibility'])
+         ->name('packaging-developments.compatibilities.store')
+         ->middleware('can:packaging_development.view');
+    Route::put('/packaging-developments/{packagingDevelopment}/compatibilities/{evaluation}', [PackagingDevelopmentController::class, 'updateCompatibility'])
+         ->name('packaging-developments.compatibilities.update')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/compatibilities/{evaluation}', [PackagingDevelopmentController::class, 'destroyCompatibility'])
+         ->name('packaging-developments.compatibilities.destroy')
+         ->middleware('can:packaging_development.view');
+    Route::post('/packaging-developments/{packagingDevelopment}/compatibilities/{evaluation}/parameters', [PackagingDevelopmentController::class, 'storeCompatibilityParameter'])
+         ->name('packaging-developments.compatibilities.parameters.store')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/compatibilities/{evaluation}/parameters/{parameter}', [PackagingDevelopmentController::class, 'destroyCompatibilityParameter'])
+         ->name('packaging-developments.compatibilities.parameters.destroy')
+         ->middleware('can:packaging_development.view');
+
+    // Child data: attachment
+    Route::post('/packaging-developments/{packagingDevelopment}/attachments', [PackagingDevelopmentController::class, 'storeAttachment'])
+         ->name('packaging-developments.attachments.store')
+         ->middleware('can:packaging_development.view');
+    Route::delete('/packaging-developments/{packagingDevelopment}/attachments/{attachment}', [PackagingDevelopmentController::class, 'destroyAttachment'])
+         ->name('packaging-developments.attachments.destroy')
+         ->middleware('can:packaging_development.view');
 
     // ── Approval Center ───────────────────────────────────
     Route::get('/approval-center', [ApprovalCenterController::class, 'index'])
