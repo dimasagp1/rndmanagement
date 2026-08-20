@@ -98,7 +98,8 @@
                 </button>
             </div>
 
-                 TAB 2: FORMULA ANTREAN
+            {{-- ──────────────────────────────────────────────────
+                 TAB 1: FORMULA ANTREAN
                  ────────────────────────────────────────────────── --}}
             <div x-show="activeTab === 'formulas'" class="space-y-3">
                 @if($pendingFormulas->isEmpty())
