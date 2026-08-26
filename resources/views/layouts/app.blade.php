@@ -72,7 +72,7 @@
             <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
                 {{-- Dashboard (hidden, route tetap aktif di /dashboard) --}}
-                {{-- <a href="{{ route('dashboard') }}"
+                {{-- <a href="{{ route('timeline.index') }}"
                    class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

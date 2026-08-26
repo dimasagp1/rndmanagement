@@ -28,7 +28,7 @@ class RoleMiddleware
             }
         }
 
-        // If no roles match, redirect to dashboard with error
-        return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
+        // If no roles match, redirect to timeline dashboard with error
+        return redirect()->route('timeline.index')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
     }
 }

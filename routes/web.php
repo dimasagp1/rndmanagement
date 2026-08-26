@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormulaController;
 use App\Http\Controllers\TrialRmController;
 use App\Http\Controllers\TrialPmController;
@@ -31,14 +30,14 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn() => redirect()->route('dashboard'));
+Route::get('/', fn() => redirect()->route('timeline.index'));
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    // Dashboard - legacy redirect to new Timeline dashboard
+    Route::get('/dashboard', fn() => redirect()->route('timeline.index', [], 301))->name('dashboard');
 
-    // Timeline View (landing page setelah login)
+    // Timeline View - Dashboard Baru (landing page setelah login)
     Route::get('/timeline', [TimelineController::class, 'index'])->name('timeline.index');
 
     // General NPD Workflow (Coming Soon)
