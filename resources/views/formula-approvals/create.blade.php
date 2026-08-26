@@ -11,32 +11,14 @@
         <header class="mb-8">
             <h1 class="text-2xl font-heading font-bold text-ink mb-1">Tambah Approval Formula & Design</h1>
             <p class="text-sm text-gray-500">
-                Proses persetujuan final terhadap formula dan artwork/design sebelum registrasi & produksi. Approval online OM → GM dengan revision & matrix terekam otomatis.
+                Proses persetujuan final formula & artwork sebelum registrasi & produksi. Lampiran (PDF/Word/Gambar) bersifat opsional. Approval online OM → GM.
             </p>
         </header>
 
         <form method="POST" action="{{ route('formula-approvals.store') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
-
             <div class="card card-body space-y-5">
-                @include('formula-approvals.partials.form-fields', ['categories' => $categories, 'products' => $products, 'formulas' => $formulas])
-
-                <div class="border-t border-gray-100 pt-5">
-                    <label class="form-label" for="files">
-                        Lampiran Pendukung (PDF/Word, opsional, multi)
-                    </label>
-                    <input type="file" id="files" name="files[]" multiple accept=".pdf,.doc,.docx"
-                           class="form-input text-sm">
-                    <p class="mt-1 text-xs text-gray-400">
-                        Maksimal 10MB per file. Format: PDF, DOC, DOCX.
-                    </p>
-                    @error('files')
-                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                    @enderror
-                    @error('files.*')
-                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
+                @include('formula-approvals.partials.form-fields', ['categories' => $categories, 'products' => $products, 'type' => $type])
             </div>
 
             <div class="flex justify-end gap-3">
@@ -44,7 +26,7 @@
                    class="px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                     Batal
                 </a>
-                <button type="submit" class="btn-primary">Simpan (Rev 00) — Draft</button>
+                <button type="submit" class="btn-primary">Simpan</button>
             </div>
         </form>
     </div>

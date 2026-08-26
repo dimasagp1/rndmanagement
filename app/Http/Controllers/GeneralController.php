@@ -75,6 +75,22 @@ class GeneralController extends Controller
             return redirect()->route('stability-tests.index');
         }
 
+        if ($tab === 'regulatory-dossier') {
+            return redirect()->route('regulatory-dossiers.index');
+        }
+
+        if ($tab === 'technology-transfer') {
+            return redirect()->route('technology-transfers.index');
+        }
+
+        if ($tab === 'nie-approved') {
+            return redirect()->route('nie-approvals.index');
+        }
+
+        if ($tab === 'commercial-production') {
+            return redirect()->route('commercial-productions.index');
+        }
+
         if ($tab === 'packaging-development') {
             return redirect()->route('packaging-developments.index');
         }

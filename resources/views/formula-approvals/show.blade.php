@@ -3,9 +3,9 @@
         <div class="flex items-center gap-2 text-sm text-gray-500">
             <a href="{{ route('timeline.index') }}" class="hover:text-primary">Dashboard</a>
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <a href="{{ route('formula-approvals.index') }}" class="hover:text-primary">Approval Formula & Design</a>
+            <a href="{{ route('formula-approvals.index', ['type' => $formApproval->type]) }}" class="hover:text-primary">Approval {{ $formApproval->type }}</a>
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span class="text-ink font-medium">{{ $formApproval->product_name }} — {{ $formApproval->revision_label }}</span>
+            <span class="text-ink font-medium">{{ $formApproval->product_name }}</span>
         </div>
     </x-slot>
 
@@ -28,33 +28,22 @@
             <div class="flex items-center gap-2 mb-1 flex-wrap">
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold
                     {{ $fa->approval_status === 'Approved' ? 'bg-green-100 text-green-700' : '' }}
-                    {{ $fa->approval_status === 'Approval by OM' ? 'bg-blue-100 text-blue-700' : '' }}
-                    {{ $fa->approval_status === 'Rejected' ? 'bg-red-100 text-red-700' : '' }}
-                    {{ $fa->approval_status === 'Pending' ? 'bg-amber-100 text-amber-700' : '' }}">
-                    {{ $fa->approval_status }}
+                    {{ in_array($fa->approval_status, ['Pending','Approval by OM']) ? 'bg-amber-100 text-amber-700' : '' }}
+                    {{ $fa->approval_status === 'Rejected' ? 'bg-red-100 text-red-700' : '' }}">
+                    {{ $fa->approval_status === 'Approval by OM' ? 'Pending GM' : $fa->approval_status }}
                 </span>
                 <span class="px-2 py-0.5 rounded bg-ink text-white text-xs font-mono">{{ $fa->code }}</span>
-                <span class="px-2 py-0.5 rounded bg-primary text-white text-xs font-semibold">{{ $fa->revision_label }}</span>
-                @if($fa->artwork_file_path)
-                <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                    {{ $fa->artwork_status === 'Approved' ? 'bg-green-100 text-green-700' : '' }}
-                    {{ $fa->artwork_status === 'Pending OM' || $fa->artwork_status === 'Pending GM' ? 'bg-amber-100 text-amber-700' : '' }}
-                    {{ $fa->artwork_status === 'Rejected' ? 'bg-red-100 text-red-700' : '' }}
-                    {{ $fa->artwork_status === 'Draft' ? 'bg-gray-100 text-gray-600' : '' }}">
-                    Artwork: {{ $fa->artwork_status }}
-                </span>
-                @endif
                 @if($fa->final_document_path)
                 <span class="px-2 py-0.5 rounded-full bg-green-600 text-white text-xs font-semibold">Final Document Ready</span>
                 @endif
             </div>
             <h1 class="page-title">{{ $fa->product_name }}</h1>
-            <p class="page-subtitle">Final approval dibuat {{ $fa->created_at?->isoFormat('D MMM Y, HH:mm') ?? '—' }} oleh {{ $fa->creator?->name ?? '—' }} — Formula & Artwork/Design untuk registrasi & produksi</p>
+            <p class="page-subtitle">Approval dibuat {{ $fa->created_at?->isoFormat('D MMM Y, HH:mm') ?? '—' }} oleh {{ $fa->creator?->name ?? '—' }} — untuk registrasi & produksi</p>
         </div>
-        <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center gap-2 flex-wrap">
             @can('formula.edit')
-                @if(!in_array($fa->approval_status, ['Pending','Approval by OM','Approved']))
-                <a href="{{ route('formula-approvals.edit', $fa) }}" class="btn-outline">Edit Final Approval</a>
+                @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
+                <a href="{{ route('formula-approvals.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit Approval</a>
                 @endif
                 <form method="POST" action="{{ route('formula-approvals.duplicate', $fa) }}" class="inline">
                     @csrf
@@ -77,7 +66,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Cetak
             </button>
-            <a href="{{ route('formula-approvals.index') }}" class="btn-ghost">← Kembali</a>
+            <a href="{{ route('formula-approvals.index', ['type' => $fa->type]) }}" class="btn-ghost">← Kembali</a>
         </div>
     </div>
 
@@ -89,7 +78,7 @@
             {{-- Approval Matrix --}}
             <div class="card border-2 {{ $fa->approval_status==='Approved' ? 'border-green-200' : 'border-primary/20' }}">
                 <div class="card-header bg-surface">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Approval Matrix — Formula & Artwork/Design</h2>
+                    <h2 class="text-sm font-heading font-semibold text-ink">Approval Matrix</h2>
                     <span class="text-xs text-gray-500">Revision {{ $fa->revision_label }} · Online approval</span>
                 </div>
                 <div class="card-body p-0">
@@ -125,53 +114,57 @@
                             </tbody>
                         </table>
                     </div>
-                    {{-- Explicit approver/date summary for brief outline --}}
-                    <div class="px-4 py-3 bg-gray-50 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                        <div><p class="text-gray-400">Approver OM</p><p class="font-semibold text-ink">{{ $fa->omApprover?->name ?? '—' }}</p></div>
-                        <div><p class="text-gray-400">Approval Date OM</p><p>{{ $fa->approved_at_om?->isoFormat('D MMM Y HH:mm') ?? '—' }}</p></div>
+                    {{-- Explicit approver/date summary — GM only --}}
+                    <div class="px-4 py-3 bg-gray-50 grid grid-cols-2 gap-3 text-xs">
                         <div><p class="text-gray-400">Approver GM (Final)</p><p class="font-semibold text-ink">{{ $fa->gmApprover?->name ?? '—' }}</p></div>
                         <div><p class="text-gray-400">Approval Date GM</p><p>{{ $fa->approved_at_gm?->isoFormat('D MMM Y HH:mm') ?? $fa->final_approved_at?->isoFormat('D MMM Y HH:mm') ?? '—' }}</p></div>
                     </div>
                 </div>
             </div>
 
-            {{-- Final Approved Document Banner --}}
-            @if($fa->final_document_path || $fa->approval_status==='Approved')
-            <div class="card {{ $fa->final_document_path ? 'border-l-4 border-green-500' : 'border-l-4 border-amber-400' }}">
-                <div class="card-body flex items-center justify-between gap-4">
-                    <div>
-                        <p class="text-sm font-semibold {{ $fa->final_document_path ? 'text-green-700' : 'text-amber-700' }}">Final Approved Document</p>
-                        @if($fa->final_document_path)
-                        <a href="{{ Storage::url($fa->final_document_path) }}" target="_blank" class="text-sm text-primary hover:underline inline-flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            {{ $fa->final_document_name }}
-                        </a>
-                        <p class="text-xs text-gray-500">Disetujui final {{ $fa->final_approved_at?->isoFormat('D MMM Y HH:mm') ?? $fa->approved_at_gm?->isoFormat('D MMM Y HH:mm') ?? '—' }} — Siap registrasi & produksi</p>
-                        @else
-                        <p class="text-xs text-gray-500">Belum ada file final. Upload setelah Approved GM.</p>
-                        @endif
-                    </div>
-                    @can('formula.edit')
-                    @if($fa->approval_status==='Approved' && !$fa->final_document_path)
-                    <form method="POST" action="{{ route('formula-approvals.attachments.store', $fa) }}" enctype="multipart/form-data" class="flex items-center gap-2">
-                        @csrf
-                        <input type="hidden" name="document_type" value="Final">
-                        <input type="file" name="file" required accept=".pdf,.doc,.docx" class="form-input text-xs">
-                        <button type="submit" class="btn-primary btn-sm">Upload Final</button>
-                    </form>
+            {{-- ─── Keputusan GM (Disetujui / Tidak Disetujui + Alasan + Saran) ─── --}}
+            @php($gmDecided = in_array($fa->approval_status, ['Approved', 'Rejected']))
+            <div class="card border-l-4 {{ $gmDecided ? ($fa->approval_status === 'Approved' ? 'border-green-500' : 'border-red-500') : 'border-gray-200' }}">
+                <div class="card-header">
+                    <h2 class="text-sm font-heading font-semibold text-ink">Keputusan GM</h2>
+                    @if($gmDecided)
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $fa->approval_status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                        {{ $fa->approval_status === 'Approved' ? '✓ Disetujui' : '✕ Tidak Disetujui' }}
+                    </span>
+                    @else
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Menunggu Keputusan</span>
                     @endif
-                    @endcan
+                </div>
+                <div class="card-body space-y-3 text-sm">
+                    @if(! $gmDecided)
+                    <p class="text-xs text-gray-400">Belum ada keputusan dari General Manager. Catatan keputusan, alasan, dan saran akan tampil di sini setelah GM memberikan keputusan.</p>
+                    @else
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Keputusan oleh</p>
+                            <p class="font-semibold text-ink">{{ $fa->gmApprover?->name ?? '—' }}</p>
+                            <p class="text-xs text-gray-400">{{ $fa->approved_at_gm?->isoFormat('D MMM Y, HH:mm') ?? '—' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Alasan {{ $fa->approval_status === 'Approved' ? 'Persetujuan' : 'Penolakan' }}</p>
+                            <p class="whitespace-pre-line text-gray-600">{{ $fa->decision_reason ?? $fa->rejection_notes ?? 'Tidak ada catatan.' }}</p>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-gray-100">
+                        <p class="text-xs text-gray-400 mb-1">Saran</p>
+                        <p class="whitespace-pre-line text-gray-600">{{ $fa->gm_suggestions ?? 'Tidak ada saran.' }}</p>
+                    </div>
+                    @endif
                 </div>
             </div>
-            @endif
 
             {{-- Formula Approval Details --}}
             <div class="card">
                 <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Formula Approval — Detail Produk</h2>
+                    <h2 class="text-sm font-heading font-semibold text-ink">{{ $fa->type === 'Design' ? 'Design' : 'Formula' }} — Detail Produk</h2>
                     @can('formula.edit')
-                        @if(!in_array($fa->approval_status, ['Pending','Approval by OM','Approved']))
-                        <a href="{{ route('formula-approvals.edit', $fa) }}" class="btn-outline btn-sm">Edit</a>
+                        @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
+                        <a href="{{ route('formula-approvals.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline btn-sm">Edit</a>
                         @endif
                     @endcan
                 </div>
@@ -180,68 +173,17 @@
                     <div><p class="text-xs text-gray-400 mb-1">Kode Approval</p><p class="font-mono">{{ $fa->code }}</p></div>
                     <div><p class="text-xs text-gray-400 mb-1">Revision Number</p><p class="font-semibold">{{ $fa->revision_label }} ({{ $fa->revision }})</p></div>
                     <div><p class="text-xs text-gray-400 mb-1">Kategori</p><p>{{ $fa->kategori ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Komoditi</p><p>{{ $fa->komoditi ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Bentuk Sediaan</p><p>{{ $fa->bentuk_sediaan ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Manufactured</p><p>{{ $fa->manufactured ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Distributor</p><p>{{ $fa->distributor ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Target Launch</p><p>{{ $fa->target_launch?->isoFormat('D MMM Y') ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Formula Terkait</p><p>@if($fa->formula)<a href="{{ route('formulas.show', $fa->formula) }}" class="text-primary hover:underline">{{ $fa->formula->code }} — {{ $fa->formula->name }}</a>@else — @endif</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Aturan Pakai</p><p>{{ $fa->aturan_pakai ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Ukuran Kemasan</p><p>{{ $fa->ukuran_kemasan ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Packaging</p><p>{{ $fa->packaging ?? '—' }}</p></div>
-                    <div class="md:col-span-3"><p class="text-xs text-gray-400 mb-1">Komposisi (Formula)</p><p class="whitespace-pre-line">{{ $fa->komposisi ?? '—' }}</p></div>
-                    <div class="md:col-span-3"><p class="text-xs text-gray-400 mb-1">Klaim Product</p><p class="whitespace-pre-line">{{ $fa->klaim_product ?? '—' }}</p></div>
-                    <div class="md:col-span-3"><p class="text-xs text-gray-400 mb-1">Sensory Product</p><p class="whitespace-pre-line">{{ $fa->sensory_product ?? '—' }}</p></div>
-                </div>
-            </div>
-
-            {{-- Artwork / Design Approval --}}
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Artwork / Design Approval</h2>
-                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $fa->artwork_status==='Approved'?'bg-green-100 text-green-700':($fa->artwork_status==='Draft'?'bg-gray-100 text-gray-600':'bg-amber-100 text-amber-700') }}">{{ $fa->artwork_status }}</span>
-                </div>
-                <div class="card-body grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
-                    <div><p class="text-xs text-gray-400 mb-1">No. Artwork</p><p>{{ $fa->artwork_no ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Judul Artwork</p><p class="font-semibold">{{ $fa->artwork_title ?? '—' }}</p></div>
-                    <div><p class="text-xs text-gray-400 mb-1">Versi Artwork</p><p>{{ $fa->artwork_version ?? '—' }}</p></div>
-                    <div class="md:col-span-3"><p class="text-xs text-gray-400 mb-1">Deskripsi</p><p class="whitespace-pre-line">{{ $fa->artwork_description ?? '—' }}</p></div>
-                    <div class="md:col-span-3">
-                        <p class="text-xs text-gray-400 mb-1">File Artwork / Design</p>
-                        @if($fa->artwork_file_path)
-                        <a href="{{ Storage::url($fa->artwork_file_path) }}" target="_blank" class="inline-flex items-center gap-2 text-primary hover:underline">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-2-6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V8z"/></svg>
-                            {{ $fa->artwork_original_name }}
-                        </a>
-                        <p class="text-xs text-gray-400">Upload {{ $fa->artwork_uploaded_at?->isoFormat('D MMM Y HH:mm') ?? '—' }} · Status {{ $fa->artwork_status }}</p>
-                        @else
-                        <p class="text-gray-400">Belum ada file artwork.</p>
-                        @endif
-                    </div>
-                    @can('formula.edit')
-                        @if(!in_array($fa->approval_status, ['Pending','Approval by OM','Approved']))
-                        <div class="md:col-span-3 border-t border-gray-100 pt-3">
-                            <form method="POST" action="{{ route('formula-approvals.update', $fa) }}" enctype="multipart/form-data" class="flex items-center gap-2 flex-wrap">
-                                @csrf @method('PUT')
-                                <input type="hidden" name="product_name" value="{{ $fa->product_name }}">
-                                <input type="hidden" name="kategori" value="{{ $fa->kategori }}">
-                                <input type="file" name="artwork_file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-input text-sm">
-                                <button type="submit" class="btn-outline btn-sm">Upload/Update Artwork</button>
-                            </form>
-                        </div>
-                        @endif
-                    @endcan
                 </div>
             </div>
 
             {{-- Attachments (PDF/Word) --}}
             <div class="card">
                 <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Lampiran — Upload File PDF/Word (Approval Online)</h2>
+                    <h2 class="text-sm font-heading font-semibold text-ink">Lampiran — Upload File (PDF/Word/Gambar, opsional)</h2>
                 </div>
                 <div class="card-body">
                     @can('formula.edit')
-                        @if(!in_array($fa->approval_status, ['Approved']))
+                        @if(!in_array($fa->approval_status, ['Approved','Pending']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                         <form method="POST" action="{{ route('formula-approvals.attachments.store', $fa) }}" enctype="multipart/form-data" class="flex items-center gap-2 mb-4 flex-wrap">
                             @csrf
                             <select name="document_type" class="form-select text-sm w-32">
@@ -249,7 +191,7 @@
                                 <option value="Artwork">Artwork</option>
                                 <option value="Final">Final</option>
                             </select>
-                            <input type="file" name="file" required accept=".pdf,.doc,.docx" class="form-input text-sm flex-1">
+                            <input type="file" name="file" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-input text-sm flex-1">
                             <button type="submit" class="btn-primary btn-sm">Upload</button>
                         </form>
                         @endif
@@ -270,7 +212,7 @@
                             <div class="flex items-center gap-3 flex-shrink-0">
                                 <span class="text-xs text-gray-400">{{ $attachment->uploader?->name ?? '—' }} · {{ $attachment->created_at?->format('d/m/y') }}</span>
                                 @can('formula.edit')
-                                    @if(!in_array($fa->approval_status, ['Pending','Approval by OM','Approved']))
+                                    @if(!in_array($fa->approval_status, ['Pending','Approved']))
                                     <form method="POST" action="{{ route('formula-approvals.attachments.destroy', [$fa, $attachment]) }}" onsubmit="return confirm('Hapus lampiran {{ $attachment->original_name }}?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="text-xs text-red-500 hover:text-red-700">Hapus</button>
@@ -328,68 +270,49 @@
                             'date'     => $fa->created_at?->isoFormat('D MMM Y'),
                         ],
                         [
-                            'label'    => 'Operational Manager',
-                            'sublabel' => 'Approval OM — Formula & Artwork',
-                            'status'   => $fa->approved_at_om
-                                ? 'completed'
-                                : ($fa->approval_status === 'Rejected' && ! $fa->approved_at_om
-                                    ? 'rejected'
-                                    : ($fa->approval_status === 'Pending' ? 'current' : 'pending')),
-                            'user'     => $fa->omApprover?->name,
-                            'date'     => $fa->approved_at_om?->isoFormat('D MMM Y'),
-                        ],
-                        [
                             'label'    => 'General Manager',
                             'sublabel' => 'Final Approval GM — Siap Registrasi/Produksi',
                             'status'   => $fa->approved_at_gm
                                 ? 'completed'
-                                : ($fa->approval_status === 'Rejected' && $fa->approved_at_om
+                                : ($fa->approval_status === 'Rejected'
                                     ? 'rejected'
-                                    : ($fa->approval_status === 'Approval by OM' ? 'current' : 'pending')),
+                                    : ($fa->approval_status === 'Pending' ? 'current' : 'pending')),
                             'user'     => $fa->gmApprover?->name,
                             'date'     => $fa->approved_at_gm?->isoFormat('D MMM Y'),
                         ],
                     ]" />
-                    <p class="text-xs text-gray-500 mt-3">Approval online via tombol di bawah. Approver & approval date terekam otomatis.</p>
+                    <p class="text-xs text-gray-500 mt-3">Approval hanya oleh GM. Approver & approval date terekam otomatis.</p>
                 </div>
             </div>
 
-            {{-- E-Approval --}}
-            @php($canOm = auth()->user()->hasRole('Operational Manager') || auth()->user()->hasRole('Superadmin'))
+            {{-- E-Approval — GM only --}}
             @php($canGm = auth()->user()->hasRole('General Manager') || auth()->user()->hasRole('Superadmin'))
-            @php($isOmTurn = $canOm && $fa->approval_status === 'Pending')
-            @php($isGmTurn = $canGm && $fa->approval_status === 'Approval by OM')
+            @php($isGmTurn = $canGm && in_array($fa->approval_status, ['Pending', 'Approval by OM']))
 
-            @if($isOmTurn || $isGmTurn)
+            @if($isGmTurn)
             <div class="card print:hidden">
                 <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Approval Online</h2>
+                    <h2 class="text-sm font-heading font-semibold text-ink">Approval Online — GM</h2>
                 </div>
                 <div class="card-body space-y-3">
-                    @if($isOmTurn)
-                    <form method="POST" action="{{ route('formula-approvals.approve-om', $fa) }}">
+                    <details class="group" open>
+                        <summary class="text-xs font-semibold text-gray-500 cursor-pointer select-none">Keputusan & Alasan (opsional)</summary>
+                    </details>
+                    <form method="POST" action="{{ route('formula-approvals.approve-gm', $fa) }}" class="space-y-2">
                         @csrf
-                        <input type="hidden" name="comment" value="">
-                        <button type="submit" class="w-full btn-primary justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Setujui (OM) — Formula & Artwork
-                        </button>
-                    </form>
-                    @endif
-                    @if($isGmTurn)
-                    <form method="POST" action="{{ route('formula-approvals.approve-gm', $fa) }}">
-                        @csrf
+                        <textarea name="decision_reason" rows="2" placeholder="Alasan persetujuan..." class="form-input text-sm"></textarea>
+                        <textarea name="gm_suggestions" rows="2" placeholder="Saran..." class="form-input text-sm"></textarea>
                         <button type="submit" class="w-full btn-primary justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Setujui Final (GM)
                         </button>
                     </form>
-                    @endif
                     <details class="group">
-                        <summary class="w-full btn-outline btn-sm justify-center list-none cursor-pointer select-none">Tolak</summary>
+                        <summary class="w-full btn-outline btn-sm justify-center list-none cursor-pointer select-none">Tidak Disetujui (Tolak)</summary>
                         <form method="POST" action="{{ route('formula-approvals.reject', $fa) }}" class="mt-3 space-y-2">
                             @csrf
-                            <textarea name="rejection_notes" rows="2" required placeholder="Alasan penolakan..." class="form-input text-sm"></textarea>
+                            <textarea name="rejection_notes" rows="2" required placeholder="Alasan tidak disetujui..." class="form-input text-sm"></textarea>
+                            <textarea name="gm_suggestions" rows="2" placeholder="Saran perbaikan (opsional)..." class="form-input text-sm"></textarea>
                             <button type="submit" class="w-full px-3 py-2 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition">Tolak Approval</button>
                         </form>
                     </details>
@@ -418,4 +341,5 @@
             </div>
         </div>
     </div>
+
 </x-app-layout>
