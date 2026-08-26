@@ -28,7 +28,6 @@ class GeneralController extends Controller
             'preformulation-qbd',
             'formulation-development',
             'sample-evaluation',
-            'formula-approval',
             'stability-test',
             'packaging-development',
             'approval-formula-design',
@@ -65,6 +64,10 @@ class GeneralController extends Controller
         }
 
         if ($tab === 'formula-approval') {
+            return redirect()->route('formula-approvals.index');
+        }
+
+        if ($tab === 'approval-formula-design') {
             return redirect()->route('formula-approvals.index');
         }
 

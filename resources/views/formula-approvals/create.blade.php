@@ -1,17 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2 text-sm text-gray-500">
-            <span class="text-ink font-medium">Formula Approval</span>
+            <a href="{{ route('formula-approvals.index') }}" class="hover:text-primary">Approval Formula & Design</a>
             <span class="text-gray-300">/</span>
-            <span class="text-gray-400">Tambah Form Approval</span>
+            <span class="text-gray-400">Tambah</span>
         </div>
     </x-slot>
 
     <div class="min-h-screen max-w-3xl">
         <header class="mb-8">
-            <h1 class="text-2xl font-heading font-bold text-ink mb-1">Tambah Form Approval</h1>
+            <h1 class="text-2xl font-heading font-bold text-ink mb-1">Tambah Approval Formula & Design</h1>
             <p class="text-sm text-gray-500">
-                Isi data produk dan dokumen pendukung di bawah ini.
+                Proses persetujuan final terhadap formula dan artwork/design sebelum registrasi & produksi. Approval online OM → GM dengan revision & matrix terekam otomatis.
             </p>
         </header>
 
@@ -19,11 +19,11 @@
             @csrf
 
             <div class="card card-body space-y-5">
-                @include('formula-approvals.partials.form-fields', ['categories' => $categories])
+                @include('formula-approvals.partials.form-fields', ['categories' => $categories, 'products' => $products, 'formulas' => $formulas])
 
                 <div class="border-t border-gray-100 pt-5">
                     <label class="form-label" for="files">
-                        Lampiran (PDF/Word, opsional)
+                        Lampiran Pendukung (PDF/Word, opsional, multi)
                     </label>
                     <input type="file" id="files" name="files[]" multiple accept=".pdf,.doc,.docx"
                            class="form-input text-sm">
@@ -44,7 +44,7 @@
                    class="px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                     Batal
                 </a>
-                <button type="submit" class="btn-primary">Simpan Form Approval</button>
+                <button type="submit" class="btn-primary">Simpan (Rev 00) — Draft</button>
             </div>
         </form>
     </div>

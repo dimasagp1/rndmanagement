@@ -194,6 +194,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/formula-approvals/{formApproval}/reject', [FormulaApprovalController::class, 'reject'])
          ->name('formula-approvals.reject')
          ->middleware('can:formula.view');
+    Route::post('/formula-approvals/{formApproval}/submit', [FormulaApprovalController::class, 'submit'])
+         ->name('formula-approvals.submit')
+         ->middleware('can:formula.view');
+    Route::post('/formula-approvals/{formApproval}/duplicate', [FormulaApprovalController::class, 'duplicate'])
+         ->name('formula-approvals.duplicate')
+         ->middleware('can:formula.view');
+    Route::post('/formula-approvals/{formApproval}/attachments', [FormulaApprovalController::class, 'storeAttachment'])
+         ->name('formula-approvals.attachments.store')
+         ->middleware('can:formula.view');
     Route::delete('/formula-approvals/{formApproval}/attachments/{attachment}', [FormulaApprovalController::class, 'destroyAttachment'])
          ->name('formula-approvals.attachments.destroy')
          ->middleware('can:formula.view');

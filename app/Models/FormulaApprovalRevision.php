@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class FormulaApprovalAttachment extends Model
+class FormulaApprovalRevision extends Model
 {
     protected $fillable = [
         'formula_approval_id',
-        'file_path',
-        'original_name',
-        'uploaded_by',
+        'revision',
         'revision_label',
-        'is_final_document',
-        'document_type',
+        'change_description',
+        'changed_by',
+        'status',
     ];
 
     protected $casts = [
-        'is_final_document' => 'boolean',
+        'revision' => 'integer',
     ];
 
     public function formApproval(): BelongsTo
@@ -26,8 +25,8 @@ class FormulaApprovalAttachment extends Model
         return $this->belongsTo(FormulaApprovalForm::class, 'formula_approval_id');
     }
 
-    public function uploader(): BelongsTo
+    public function changer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->belongsTo(User::class, 'changed_by');
     }
 }

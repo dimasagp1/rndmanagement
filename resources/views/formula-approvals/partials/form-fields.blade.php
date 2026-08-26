@@ -1,6 +1,21 @@
 @php($form = $form ?? null)
 @php($categories = $categories ?? collect())
+@php($products = $products ?? collect())
+@php($formulas = $formulas ?? collect())
 
+{{-- ── Final Approval: Formula & Artwork/Design ── --}}
+<p class="text-xs font-semibold uppercase tracking-widest text-primary mb-1">Final Approval — Formula & Artwork/Design</p>
+<p class="text-xs text-gray-500 mb-4">Proses persetujuan final terhadap formula dan artwork/design sebelum registrasi dan produksi. Revision, Approver & Approval Date akan terekam otomatis via approval online.</p>
+
+@if($form)
+<div class="flex items-center gap-2 mb-4 p-3 rounded-lg bg-surface border border-gray-100">
+    <span class="px-2 py-1 rounded bg-ink text-white text-xs font-mono">{{ $form->code }}</span>
+    <span class="px-2 py-1 rounded bg-primary text-white text-xs font-semibold">{{ $form->revision_label }}</span>
+    <span class="text-xs text-gray-500">Status: <strong class="text-ink">{{ $form->approval_status }}</strong></span>
+</div>
+@endif
+
+{{-- Product & Formula linkage --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="md:col-span-2">
         <label for="product_name" class="form-label">
@@ -14,6 +29,38 @@
         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
         @enderror
     </div>
+
+    @if($products->isNotEmpty())
+    <div>
+        <label class="form-label" for="product_id">Link ke Master Produk (opsional)</label>
+        <select id="product_id" name="product_id" class="form-select">
+            <option value="">— Tanpa link —</option>
+            @foreach($products as $product)
+            <option value="{{ $product->id }}" {{ (string) old('product_id', $form?->product_id) === (string) $product->id ? 'selected' : '' }}>
+                {{ $product->name }} ({{ $product->code ?? $product->id }})
+            </option>
+            @endforeach
+        </select>
+        @error('product_id')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
+    </div>
+    @endif
+
+    @if($formulas->isNotEmpty())
+    <div>
+        <label class="form-label" for="formula_id">Link Formula Approved (opsional)</label>
+        <select id="formula_id" name="formula_id" class="form-select">
+            <option value="">— Pilih Formula —</option>
+            @foreach($formulas as $formula)
+            <option value="{{ $formula->id }}" {{ (string) old('formula_id', $form?->formula_id) === (string) $formula->id ? 'selected' : '' }}>
+                {{ $formula->code }} — {{ $formula->name }} (v{{ $formula->version }})
+            </option>
+            @endforeach
+        </select>
+        <p class="text-xs text-gray-400 mt-1">Hanya formula Approved yang tampil.</p>
+        @error('formula_id')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
+    </div>
+    @endif
+
     <div>
         <label class="form-label" for="kategori">Kategori</label>
         <select id="kategori" name="kategori" class="form-select {{ $errors->has('kategori') ? 'border-red-400' : '' }}">
@@ -70,11 +117,56 @@
         <textarea id="klaim_product" name="klaim_product" rows="3" class="form-input">{{ old('klaim_product', $form?->klaim_product) }}</textarea>
     </div>
     <div class="md:col-span-2">
-        <label class="form-label" for="komposisi">Komposisi</label>
-        <textarea id="komposisi" name="komposisi" rows="3" class="form-input">{{ old('komposisi', $form?->komposisi) }}</textarea>
+        <label class="form-label" for="komposisi">Komposisi (Formula Approval)</label>
+        <textarea id="komposisi" name="komposisi" rows="3" class="form-input" placeholder="Rincian formula final yang akan diregistrasi...">{{ old('komposisi', $form?->komposisi) }}</textarea>
     </div>
     <div class="md:col-span-2">
         <label class="form-label" for="sensory_product">Sensory Product</label>
         <textarea id="sensory_product" name="sensory_product" rows="3" class="form-input">{{ old('sensory_product', $form?->sensory_product) }}</textarea>
     </div>
+</div>
+
+{{-- ── Artwork / Design Approval ── --}}
+<div class="border-t border-gray-100 pt-5 mt-5">
+    <h3 class="text-sm font-heading font-semibold text-ink mb-1">Artwork / Design Approval</h3>
+    <p class="text-xs text-gray-500 mb-4">Upload file artwork/design (PDF/JPG/PNG/DOC) yang akan diproses approval bersama formula. Approval matrix akan mencatat OM & GM untuk artwork terpisah.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="form-label" for="artwork_no">No. Artwork / Design</label>
+            <input type="text" id="artwork_no" name="artwork_no" value="{{ old('artwork_no', $form?->artwork_no) }}" placeholder="ART-2026-001" class="form-input">
+        </div>
+        <div>
+            <label class="form-label" for="artwork_version">Versi Artwork</label>
+            <input type="text" id="artwork_version" name="artwork_version" value="{{ old('artwork_version', $form?->artwork_version) }}" placeholder="v1.0" class="form-input">
+        </div>
+        <div class="md:col-span-2">
+            <label class="form-label" for="artwork_title">Judul Artwork / Design</label>
+            <input type="text" id="artwork_title" name="artwork_title" value="{{ old('artwork_title', $form?->artwork_title) }}" placeholder="Artwork kemasan box + label" class="form-input">
+        </div>
+        <div class="md:col-span-2">
+            <label class="form-label" for="artwork_description">Deskripsi Artwork</label>
+            <textarea id="artwork_description" name="artwork_description" rows="2" class="form-input" placeholder="Catatan perubahan desain, warna, klaim visual...">{{ old('artwork_description', $form?->artwork_description) }}</textarea>
+        </div>
+        <div class="md:col-span-2">
+            <label class="form-label" for="artwork_file">File Artwork / Design (PDF/DOC/JPG/PNG, max 10MB)</label>
+            @if($form?->artwork_file_path)
+            <p class="text-xs text-gray-500 mb-1">File saat ini: <a href="{{ Storage::url($form->artwork_file_path) }}" target="_blank" class="text-primary hover:underline">{{ $form->artwork_original_name }}</a> ({{ $form->artwork_status }})</p>
+            @endif
+            <input type="file" id="artwork_file" name="artwork_file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-input text-sm">
+            @error('artwork_file')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
+        </div>
+    </div>
+</div>
+
+{{-- Final Approved Document --}}
+<div class="border-t border-gray-100 pt-5 mt-5">
+    <h3 class="text-sm font-heading font-semibold text-ink mb-1">Final Approved Document</h3>
+    <p class="text-xs text-gray-500 mb-3">Dokumen final (PDF/Word) yang menjadi acuan registrasi & produksi setelah Approved GM. Bisa diunggah saat create atau setelah approval.</p>
+    @if($form?->final_document_path)
+    <p class="text-xs text-green-600 mb-2">✓ Final: <a href="{{ Storage::url($form->final_document_path) }}" target="_blank" class="underline">{{ $form->final_document_name }}</a> — {{ $form->final_approved_at?->isoFormat('D MMM Y HH:mm') ?? '—' }}</p>
+    @endif
+    <label class="form-label" for="final_document">Upload Final Approved Document (PDF/Word, max 10MB)</label>
+    <input type="file" id="final_document" name="final_document" accept=".pdf,.doc,.docx" class="form-input text-sm">
+    @error('final_document')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
 </div>
