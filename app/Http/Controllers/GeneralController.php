@@ -76,7 +76,7 @@ class GeneralController extends Controller
         }
 
         if ($tab === 'regulatory-dossier') {
-            return redirect()->route('regulatory-dossiers.index');
+            return redirect()->route('regulatory-dossier.index');
         }
 
         if ($tab === 'technology-transfer') {

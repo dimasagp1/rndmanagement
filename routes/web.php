@@ -213,72 +213,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->name('formula-approvals.tracker.update')
          ->middleware('can:formula.view');
 
-    // ── Regulatory Dossier ────────────────────────────────────
-    Route::get('/regulatory-dossiers', [RegulatoryDossierController::class, 'index'])
-         ->name('regulatory-dossiers.index')
+    // ── Regulatory Dossier — Document & Folder Management ─────────
+    Route::get('/regulatory-dossier', [RegulatoryDossierController::class, 'index'])
+         ->name('regulatory-dossier.index')
          ->middleware('can:regulatory_dossier.view');
-    Route::get('/regulatory-dossiers/create', [RegulatoryDossierController::class, 'create'])
-         ->name('regulatory-dossiers.create')
+    Route::post('/regulatory-dossier/folders', [RegulatoryDossierController::class, 'storeFolder'])
+         ->name('regulatory-dossier.folders.store')
+         ->middleware('can:regulatory_dossier.create');
+    Route::put('/regulatory-dossier/folders/{folder}', [RegulatoryDossierController::class, 'updateFolder'])
+         ->name('regulatory-dossier.folders.update')
+         ->middleware('can:regulatory_dossier.edit');
+    Route::delete('/regulatory-dossier/folders/{folder}', [RegulatoryDossierController::class, 'destroyFolder'])
+         ->name('regulatory-dossier.folders.destroy')
+         ->middleware('can:regulatory_dossier.delete');
+    Route::post('/regulatory-dossier/documents', [RegulatoryDossierController::class, 'storeDocument'])
+         ->name('regulatory-dossier.documents.store')
+         ->middleware('can:regulatory_dossier.create');
+    Route::get('/regulatory-dossier/documents/{document}', [RegulatoryDossierController::class, 'showDocument'])
+         ->name('regulatory-dossier.documents.show')
          ->middleware('can:regulatory_dossier.view');
-    Route::post('/regulatory-dossiers', [RegulatoryDossierController::class, 'store'])
-         ->name('regulatory-dossiers.store')
+    Route::put('/regulatory-dossier/documents/{document}', [RegulatoryDossierController::class, 'updateDocument'])
+         ->name('regulatory-dossier.documents.update')
+         ->middleware('can:regulatory_dossier.edit');
+    Route::post('/regulatory-dossier/documents/{document}/move', [RegulatoryDossierController::class, 'moveDocument'])
+         ->name('regulatory-dossier.documents.move')
+         ->middleware('can:regulatory_dossier.edit');
+    Route::delete('/regulatory-dossier/documents/{document}', [RegulatoryDossierController::class, 'destroyDocument'])
+         ->name('regulatory-dossier.documents.destroy')
+         ->middleware('can:regulatory_dossier.delete');
+    Route::get('/regulatory-dossier/documents/{document}/download', [RegulatoryDossierController::class, 'downloadDocument'])
+         ->name('regulatory-dossier.documents.download')
          ->middleware('can:regulatory_dossier.view');
-    Route::get('/regulatory-dossiers/{regulatoryDossier}', [RegulatoryDossierController::class, 'show'])
-         ->name('regulatory-dossiers.show')
+    Route::get('/regulatory-dossier/documents/{document}/preview', [RegulatoryDossierController::class, 'previewDocument'])
+         ->name('regulatory-dossier.documents.preview')
          ->middleware('can:regulatory_dossier.view');
-    Route::get('/regulatory-dossiers/{regulatoryDossier}/edit', [RegulatoryDossierController::class, 'edit'])
-         ->name('regulatory-dossiers.edit')
-         ->middleware('can:regulatory_dossier.view');
-    Route::put('/regulatory-dossiers/{regulatoryDossier}', [RegulatoryDossierController::class, 'update'])
-         ->name('regulatory-dossiers.update')
-         ->middleware('can:regulatory_dossier.view');
-    Route::delete('/regulatory-dossiers/{regulatoryDossier}', [RegulatoryDossierController::class, 'destroy'])
-         ->name('regulatory-dossiers.destroy')
-         ->middleware('can:regulatory_dossier.view');
-
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/submit', [RegulatoryDossierController::class, 'submit'])
-         ->name('regulatory-dossiers.submit')
-         ->middleware('can:regulatory_dossier.view');
-
-    // Checklist documents
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/documents', [RegulatoryDossierController::class, 'storeDocument'])
-         ->name('regulatory-dossiers.documents.store')
-         ->middleware('can:regulatory_dossier.view');
-    Route::put('/regulatory-dossiers/{regulatoryDossier}/documents/{document}', [RegulatoryDossierController::class, 'updateDocument'])
-         ->name('regulatory-dossiers.documents.update')
-         ->middleware('can:regulatory_dossier.view');
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/documents/{document}/complete', [RegulatoryDossierController::class, 'completeDocument'])
-         ->name('regulatory-dossiers.documents.complete')
-         ->middleware('can:regulatory_dossier.view');
-    Route::delete('/regulatory-dossiers/{regulatoryDossier}/documents/{document}', [RegulatoryDossierController::class, 'destroyDocument'])
-         ->name('regulatory-dossiers.documents.destroy')
-         ->middleware('can:regulatory_dossier.view');
-
-    // Folders
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/folders', [RegulatoryDossierController::class, 'storeFolder'])
-         ->name('regulatory-dossiers.folders.store')
-         ->middleware('can:regulatory_dossier.view');
-    Route::delete('/regulatory-dossiers/{regulatoryDossier}/folders/{folder}', [RegulatoryDossierController::class, 'destroyFolder'])
-         ->name('regulatory-dossiers.folders.destroy')
-         ->middleware('can:regulatory_dossier.view');
-
-    // Attachments (upload file / upload folder)
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/attachments', [RegulatoryDossierController::class, 'storeAttachment'])
-         ->name('regulatory-dossiers.attachments.store')
-         ->middleware('can:regulatory_dossier.view');
-    Route::delete('/regulatory-dossiers/{regulatoryDossier}/attachments/{attachment}', [RegulatoryDossierController::class, 'destroyAttachment'])
-         ->name('regulatory-dossiers.attachments.destroy')
-         ->middleware('can:regulatory_dossier.view');
-
-    // Query / Deficiency tracking
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/queries', [RegulatoryDossierController::class, 'storeQuery'])
-         ->name('regulatory-dossiers.queries.store')
-         ->middleware('can:regulatory_dossier.view');
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/queries/{query}/respond', [RegulatoryDossierController::class, 'respondQuery'])
-         ->name('regulatory-dossiers.queries.respond')
-         ->middleware('can:regulatory_dossier.view');
-    Route::post('/regulatory-dossiers/{regulatoryDossier}/queries/{query}/status', [RegulatoryDossierController::class, 'updateQueryStatus'])
-         ->name('regulatory-dossiers.queries.status')
+    Route::get('/regulatory-dossier/versions/{version}/download', [RegulatoryDossierController::class, 'downloadVersion'])
+         ->name('regulatory-dossier.versions.download')
          ->middleware('can:regulatory_dossier.view');
 
     // ── Technology Transfer ───────────────────────────────────
@@ -287,58 +257,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:technology_transfer.view');
     Route::get('/technology-transfers/create', [TechnologyTransferController::class, 'create'])
          ->name('technology-transfers.create')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
     Route::post('/technology-transfers', [TechnologyTransferController::class, 'store'])
          ->name('technology-transfers.store')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
     Route::get('/technology-transfers/{technologyTransfer}', [TechnologyTransferController::class, 'show'])
          ->name('technology-transfers.show')
          ->middleware('can:technology_transfer.view');
     Route::get('/technology-transfers/{technologyTransfer}/edit', [TechnologyTransferController::class, 'edit'])
          ->name('technology-transfers.edit')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
     Route::put('/technology-transfers/{technologyTransfer}', [TechnologyTransferController::class, 'update'])
          ->name('technology-transfers.update')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
     Route::delete('/technology-transfers/{technologyTransfer}', [TechnologyTransferController::class, 'destroy'])
          ->name('technology-transfers.destroy')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
 
-    // Approval online: OM → GM
-    Route::post('/technology-transfers/{technologyTransfer}/submit', [TechnologyTransferController::class, 'submit'])
-         ->name('technology-transfers.submit')
-         ->middleware('can:technology_transfer.view');
-    Route::post('/technology-transfers/{technologyTransfer}/approve-om', [TechnologyTransferController::class, 'approveOm'])
-         ->name('technology-transfers.approve-om')
-         ->middleware('can:technology_transfer.view');
-    Route::post('/technology-transfers/{technologyTransfer}/approve-gm', [TechnologyTransferController::class, 'approveGm'])
-         ->name('technology-transfers.approve-gm')
-         ->middleware('can:technology_transfer.view');
-    Route::post('/technology-transfers/{technologyTransfer}/reject', [TechnologyTransferController::class, 'reject'])
-         ->name('technology-transfers.reject')
-         ->middleware('can:technology_transfer.view');
-
-    // Checklist
-    Route::post('/technology-transfers/{technologyTransfer}/checklists', [TechnologyTransferController::class, 'storeChecklist'])
-         ->name('technology-transfers.checklists.store')
-         ->middleware('can:technology_transfer.view');
-    Route::put('/technology-transfers/{technologyTransfer}/checklists/{checklist}', [TechnologyTransferController::class, 'updateChecklist'])
-         ->name('technology-transfers.checklists.update')
-         ->middleware('can:technology_transfer.view');
-    Route::post('/technology-transfers/{technologyTransfer}/checklists/{checklist}/complete', [TechnologyTransferController::class, 'completeChecklist'])
-         ->name('technology-transfers.checklists.complete')
-         ->middleware('can:technology_transfer.view');
-    Route::delete('/technology-transfers/{technologyTransfer}/checklists/{checklist}', [TechnologyTransferController::class, 'destroyChecklist'])
-         ->name('technology-transfers.checklists.destroy')
-         ->middleware('can:technology_transfer.view');
-
-    // Attachments (pdf/word)
+    // Attachments (pdf/word/img)
     Route::post('/technology-transfers/{technologyTransfer}/attachments', [TechnologyTransferController::class, 'storeAttachment'])
          ->name('technology-transfers.attachments.store')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
     Route::delete('/technology-transfers/{technologyTransfer}/attachments/{attachment}', [TechnologyTransferController::class, 'destroyAttachment'])
          ->name('technology-transfers.attachments.destroy')
-         ->middleware('can:technology_transfer.view');
+         ->middleware('can:technology_transfer.edit');
 
     // ── NIE Approved (Monitoring Nomor Izin Edar) ─────────────
     Route::get('/nie-approvals', [NieApprovalController::class, 'index'])

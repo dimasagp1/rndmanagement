@@ -128,6 +128,54 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission);
         }
 
+        // Create permissions untuk Technology Transfer
+        $technologyTransferPermissions = [
+            'technology_transfer.create',
+            'technology_transfer.view',
+            'technology_transfer.edit',
+            'technology_transfer.delete',
+        ];
+
+        foreach ($technologyTransferPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
+        // Create permissions untuk NIE Approved
+        $nieApprovalPermissions = [
+            'nie_approval.create',
+            'nie_approval.view',
+            'nie_approval.edit',
+            'nie_approval.delete',
+        ];
+
+        foreach ($nieApprovalPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
+        // Create permissions untuk Commercial Production
+        $commercialProductionPermissions = [
+            'commercial_production.create',
+            'commercial_production.view',
+            'commercial_production.edit',
+            'commercial_production.delete',
+        ];
+
+        foreach ($commercialProductionPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
+        // Create permissions untuk Regulatory Dossier - Document & Folder Management
+        $regulatoryDossierPermissions = [
+            'regulatory_dossier.create',
+            'regulatory_dossier.view',
+            'regulatory_dossier.edit',
+            'regulatory_dossier.delete',
+        ];
+
+        foreach ($regulatoryDossierPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
         // Create roles
         $superadmin = Role::findOrCreate('Superadmin');
         $staffRnd = Role::findOrCreate('Staff R&D');
@@ -163,6 +211,22 @@ class RolePermissionSeeder extends Seeder
             'stability_test.view',
             'stability_test.edit',
             'stability_test.delete',
+            'technology_transfer.create',
+            'technology_transfer.view',
+            'technology_transfer.edit',
+            'technology_transfer.delete',
+            'nie_approval.create',
+            'nie_approval.view',
+            'nie_approval.edit',
+            'nie_approval.delete',
+            'commercial_production.create',
+            'commercial_production.view',
+            'commercial_production.edit',
+            'commercial_production.delete',
+            'regulatory_dossier.create',
+            'regulatory_dossier.view',
+            'regulatory_dossier.edit',
+            'regulatory_dossier.delete',
             'packaging_development.create',
             'packaging_development.view',
             'packaging_development.edit',
@@ -197,6 +261,22 @@ class RolePermissionSeeder extends Seeder
             'stability_test.view',
             'stability_test.edit',
             'stability_test.delete',
+            'technology_transfer.create',
+            'technology_transfer.view',
+            'technology_transfer.edit',
+            'technology_transfer.delete',
+            'nie_approval.create',
+            'nie_approval.view',
+            'nie_approval.edit',
+            'nie_approval.delete',
+            'commercial_production.create',
+            'commercial_production.view',
+            'commercial_production.edit',
+            'commercial_production.delete',
+            'regulatory_dossier.create',
+            'regulatory_dossier.view',
+            'regulatory_dossier.edit',
+            'regulatory_dossier.delete',
             'packaging_development.create',
             'packaging_development.view',
             'packaging_development.edit',
@@ -217,6 +297,10 @@ class RolePermissionSeeder extends Seeder
             'sample_evaluation.view',
             'stability_test.view',
             'packaging_development.view',
+            'regulatory_dossier.view',
+            'technology_transfer.view',
+            'nie_approval.view',
+            'commercial_production.view',
         ]);
 
         // Assign permissions to General Manager
@@ -233,6 +317,10 @@ class RolePermissionSeeder extends Seeder
             'sample_evaluation.view',
             'stability_test.view',
             'packaging_development.view',
+            'regulatory_dossier.view',
+            'technology_transfer.view',
+            'nie_approval.view',
+            'commercial_production.view',
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');
