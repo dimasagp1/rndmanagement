@@ -299,7 +299,10 @@ class RolePermissionSeeder extends Seeder
             'packaging_development.view',
             'regulatory_dossier.view',
             'technology_transfer.view',
+            'nie_approval.create',
             'nie_approval.view',
+            'nie_approval.edit',
+            'nie_approval.delete',
             'commercial_production.view',
         ]);
 
@@ -319,7 +322,10 @@ class RolePermissionSeeder extends Seeder
             'packaging_development.view',
             'regulatory_dossier.view',
             'technology_transfer.view',
+            'nie_approval.create',
             'nie_approval.view',
+            'nie_approval.edit',
+            'nie_approval.delete',
             'commercial_production.view',
         ]);
 

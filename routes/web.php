@@ -282,50 +282,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->name('technology-transfers.attachments.destroy')
          ->middleware('can:technology_transfer.edit');
 
-    // ── NIE Approved (Monitoring Nomor Izin Edar) ─────────────
+    // ── NIE Approved ─────────────────────────────────────────
     Route::get('/nie-approvals', [NieApprovalController::class, 'index'])
          ->name('nie-approvals.index')
          ->middleware('can:nie_approval.view');
     Route::get('/nie-approvals/create', [NieApprovalController::class, 'create'])
          ->name('nie-approvals.create')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
     Route::post('/nie-approvals', [NieApprovalController::class, 'store'])
          ->name('nie-approvals.store')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
     Route::get('/nie-approvals/{nieApproval}', [NieApprovalController::class, 'show'])
          ->name('nie-approvals.show')
          ->middleware('can:nie_approval.view');
     Route::get('/nie-approvals/{nieApproval}/edit', [NieApprovalController::class, 'edit'])
          ->name('nie-approvals.edit')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
     Route::put('/nie-approvals/{nieApproval}', [NieApprovalController::class, 'update'])
          ->name('nie-approvals.update')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
     Route::delete('/nie-approvals/{nieApproval}', [NieApprovalController::class, 'destroy'])
          ->name('nie-approvals.destroy')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
 
-    // Approval online: OM → GM
-    Route::post('/nie-approvals/{nieApproval}/submit', [NieApprovalController::class, 'submit'])
-         ->name('nie-approvals.submit')
-         ->middleware('can:nie_approval.view');
-    Route::post('/nie-approvals/{nieApproval}/approve-om', [NieApprovalController::class, 'approveOm'])
-         ->name('nie-approvals.approve-om')
-         ->middleware('can:nie_approval.view');
-    Route::post('/nie-approvals/{nieApproval}/approve-gm', [NieApprovalController::class, 'approveGm'])
-         ->name('nie-approvals.approve-gm')
-         ->middleware('can:nie_approval.view');
-    Route::post('/nie-approvals/{nieApproval}/reject', [NieApprovalController::class, 'reject'])
-         ->name('nie-approvals.reject')
-         ->middleware('can:nie_approval.view');
-
-    // Attachments (pdf/word/jpg)
+    // Attachments (pdf/word/img)
     Route::post('/nie-approvals/{nieApproval}/attachments', [NieApprovalController::class, 'storeAttachment'])
          ->name('nie-approvals.attachments.store')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
     Route::delete('/nie-approvals/{nieApproval}/attachments/{attachment}', [NieApprovalController::class, 'destroyAttachment'])
          ->name('nie-approvals.attachments.destroy')
-         ->middleware('can:nie_approval.view');
+         ->middleware('can:nie_approval.edit');
 
     // ── Packaging Development ─────────────────────────────────
     Route::get('/packaging-developments', [PackagingDevelopmentController::class, 'index'])
