@@ -56,7 +56,7 @@ class GeneralController extends Controller
         }
 
         if ($tab === 'preformulation-qbd') {
-            return redirect()->route('qbd.dashboard');
+            return redirect()->route('qbds.index');
         }
 
         if ($tab === 'sample-evaluation') {

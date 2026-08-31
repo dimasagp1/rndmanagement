@@ -432,60 +432,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->name('packaging-developments.attachments.destroy')
          ->middleware('can:packaging_development.view');
 
-    // ── Commercial Production (CPB) ───────────────────────────
+    // ── Commercial Production (Folder/Document Management) ──
     Route::get('/commercial-productions', [CommercialProductionController::class, 'index'])
          ->name('commercial-productions.index')
          ->middleware('can:commercial_production.view');
-    Route::get('/commercial-productions/create', [CommercialProductionController::class, 'create'])
-         ->name('commercial-productions.create')
+    Route::post('/commercial-productions/folders', [CommercialProductionController::class, 'storeFolder'])
+         ->name('commercial-productions.folders.store')
+         ->middleware('can:commercial_production.create');
+    Route::put('/commercial-productions/folders/{folder}', [CommercialProductionController::class, 'updateFolder'])
+         ->name('commercial-productions.folders.update')
+         ->middleware('can:commercial_production.edit');
+    Route::delete('/commercial-productions/folders/{folder}', [CommercialProductionController::class, 'destroyFolder'])
+         ->name('commercial-productions.folders.destroy')
+         ->middleware('can:commercial_production.delete');
+    Route::post('/commercial-productions/documents', [CommercialProductionController::class, 'storeDocument'])
+         ->name('commercial-productions.documents.store')
+         ->middleware('can:commercial_production.create');
+    Route::get('/commercial-productions/documents/{document}', [CommercialProductionController::class, 'showDocument'])
+         ->name('commercial-productions.documents.show')
          ->middleware('can:commercial_production.view');
-    Route::post('/commercial-productions', [CommercialProductionController::class, 'store'])
-         ->name('commercial-productions.store')
+    Route::put('/commercial-productions/documents/{document}', [CommercialProductionController::class, 'updateDocument'])
+         ->name('commercial-productions.documents.update')
+         ->middleware('can:commercial_production.edit');
+    Route::post('/commercial-productions/documents/{document}/move', [CommercialProductionController::class, 'moveDocument'])
+         ->name('commercial-productions.documents.move')
+         ->middleware('can:commercial_production.edit');
+    Route::delete('/commercial-productions/documents/{document}', [CommercialProductionController::class, 'destroyDocument'])
+         ->name('commercial-productions.documents.destroy')
+         ->middleware('can:commercial_production.delete');
+    Route::get('/commercial-productions/documents/{document}/download', [CommercialProductionController::class, 'downloadDocument'])
+         ->name('commercial-productions.documents.download')
          ->middleware('can:commercial_production.view');
-    Route::get('/commercial-productions/{commercialProduction}', [CommercialProductionController::class, 'show'])
-         ->name('commercial-productions.show')
+    Route::get('/commercial-productions/documents/{document}/preview', [CommercialProductionController::class, 'previewDocument'])
+         ->name('commercial-productions.documents.preview')
          ->middleware('can:commercial_production.view');
-    Route::get('/commercial-productions/{commercialProduction}/edit', [CommercialProductionController::class, 'edit'])
-         ->name('commercial-productions.edit')
-         ->middleware('can:commercial_production.view');
-    Route::put('/commercial-productions/{commercialProduction}', [CommercialProductionController::class, 'update'])
-         ->name('commercial-productions.update')
-         ->middleware('can:commercial_production.view');
-    Route::delete('/commercial-productions/{commercialProduction}', [CommercialProductionController::class, 'destroy'])
-         ->name('commercial-productions.destroy')
-         ->middleware('can:commercial_production.view');
-
-    // Approval online: OM → GM
-    Route::post('/commercial-productions/{commercialProduction}/submit', [CommercialProductionController::class, 'submit'])
-         ->name('commercial-productions.submit')
-         ->middleware('can:commercial_production.view');
-    Route::post('/commercial-productions/{commercialProduction}/approve-om', [CommercialProductionController::class, 'approveOm'])
-         ->name('commercial-productions.approve-om')
-         ->middleware('can:commercial_production.view');
-    Route::post('/commercial-productions/{commercialProduction}/approve-gm', [CommercialProductionController::class, 'approveGm'])
-         ->name('commercial-productions.approve-gm')
-         ->middleware('can:commercial_production.view');
-    Route::post('/commercial-productions/{commercialProduction}/reject', [CommercialProductionController::class, 'reject'])
-         ->name('commercial-productions.reject')
-         ->middleware('can:commercial_production.view');
-
-    // Material requirement ops
-    Route::post('/commercial-productions/{commercialProduction}/materials', [CommercialProductionController::class, 'storeMaterial'])
-         ->name('commercial-productions.materials.store')
-         ->middleware('can:commercial_production.view');
-    Route::put('/commercial-productions/{commercialProduction}/materials/{material}', [CommercialProductionController::class, 'updateMaterial'])
-         ->name('commercial-productions.materials.update')
-         ->middleware('can:commercial_production.view');
-    Route::delete('/commercial-productions/{commercialProduction}/materials/{material}', [CommercialProductionController::class, 'destroyMaterial'])
-         ->name('commercial-productions.materials.destroy')
-         ->middleware('can:commercial_production.view');
-
-    // Attachments (pdf/word)
-    Route::post('/commercial-productions/{commercialProduction}/attachments', [CommercialProductionController::class, 'storeAttachment'])
-         ->name('commercial-productions.attachments.store')
-         ->middleware('can:commercial_production.view');
-    Route::delete('/commercial-productions/{commercialProduction}/attachments/{attachment}', [CommercialProductionController::class, 'destroyAttachment'])
-         ->name('commercial-productions.attachments.destroy')
+    Route::get('/commercial-productions/versions/{version}/download', [CommercialProductionController::class, 'downloadVersion'])
+         ->name('commercial-productions.versions.download')
          ->middleware('can:commercial_production.view');
 
     // ── Approval Center ───────────────────────────────────
@@ -534,33 +516,36 @@ Route::resource('preformulation-studies', PreformulationStudyController::class)-
     Route::post('preformulation-studies/{preformulationStudy}/submit', [PreformulationStudyController::class, 'submit'])->name('preformulation-studies.submit')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
     Route::delete('preformulation-studies/documents/{document}', [PreformulationStudyController::class, 'destroyDocument'])->name('preformulation-studies.documents.destroy')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
 
-    // ── QbD Modules (QTPP, CQA, CMA, CPP, Risk, Design Space, Control Strategy) ──
-    Route::get('/qbd', [QbdController::class, 'dashboard'])->name('qbd.dashboard')->middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager');
-    Route::middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager')->prefix('preformulation-studies/{study}/qbd')->group(function () {
-        Route::get('/', [QbdController::class, 'show'])->name('qbd.show');
+    // ── QbD (Quality by Design) ─────────────────────────────
+    Route::get('/qbds', [QbdController::class, 'index'])
+         ->name('qbds.index')
+         ->middleware('can:qbd.view');
+    Route::get('/qbds/create', [QbdController::class, 'create'])
+         ->name('qbds.create')
+         ->middleware('can:qbd.edit');
+    Route::post('/qbds', [QbdController::class, 'store'])
+         ->name('qbds.store')
+         ->middleware('can:qbd.edit');
+    Route::get('/qbds/{qbd}', [QbdController::class, 'show'])
+         ->name('qbds.show')
+         ->middleware('can:qbd.view');
+    Route::get('/qbds/{qbd}/edit', [QbdController::class, 'edit'])
+         ->name('qbds.edit')
+         ->middleware('can:qbd.edit');
+    Route::put('/qbds/{qbd}', [QbdController::class, 'update'])
+         ->name('qbds.update')
+         ->middleware('can:qbd.edit');
+    Route::delete('/qbds/{qbd}', [QbdController::class, 'destroy'])
+         ->name('qbds.destroy')
+         ->middleware('can:qbd.edit');
 
-        Route::post('qtpp', [QbdController::class, 'saveQtpp'])->name('qbd.qtpp.save');
-        Route::post('qtpp-attributes', [QbdController::class, 'storeQtppAttribute'])->name('qbd.qtpp-attributes.store');
-        Route::delete('qtpp-attributes/{attribute}', [QbdController::class, 'destroyQtppAttribute'])->name('qbd.qtpp-attributes.destroy');
-
-        Route::post('cqa', [QbdController::class, 'storeCqa'])->name('qbd.cqa.store');
-        Route::delete('cqa/{cqa}', [QbdController::class, 'destroyCqa'])->name('qbd.cqa.destroy');
-
-        Route::post('cma', [QbdController::class, 'storeCma'])->name('qbd.cma.store');
-        Route::delete('cma/{cma}', [QbdController::class, 'destroyCma'])->name('qbd.cma.destroy');
-
-        Route::post('cpp', [QbdController::class, 'storeCpp'])->name('qbd.cpp.store');
-        Route::delete('cpp/{cpp}', [QbdController::class, 'destroyCpp'])->name('qbd.cpp.destroy');
-
-        Route::post('risk', [QbdController::class, 'storeRisk'])->name('qbd.risk.store');
-        Route::delete('risk/{risk}', [QbdController::class, 'destroyRisk'])->name('qbd.risk.destroy');
-
-        Route::post('design-space', [QbdController::class, 'storeDesignSpace'])->name('qbd.design-space.store');
-        Route::delete('design-space/{designSpace}', [QbdController::class, 'destroyDesignSpace'])->name('qbd.design-space.destroy');
-
-        Route::post('control-strategy', [QbdController::class, 'storeControlStrategy'])->name('qbd.control-strategy.store');
-        Route::delete('control-strategy/{controlStrategy}', [QbdController::class, 'destroyControlStrategy'])->name('qbd.control-strategy.destroy');
-    });
+    // Attachments (pdf/word/img)
+    Route::post('/qbds/{qbd}/attachments', [QbdController::class, 'storeAttachment'])
+         ->name('qbds.attachments.store')
+         ->middleware('can:qbd.edit');
+    Route::delete('/qbds/{qbd}/attachments/{attachment}', [QbdController::class, 'destroyAttachment'])
+         ->name('qbds.attachments.destroy')
+         ->middleware('can:qbd.edit');
 });
 
 require __DIR__.'/auth.php';

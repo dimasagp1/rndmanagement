@@ -28,8 +28,6 @@
             </p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-            <a href="{{ route('qbd.show', $study) }}" class="btn-primary">QbD Wizard</a>
-
             @if(in_array($study->approval_status, ['Draft', 'Rejected']) && ($study->created_by === auth()->id() || auth()->hasRole('Superadmin')))
             <a href="{{ route('preformulation-studies.edit', $study) }}" class="btn-outline">Edit</a>
             <form method="POST" action="{{ route('preformulation-studies.submit', $study) }}" class="inline">
@@ -47,7 +45,7 @@
             </form>
             @endif
 
-            <a href="{{ route('qbd.dashboard') }}" class="btn-ghost">← Kembali</a>
+            <a href="{{ route('preformulation-studies.index') }}" class="btn-ghost">← Kembali</a>
         </div>
     </div>
 
@@ -145,41 +143,6 @@
 
         {{-- ─── SIDEBAR ───────────────────────────────────── --}}
         <div class="space-y-4">
-
-            {{-- QbD Progress --}}
-            @php($qbd = $study->qbdProgress())
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">QbD Progress</h2>
-                </div>
-                <div class="card-body">
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
-                        <span class="font-semibold text-ink">Kelengkapan Modul</span>
-                        <span>{{ $qbd['completed'] }}/{{ $qbd['total'] }}</span>
-                    </div>
-                    <div class="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
-                        <div class="h-full bg-primary rounded-full transition-all"
-                             style="width: {{ $qbd['total'] ? round($qbd['completed'] / $qbd['total'] * 100) : 0 }}%"></div>
-                    </div>
-
-                    <div class="flex flex-wrap gap-1.5 mb-3">
-                        @foreach($qbd['modules'] as $name => $done)
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold
-                                     {{ $done ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400' }}">
-                            {{ $done ? '✓' : '○' }} {{ $name }}
-                        </span>
-                        @endforeach
-                    </div>
-
-                    @if($qbd['high_risk'] > 0)
-                    <div class="p-3 bg-red-50 rounded-lg border border-red-200 mb-3">
-                        <p class="text-xs font-semibold text-red-700">⚠ {{ $qbd['high_risk'] }} Risiko High teridentifikasi</p>
-                    </div>
-                    @endif
-
-                    <a href="{{ route('qbd.show', $study) }}" class="btn-primary w-full justify-center">Buka QbD Wizard</a>
-                </div>
-            </div>
 
             {{-- Approval --}}
             <div class="card">

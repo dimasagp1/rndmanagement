@@ -374,10 +374,8 @@
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
                                 <code class="text-xs font-mono text-primary bg-surface px-1.5 py-0.5 rounded">{{ $approval->code }}</code>
-                                @if($approval->approval_status === 'Pending')
-                                <span class="badge bg-amber-100 text-amber-700">Menunggu Approval OM</span>
-                                @elseif($approval->approval_status === 'Approval by OM')
-                                <span class="badge bg-blue-100 text-blue-700">Menunggu Approval GM</span>
+                                @if(in_array($approval->approval_status, ['Pending','Approval by OM']))
+                                <span class="badge bg-amber-100 text-amber-700">Menunggu Approval GM</span>
                                 @else
                                 <span class="badge bg-gray-100 text-gray-600">{{ $approval->approval_status }}</span>
                                 @endif
@@ -393,13 +391,10 @@
                         <div class="flex items-center gap-2 flex-shrink-0">
                             <a href="{{ route('formula-approvals.show', $approval) }}" class="btn-ghost btn-sm">Lihat Detail</a>
 
-                            <form method="POST"
-                                  action="{{ $approval->approval_status === 'Pending'
-                                      ? route('formula-approvals.approve-om', $approval)
-                                      : route('formula-approvals.approve-gm', $approval) }}">
+                            <form method="POST" action="{{ route('formula-approvals.approve-gm', $approval) }}">
                                 @csrf
                                 <button type="submit" class="btn-primary btn-sm" id="btn-approve-form-approval-{{ $approval->id }}">
-                                    Setujui
+                                    Setujui (GM)
                                 </button>
                             </form>
 

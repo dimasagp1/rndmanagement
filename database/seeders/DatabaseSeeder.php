@@ -22,8 +22,6 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             FormulaApprovalFormSeeder::class,
             PackagingDevelopmentSeeder::class,
-            NieApprovalSeeder::class,
-            CommercialProductionSeeder::class,
         ]);
 
         $this->command->info('');

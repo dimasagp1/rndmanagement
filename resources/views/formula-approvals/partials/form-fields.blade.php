@@ -20,7 +20,7 @@
 {{-- ── DESIGN MODE: hanya 3 field ── --}}
 <div class="grid grid-cols-1 gap-4">
     <div>
-        <label for="artwork_title" class="form-label">Judul Design <span class="text-red-500">*</span></label>
+        <label for="artwork_title" class="form-label">product/variant <span class="text-red-500">*</span></label>
         <input type="text" id="artwork_title" name="artwork_title" required
                value="{{ old('artwork_title', $form?->artwork_title ?? $form?->product_name) }}"
                placeholder="Contoh: Design Kemasan Serum Brightening Rev 01"
@@ -30,10 +30,10 @@
         <input type="hidden" name="product_name" value="{{ old('product_name', $form?->product_name ?? old('artwork_title')) }}" id="hidden_product_name">
     </div>
     <div>
-        <label for="kategori" class="form-label">Kategori Produk <span class="text-red-500">*</span></label>
+        <label for="kategori" class="form-label">jenis kemasan <span class="text-red-500">*</span></label>
         <input type="text" id="kategori" name="kategori" required
                value="{{ old('kategori', $form?->kategori) }}"
-               placeholder="Ketik kategori manual, contoh: Skincare / Herbal"
+               placeholder="Ketik jenis kemasan manual, contoh: Skincare / Herbal"
                class="form-input {{ $errors->has('kategori') ? 'border-red-400' : '' }}">
         @error('kategori')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
     </div>

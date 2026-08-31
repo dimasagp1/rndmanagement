@@ -75,7 +75,7 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
         }
-        // Antrean Operational Manager (Tahap 1)
+        // Antrean Operational Manager (Tahap 1) — Formula Approval tidak lagi di OM, hanya GM
         elseif ($user->hasRole('Operational Manager')) {
             $pendingFormulas = Formula::where('approval_status', 'Pending Tahap 1')
                 ->with('creator')
@@ -97,17 +97,15 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingFormulaApprovals = FormulaApprovalForm::where('approval_status', 'Pending')
-                ->with('product.creator', 'omApprover', 'gmApprover')
-                ->latest()
-                ->get();
+            // Formula Approval: GM only, OM tidak tampil
+            $pendingFormulaApprovals = collect();
 
             $pendingPackagingDevelopments = PackagingDevelopment::where('approval_status', 'Pending OM')
                 ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
                 ->latest()
                 ->get();
         } 
-        // Antrean General Manager (Tahap 2)
+        // Antrean General Manager (Tahap 2) — Formula Approval GM only
         elseif ($user->hasRole('General Manager')) {
             $pendingFormulas = Formula::where('approval_status', 'Pending Tahap 2')
                 ->with('creator')
@@ -124,7 +122,7 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            $pendingFormulaApprovals = FormulaApprovalForm::where('approval_status', 'Approval by OM')
+            $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();

@@ -10,9 +10,9 @@
     <div class="min-h-screen">
         <header class="flex flex-wrap justify-between items-start gap-4 mb-8">
             <div>
-                <h1 class="text-2xl font-heading font-bold text-ink mb-1">Preformulation Study & QbD</h1>
+                <h1 class="text-2xl font-heading font-bold text-ink mb-1">Preformulation Study</h1>
                 <p class="text-sm text-gray-500 max-w-2xl">
-                    Penyusunan study preformulation dan QBD analysis untuk menentukan mutu produk di tahap awal pengembangan.
+                    Penyusunan study preformulation untuk menentukan mutu produk di tahap awal pengembangan.
                 </p>
             </div>
             @can('npd_proposal.create')

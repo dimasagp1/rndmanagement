@@ -152,6 +152,18 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission);
         }
 
+        // Create permissions untuk QbD
+        $qbdPermissions = [
+            'qbd.create',
+            'qbd.view',
+            'qbd.edit',
+            'qbd.delete',
+        ];
+
+        foreach ($qbdPermissions as $permission) {
+            Permission::findOrCreate($permission);
+        }
+
         // Create permissions untuk Commercial Production
         $commercialProductionPermissions = [
             'commercial_production.create',
@@ -219,6 +231,10 @@ class RolePermissionSeeder extends Seeder
             'nie_approval.view',
             'nie_approval.edit',
             'nie_approval.delete',
+            'qbd.create',
+            'qbd.view',
+            'qbd.edit',
+            'qbd.delete',
             'commercial_production.create',
             'commercial_production.view',
             'commercial_production.edit',
@@ -281,6 +297,10 @@ class RolePermissionSeeder extends Seeder
             'packaging_development.view',
             'packaging_development.edit',
             'packaging_development.delete',
+            'qbd.create',
+            'qbd.view',
+            'qbd.edit',
+            'qbd.delete',
         ]);
 
         // Assign permissions to Operational Manager
@@ -303,6 +323,10 @@ class RolePermissionSeeder extends Seeder
             'nie_approval.view',
             'nie_approval.edit',
             'nie_approval.delete',
+            'qbd.create',
+            'qbd.view',
+            'qbd.edit',
+            'qbd.delete',
             'commercial_production.view',
         ]);
 
@@ -326,6 +350,10 @@ class RolePermissionSeeder extends Seeder
             'nie_approval.view',
             'nie_approval.edit',
             'nie_approval.delete',
+            'qbd.create',
+            'qbd.view',
+            'qbd.edit',
+            'qbd.delete',
             'commercial_production.view',
         ]);
 
