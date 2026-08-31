@@ -188,11 +188,7 @@
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  class="ml-4 pl-2 border-l border-white/10">
-                                <a href="{{ route('approval-formula-designs.index', ['type' => 'Formula']) }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('approval-formula-designs.*') && request('type') === 'Formula' ? 'active' : '' }}">
-                                    <span class="flex-1 truncate">Formula</span>
-                                </a>
-                                <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
+                                 <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
                                    class="sidebar-sub-link {{ request()->routeIs('approval-formula-designs.*') && request('type') === 'Design' ? 'active' : '' }}">
                                     <span class="flex-1 truncate">Design</span>
                                 </a>

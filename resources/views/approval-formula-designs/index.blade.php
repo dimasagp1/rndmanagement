@@ -38,12 +38,6 @@
                     </a>
                     @endif
                 </div>
-                <select name="status" onchange="this.form.submit()" class="form-select text-xs py-2">
-                    <option value="">Semua Status</option>
-                    <option value="Pending" {{ request('status')==='Pending'?'selected':'' }}>Pending (GM)</option>
-                    <option value="Approved" {{ request('status')==='Approved'?'selected':'' }}>Approved</option>
-                    <option value="Rejected" {{ request('status')==='Rejected'?'selected':'' }}>Rejected</option>
-                </select>
             </form>
         </div>
     </div>
