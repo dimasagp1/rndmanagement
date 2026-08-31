@@ -72,7 +72,7 @@
             <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
                 {{-- Dashboard (hidden, route tetap aktif di /dashboard) --}}
-                {{-- <a href="{{ route('timeline.index') }}"
+                {{-- <a href="{{ route('dashboard') }}"
                    class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -97,35 +97,22 @@
 
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
-                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'qbd.view', 'formulation-development' => 'formula.view', 'sample-evaluation' => 'sample_evaluation.view', 'formula-approval' => 'formula.view', 'stability-test' => 'stability_test.view', 'packaging-development' => 'packaging_development.view', 'approval-formula-design' => 'formula.view', 'regulatory-dossier' => 'regulatory_dossier.view', 'technology-transfer' => 'technology_transfer.view', 'nie-approved' => 'nie_approval.view', 'commercial-production' => 'commercial_production.view'])
-                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbds.index', 'formulation-development' => 'formulas.index', 'sample-evaluation' => 'sample-evaluations.index', 'formula-approval' => 'formula-approvals.index', 'stability-test' => 'stability-tests.index', 'packaging-development' => 'packaging-developments.index', 'approval-formula-design' => 'formula-approvals.index', 'regulatory-dossier' => 'regulatory-dossier.index', 'technology-transfer' => 'technology-transfers.index', 'nie-approved' => 'nie-approvals.index', 'commercial-production' => 'commercial-productions.index'])
+                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'formula.view', 'formulation-development' => 'formula.view', 'sample-evaluation' => 'sample_evaluation.view', 'formula-approval' => 'formula.view'])
+                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbd.dashboard', 'formulation-development' => 'formulas.index', 'sample-evaluation' => 'sample-evaluations.index', 'formula-approval' => 'formula-approvals.index'])
                 @php($moduleActive = collect($moduleRoutes)->filter(fn($r) => request()->routeIs(str($r)->before('.') . '.*'))->keys()->all())
-                @php($moduleActive = array_merge($moduleActive, request()->routeIs('formula-approvals.*') ? ['approval-formula-design'] : []))
                 @php($moduleActive = array_merge($moduleActive, request()->routeIs('trial-rms.*') || request()->routeIs('trial-pms.*') || request()->routeIs('logbook-pm.*') ? ['formulation-development'] : []))
                 @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)
                 <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'true' : 'false' }} }">
                     <button type="button" @click="open = !open"
-                            class="sidebar-link w-full text-left justify-between {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'active' : '' }}">
-                        <span class="flex items-center gap-3 min-w-0 flex-1">
-                            @if($group === 'Insight & Concept')
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="sidebar-link w-full justify-between {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'active' : '' }}">
+                        <span class="flex items-center gap-3 min-w-0">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
-                            @elseif($group === 'Development & Regulatory')
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                            </svg>
-                            @else
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M21 7v6m0-6h-6"/>
-                            </svg>
-                            @endif
-                            <span class="flex-1 truncate text-sm font-medium leading-normal">{{ $group }}</span>
+                            <span class="flex-1">{{ $group }}</span>
                         </span>
-                        <svg class="w-4 h-4 flex-shrink-0 ml-1.5 transition-transform duration-200"
+                        <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
                              :class="open ? 'rotate-180' : ''"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -173,33 +160,6 @@
                                     <span class="flex-1 truncate">Log Book PM</span>
                                 </a>
                                 @endcan
-                            </div>
-                        </div>
-                        @continue
-                        @endif
-
-                        @if($slug === 'approval-formula-design')
-                        <div x-data="{ subOpen: {{ request()->routeIs('formula-approvals.*') ? 'true' : 'false' }} }">
-                            <button type="button" @click="subOpen = !subOpen"
-                                    class="sidebar-sub-link w-full justify-between {{ request()->routeIs('formula-approvals.*') ? 'active' : '' }}">
-                                <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
-                                <svg class="w-3 h-3 flex-shrink-0 transition-transform duration-200" :class="subOpen ? 'rotate-180' : ''"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div x-show="subOpen" x-transition:enter="transition ease-out duration-150"
-                                 x-transition:enter-start="opacity-0 -translate-y-1"
-                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="ml-4 pl-2 border-l border-white/10">
-                                <a href="{{ route('formula-approvals.index', ['type' => 'Formula']) }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('formula-approvals.*') && request('type', 'Formula') === 'Formula' ? 'active' : '' }}">
-                                    <span class="flex-1 truncate">Formula</span>
-                                </a>
-                                <a href="{{ route('formula-approvals.index', ['type' => 'Design']) }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('formula-approvals.*') && request('type') === 'Design' ? 'active' : '' }}">
-                                    <span class="flex-1 truncate">Design</span>
-                                </a>
                             </div>
                         </div>
                         @continue
