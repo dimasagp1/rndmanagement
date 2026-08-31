@@ -5,6 +5,7 @@ use App\Http\Controllers\FormulaController;
 use App\Http\Controllers\TrialRmController;
 use App\Http\Controllers\TrialPmController;
 use App\Http\Controllers\ApprovalCenterController;
+use App\Http\Controllers\ApprovalFormulaDesignController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
@@ -211,6 +212,50 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:formula.view');
     Route::patch('/formula-approvals/{formApproval}/tracker', [FormulaApprovalController::class, 'updateTracker'])
          ->name('formula-approvals.tracker.update')
+         ->middleware('can:formula.view');
+
+    // ── Approval Formula & Design (terpisah dari Formula Approval) ──
+    Route::get('/approval-formula-designs', [ApprovalFormulaDesignController::class, 'index'])
+         ->name('approval-formula-designs.index')
+         ->middleware('can:formula.view');
+    Route::get('/approval-formula-designs/create', [ApprovalFormulaDesignController::class, 'create'])
+         ->name('approval-formula-designs.create')
+         ->middleware('can:formula.view');
+    Route::post('/approval-formula-designs', [ApprovalFormulaDesignController::class, 'store'])
+         ->name('approval-formula-designs.store')
+         ->middleware('can:formula.view');
+    Route::get('/approval-formula-designs/{formApproval}', [ApprovalFormulaDesignController::class, 'show'])
+         ->name('approval-formula-designs.show')
+         ->middleware('can:formula.view');
+    Route::get('/approval-formula-designs/{formApproval}/edit', [ApprovalFormulaDesignController::class, 'edit'])
+         ->name('approval-formula-designs.edit')
+         ->middleware('can:formula.view');
+    Route::put('/approval-formula-designs/{formApproval}', [ApprovalFormulaDesignController::class, 'update'])
+         ->name('approval-formula-designs.update')
+         ->middleware('can:formula.view');
+    Route::delete('/approval-formula-designs/{formApproval}', [ApprovalFormulaDesignController::class, 'destroy'])
+         ->name('approval-formula-designs.destroy')
+         ->middleware('can:formula.view');
+    Route::post('/approval-formula-designs/{formApproval}/approve-gm', [ApprovalFormulaDesignController::class, 'approveGm'])
+         ->name('approval-formula-designs.approve-gm')
+         ->middleware('can:formula.view');
+    Route::post('/approval-formula-designs/{formApproval}/reject', [ApprovalFormulaDesignController::class, 'reject'])
+         ->name('approval-formula-designs.reject')
+         ->middleware('can:formula.view');
+    Route::post('/approval-formula-designs/{formApproval}/submit', [ApprovalFormulaDesignController::class, 'submit'])
+         ->name('approval-formula-designs.submit')
+         ->middleware('can:formula.view');
+    Route::post('/approval-formula-designs/{formApproval}/duplicate', [ApprovalFormulaDesignController::class, 'duplicate'])
+         ->name('approval-formula-designs.duplicate')
+         ->middleware('can:formula.view');
+    Route::post('/approval-formula-designs/{formApproval}/attachments', [ApprovalFormulaDesignController::class, 'storeAttachment'])
+         ->name('approval-formula-designs.attachments.store')
+         ->middleware('can:formula.view');
+    Route::delete('/approval-formula-designs/{formApproval}/attachments/{attachment}', [ApprovalFormulaDesignController::class, 'destroyAttachment'])
+         ->name('approval-formula-designs.attachments.destroy')
+         ->middleware('can:formula.view');
+    Route::patch('/approval-formula-designs/{formApproval}/tracker', [ApprovalFormulaDesignController::class, 'updateTracker'])
+         ->name('approval-formula-designs.tracker.update')
          ->middleware('can:formula.view');
 
     // ── Regulatory Dossier — Document & Folder Management ─────────

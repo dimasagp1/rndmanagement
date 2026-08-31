@@ -97,9 +97,10 @@
 
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
-                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'formula.view', 'formulation-development' => 'formula.view', 'sample-evaluation' => 'sample_evaluation.view', 'formula-approval' => 'formula.view'])
-                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbd.dashboard', 'formulation-development' => 'formulas.index', 'sample-evaluation' => 'sample-evaluations.index', 'formula-approval' => 'formula-approvals.index'])
+                @php($modulePerms = ['prf' => 'prf.view', 'npd-proposal' => 'npd_proposal.view', 'preformulation-qbd' => 'qbd.view', 'formulation-development' => 'formula.view', 'sample-evaluation' => 'sample_evaluation.view', 'formula-approval' => 'formula.view', 'stability-test' => 'stability_test.view', 'packaging-development' => 'packaging_development.view', 'approval-formula-design' => 'formula.view', 'regulatory-dossier' => 'regulatory_dossier.view', 'technology-transfer' => 'technology_transfer.view', 'nie-approved' => 'nie_approval.view', 'commercial-production' => 'commercial_production.view'])
+                @php($moduleRoutes = ['prf' => 'prfs.index', 'npd-proposal' => 'npd-proposals.index', 'preformulation-qbd' => 'qbds.index', 'formulation-development' => 'formulas.index', 'sample-evaluation' => 'sample-evaluations.index', 'formula-approval' => 'formula-approvals.index', 'stability-test' => 'stability-tests.index', 'packaging-development' => 'packaging-developments.index', 'approval-formula-design' => 'approval-formula-designs.index', 'regulatory-dossier' => 'regulatory-dossier.index', 'technology-transfer' => 'technology-transfers.index', 'nie-approved' => 'nie-approvals.index', 'commercial-production' => 'commercial-productions.index'])
                 @php($moduleActive = collect($moduleRoutes)->filter(fn($r) => request()->routeIs(str($r)->before('.') . '.*'))->keys()->all())
+                @php($moduleActive = array_merge($moduleActive, request()->routeIs('approval-formula-designs.*') ? ['approval-formula-design'] : []))
                 @php($moduleActive = array_merge($moduleActive, request()->routeIs('trial-rms.*') || request()->routeIs('trial-pms.*') || request()->routeIs('logbook-pm.*') ? ['formulation-development'] : []))
                 @foreach(\App\Http\Controllers\GeneralController::GROUPS as $group => $slugs)
                 <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'true' : 'false' }} }">
@@ -160,6 +161,41 @@
                                     <span class="flex-1 truncate">Log Book PM</span>
                                 </a>
                                 @endcan
+                            </div>
+                        </div>
+                        @continue
+                        @endif
+
+                        @if($slug === 'formula-approval')
+                        <a href="{{ route('formula-approvals.index') }}"
+                           class="sidebar-sub-link {{ request()->routeIs('formula-approvals.*') && !request('type') ? 'active' : '' }}">
+                            <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
+                        </a>
+                        @continue
+                        @endif
+
+                        @if($slug === 'approval-formula-design')
+                        <div x-data="{ subOpen: {{ request()->routeIs('approval-formula-designs.*') ? 'true' : 'false' }} }">
+                            <button type="button" @click="subOpen = !subOpen"
+                                    class="sidebar-sub-link w-full justify-between {{ request()->routeIs('approval-formula-designs.*') ? 'active' : '' }}">
+                                <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
+                                <svg class="w-3 h-3 flex-shrink-0 transition-transform duration-200" :class="subOpen ? 'rotate-180' : ''"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <div x-show="subOpen" x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="ml-4 pl-2 border-l border-white/10">
+                                <a href="{{ route('approval-formula-designs.index', ['type' => 'Formula']) }}"
+                                   class="sidebar-sub-link {{ request()->routeIs('approval-formula-designs.*') && request('type') === 'Formula' ? 'active' : '' }}">
+                                    <span class="flex-1 truncate">Formula</span>
+                                </a>
+                                <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
+                                   class="sidebar-sub-link {{ request()->routeIs('approval-formula-designs.*') && request('type') === 'Design' ? 'active' : '' }}">
+                                    <span class="flex-1 truncate">Design</span>
+                                </a>
                             </div>
                         </div>
                         @continue

@@ -41,6 +41,7 @@ class ApprovalCenterController extends Controller
         $pendingTrialPms = collect();
         $pendingPreformulationStudies = collect();
         $pendingFormulaApprovals = collect();
+        $pendingApprovalFormulaDesigns = collect();
         $pendingPackagingDevelopments = collect();
 
         // Antrean Superadmin (Melihat semua)
@@ -66,6 +67,13 @@ class ApprovalCenterController extends Controller
                 ->get();
 
             $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
+                ->where('source', 'formula-approval')
+                ->with('product.creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
+
+            $pendingApprovalFormulaDesigns = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
+                ->where('source', 'approval-formula-design')
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
@@ -97,8 +105,8 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
-            // Formula Approval: GM only, OM tidak tampil
             $pendingFormulaApprovals = collect();
+            $pendingApprovalFormulaDesigns = collect();
 
             $pendingPackagingDevelopments = PackagingDevelopment::where('approval_status', 'Pending OM')
                 ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
@@ -123,6 +131,13 @@ class ApprovalCenterController extends Controller
                 ->get();
 
             $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
+                ->where('source', 'formula-approval')
+                ->with('product.creator', 'omApprover', 'gmApprover')
+                ->latest()
+                ->get();
+
+            $pendingApprovalFormulaDesigns = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
+                ->where('source', 'approval-formula-design')
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
@@ -133,7 +148,7 @@ class ApprovalCenterController extends Controller
                 ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals', 'pendingPackagingDevelopments'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals', 'pendingApprovalFormulaDesigns', 'pendingPackagingDevelopments'));
     }
 
     // ──────────────────────────────────────────────────────────────

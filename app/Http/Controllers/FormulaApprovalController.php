@@ -27,6 +27,7 @@ class FormulaApprovalController extends Controller
         $typeFilter = in_array($request->get('type'), FormulaApprovalForm::TYPES) ? $request->get('type') : null;
 
         $forms = FormulaApprovalForm::with(['omApprover', 'gmApprover', 'creator', 'formula', 'product', 'trackerUpdater'])
+            ->where('source', 'formula-approval')
             ->when($typeFilter, fn ($q) => $q->where('type', $typeFilter))
             ->when($request->get('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -119,6 +120,7 @@ class FormulaApprovalController extends Controller
         $form = FormulaApprovalForm::create([
             ...collect($validated)->except(['files', 'files.*', 'product_name', 'artwork_file', 'artwork_title'])->toArray(),
             'type'                => $type,
+            'source'              => 'formula-approval',
             'product_id'          => $validated['product_id'] ?? null,
             'product_name'        => $productName,
             'artwork_title'       => $validated['artwork_title'] ?? $validated['product_name'] ?? null,

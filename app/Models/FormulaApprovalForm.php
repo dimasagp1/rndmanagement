@@ -14,6 +14,7 @@ class FormulaApprovalForm extends Model
 
     protected $fillable = [
         'type',
+        'source',
         'product_id',
         'formula_id',
         'approval_status',
