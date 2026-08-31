@@ -10,6 +10,7 @@
     </x-slot>
 
     @php($fa = $formApproval)
+    @php($isDesign = $fa->type === 'Design')
 
     {{-- Flash --}}
     @if(session('success'))
@@ -49,7 +50,7 @@
                     @csrf
                     <button type="submit" class="btn-outline text-primary border-primary/20 hover:bg-primary/5" onclick="return confirm('Buat revisi baru dari {{ $fa->revision_label }}?')">Duplikasi → Revisi {{ str_pad((string)((int)$fa->revision+1),2,'0',STR_PAD_LEFT) }}</button>
                 </form>
-                @if(in_array($fa->approval_status, ['Draft','Rejected']))
+                @if(in_array($fa->approval_status, ['Draft','Rejected']) && !$isDesign)
                 <form method="POST" action="{{ route('approval-formula-designs.submit', $fa) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-primary">Ajukan Approval (Online)</button>
@@ -76,6 +77,7 @@
         <div class="lg:col-span-2 space-y-4">
 
             {{-- Approval Matrix --}}
+            @if(!$isDesign)
             <div class="card border-2 {{ $fa->approval_status==='Approved' ? 'border-green-200' : 'border-primary/20' }}">
                 <div class="card-header bg-surface">
                     <h2 class="text-sm font-heading font-semibold text-ink">Approval Matrix</h2>
@@ -121,6 +123,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             {{-- ─── Keputusan GM (Disetujui / Tidak Disetujui + Alasan + Saran) ─── --}}
             @php($gmDecided = in_array($fa->approval_status, ['Approved', 'Rejected']))

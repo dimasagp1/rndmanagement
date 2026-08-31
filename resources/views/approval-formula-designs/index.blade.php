@@ -49,6 +49,25 @@
     </div>
 
     @php($showTracker = request('type') !== 'Formula')
+    @php($currentApprovalInternal = request('approval_internal'))
+
+    @if($typeFilter === 'Design')
+    <div class="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1 w-fit">
+        <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
+           class="px-4 py-1.5 rounded-md text-xs font-medium transition {{ !$currentApprovalInternal ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+            Semua
+        </a>
+        <a href="{{ route('approval-formula-designs.index', ['type' => 'Design', 'approval_internal' => 'Maklon']) }}"
+           class="px-4 py-1.5 rounded-md text-xs font-medium transition {{ $currentApprovalInternal === 'Maklon' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+            Maklon
+        </a>
+        <a href="{{ route('approval-formula-designs.index', ['type' => 'Design', 'approval_internal' => 'Vitabrand']) }}"
+           class="px-4 py-1.5 rounded-md text-xs font-medium transition {{ $currentApprovalInternal === 'Vitabrand' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+            Vitabrand
+        </a>
+    </div>
+    @endif
+
     <div class="card">
         @if($forms->isEmpty())
         <x-empty-state
@@ -63,9 +82,6 @@
                     <tr>
                         <th class="w-20">Code</th>
                         <th>Product / Artwork</th>
-                        <th>Approval Matrix</th>
-                        <th>Approver / Date</th>
-                        <th>Status</th>
                         @if($showTracker)<th>Tracker Status</th>@endif
                         <th>Final Doc</th>
                         <th class="w-32 text-center">Aksi</th>
@@ -91,28 +107,6 @@
                             <div class="text-[11px] text-primary">Formula: {{ $form->formula->code }}</div>
                             @endif
                         </td>
-                        <td class="text-xs">
-                            <div class="flex flex-col gap-0.5">
-                                <span class="{{ $form->approved_at_gm ? 'text-green-600' : 'text-amber-600' }}">Formula GM: {{ $form->approved_at_gm ? '✓' : '○' }}</span>
-                                <span class="{{ $form->artwork_status === 'Approved' ? 'text-green-600' : ($form->artwork_file_path ? 'text-amber-600' : 'text-gray-300') }}">Artwork: {{ $form->artwork_status }}</span>
-                            </div>
-                        </td>
-                        <td class="text-xs text-gray-600">
-                            <div>{{ $form->gmApprover?->name ?? $form->creator?->name ?? '—' }}</div>
-                            <div class="text-[11px] text-gray-400">{{ $form->approved_at_gm?->format('d M Y') ?? $form->created_at?->format('d M Y') ?? '—' }}</div>
-                        </td>
-                        <td>
-                            @if($form->approval_status === 'Approved')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Approved</span>
-                            @elseif($form->approval_status === 'Rejected')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Rejected</span>
-                            @else
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Pending GM</span>
-                            @endif
-                            @if($form->artwork_status === 'Approved' && $form->approval_status === 'Approved')
-                            <div class="text-[10px] text-green-600 mt-0.5">Artwork Approved</div>
-                            @endif
-                        </td>
                         @if($showTracker)
                         <td class="text-xs">
                             @php(
@@ -120,17 +114,8 @@
                                     ? array_search($form->tracker_status, \App\Models\FormulaApprovalForm::TRACKER_STATUSES)
                                     : -1
                             )
-                            @php($stepColors = ['bg-emerald-500', 'bg-blue-500', 'bg-violet-500'])
-                            @if($form->approval_status !== 'Approved')
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-                                    <span class="text-gray-400">Menunggu GM</span>
-                                    @if($form->tracker_status)
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">{{ \Illuminate\Support\Str::limit($form->tracker_status, 16) }}</span>
-                                    @endif
-                                </div>
-                            @else
-                                <details class="relative group/trk">
+                            @php($stepColors = ['bg-emerald-500', 'bg-blue-500', 'bg-violet-500', 'bg-gray-500'])
+                                <details class="relative group/trk tracker-dropdown">
                                     <summary class="inline-flex items-center gap-1.5 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
                                         <div class="flex items-center gap-0.5">
                                             @foreach(\App\Models\FormulaApprovalForm::TRACKER_STATUSES as $ti => $tst)
@@ -162,7 +147,6 @@
                                         </div>
                                     </div>
                                 </details>
-                            @endif
                         </td>
                         @endif
 
@@ -191,7 +175,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-10 text-gray-400 text-sm">Belum ada data.</td>
+                        <td colspan="5" class="text-center py-10 text-gray-400 text-sm">Belum ada data.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -219,6 +203,24 @@
     </div>
 
     <script>
+    // Tutup semua tracker dropdown saat klik di luar
+    document.addEventListener('click', function(e){
+        if(!e.target.closest('.tracker-dropdown')){
+            document.querySelectorAll('details.tracker-dropdown[open]').forEach(d => d.removeAttribute('open'));
+        }
+    });
+
+    // Tutup dropdown lain saat satu dibuka
+    document.querySelectorAll('details.tracker-dropdown').forEach(d => {
+        d.addEventListener('toggle', function(){
+            if(this.open){
+                document.querySelectorAll('details.tracker-dropdown').forEach(other => {
+                    if(other !== this) other.removeAttribute('open');
+                });
+            }
+        });
+    });
+
     // Event delegation: klik status di dropdown tracker → langsung PATCH tanpa reload/alert
     document.addEventListener('click', function(e){
         const pick = e.target.closest('.tracker-pick');

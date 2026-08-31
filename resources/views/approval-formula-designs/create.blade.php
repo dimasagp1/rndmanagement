@@ -10,9 +10,6 @@
     <div class="min-h-screen max-w-3xl">
         <header class="mb-8">
             <h1 class="text-2xl font-heading font-bold text-ink mb-1">Tambah Approval Formula & Design</h1>
-            <p class="text-sm text-gray-500">
-                Proses persetujuan final formula & artwork sebelum registrasi & produksi. Lampiran (PDF/Word/Gambar) bersifat opsional. Approval online OM → GM.
-            </p>
         </header>
 
         <form method="POST" action="{{ route('approval-formula-designs.store') }}" enctype="multipart/form-data" class="space-y-6">

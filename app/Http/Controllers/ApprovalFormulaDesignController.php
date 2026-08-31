@@ -30,6 +30,7 @@ class ApprovalFormulaDesignController extends Controller
         $forms = FormulaApprovalForm::with(['omApprover', 'gmApprover', 'creator', 'formula', 'product', 'trackerUpdater'])
             ->where('source', 'approval-formula-design')
             ->where('type', $typeFilter)
+            ->when($request->get('approval_internal'), fn ($q, $v) => $q->where('approval_internal', $v))
             ->when($request->get('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('product_name', 'like', "%{$search}%")
@@ -94,6 +95,7 @@ class ApprovalFormulaDesignController extends Controller
 
         if ($type === 'Design') {
             $rules['artwork_title'] = 'required|string|max:255';
+            $rules['approval_internal'] = 'required|in:Maklon,Vitabrand';
             $rules['kategori'] = 'required|string|max:255';
             $rules['artwork_file'] = 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png';
             $rules['product_name'] = 'nullable|string|max:255';
@@ -120,6 +122,7 @@ class ApprovalFormulaDesignController extends Controller
             ...collect($validated)->except(['files', 'files.*', 'product_name', 'artwork_file', 'artwork_title'])->toArray(),
             'type' => $type,
             'source' => 'approval-formula-design',
+            'approval_internal' => $validated['approval_internal'] ?? null,
             'product_id' => $validated['product_id'] ?? null,
             'product_name' => $productName,
             'artwork_title' => $validated['artwork_title'] ?? $validated['product_name'] ?? null,
@@ -432,7 +435,9 @@ class ApprovalFormulaDesignController extends Controller
     public function updateTracker(Request $request, FormulaApprovalForm $formApproval)
     {
         abort_unless(auth()->user()->can('formula.view'), 403);
-        abort_unless($formApproval->approval_status === 'Approved', 422, 'Tracker hanya bisa diupdate jika sudah di-Approve GM.');
+        if ($formApproval->type !== 'Design') {
+            abort_unless($formApproval->approval_status === 'Approved', 422, 'Tracker hanya bisa diupdate jika sudah di-Approve GM.');
+        }
 
         $validated = $request->validate(['tracker_status' => 'required|in:' . implode(',', FormulaApprovalForm::TRACKER_STATUSES)]);
         $newStatus = $validated['tracker_status'];

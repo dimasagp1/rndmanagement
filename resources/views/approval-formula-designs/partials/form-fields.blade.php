@@ -17,7 +17,7 @@
 <input type="hidden" name="type" value="{{ old('type', $form?->type ?? $type) }}">
 
 @if($isDesign)
-{{-- ── DESIGN MODE: hanya 3 field ── --}}
+{{-- ── DESIGN MODE ── --}}
 <div class="grid grid-cols-1 gap-4">
     <div>
         <label for="artwork_title" class="form-label">product/variant <span class="text-red-500">*</span></label>
@@ -28,6 +28,15 @@
         @error('artwork_title')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
         {{-- sinkron product_name otomatis dari judul design --}}
         <input type="hidden" name="product_name" value="{{ old('product_name', $form?->product_name ?? old('artwork_title')) }}" id="hidden_product_name">
+    </div>
+    <div>
+        <label for="approval_internal" class="form-label">Approval Internal <span class="text-red-500">*</span></label>
+        <select id="approval_internal" name="approval_internal" required class="form-select {{ $errors->has('approval_internal') ? 'border-red-400' : '' }}">
+            <option value="">— Pilih Approval Internal —</option>
+            <option value="Maklon" {{ old('approval_internal', $form?->approval_internal) === 'Maklon' ? 'selected' : '' }}>Maklon</option>
+            <option value="Vitabrand" {{ old('approval_internal', $form?->approval_internal) === 'Vitabrand' ? 'selected' : '' }}>Vitabrand</option>
+        </select>
+        @error('approval_internal')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
     </div>
     <div>
         <label for="kategori" class="form-label">jenis kemasan <span class="text-red-500">*</span></label>

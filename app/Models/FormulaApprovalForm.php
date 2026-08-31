@@ -10,11 +10,12 @@ class FormulaApprovalForm extends Model
 {
     public const TYPES = ['Formula', 'Design'];
 
-    public const TRACKER_STATUSES = ['Direktur Utama', 'General Manager ERICK', 'Direktur'];
+    public const TRACKER_STATUSES = ['Checked by GM', 'Approved Direktur Utama Herbatech', 'Approved GM Sales & Marketing', 'Approved Direktur', 'Approved Direktur Utama'];
 
     protected $fillable = [
         'type',
         'source',
+        'approval_internal',
         'product_id',
         'formula_id',
         'approval_status',
