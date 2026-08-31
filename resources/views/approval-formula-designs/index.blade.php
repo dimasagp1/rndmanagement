@@ -76,6 +76,7 @@
                     <tr>
                         <th class="w-20">Code</th>
                         <th>Product / Artwork</th>
+                        <th>PIC / Pengaju</th>
                         @if($showTracker)<th>Tracker Status</th>@endif
                         <th>Final Doc</th>
                         <th class="w-32 text-center">Aksi</th>
@@ -99,6 +100,12 @@
                             </div>
                             @if($form->formula)
                             <div class="text-[11px] text-primary">Formula: {{ $form->formula->code }}</div>
+                            @endif
+                        </td>
+                        <td class="text-xs text-gray-600">
+                            <div>{{ $form->pic_pengaju ?? '—' }}</div>
+                            @if($form->tanggal_pengajuan)
+                            <div class="text-[10px] text-gray-400">{{ $form->tanggal_pengajuan?->format('d M Y') }}</div>
                             @endif
                         </td>
                         @if($showTracker)
@@ -169,7 +176,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-10 text-gray-400 text-sm">Belum ada data.</td>
+                        <td colspan="6" class="text-center py-10 text-gray-400 text-sm">Belum ada data.</td>
                     </tr>
                     @endforelse
                 </tbody>

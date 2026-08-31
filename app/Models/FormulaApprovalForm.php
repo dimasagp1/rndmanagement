@@ -58,10 +58,13 @@ class FormulaApprovalForm extends Model
         'tracker_history',
         'tracker_updated_by',
         'tracker_updated_at',
+        'tanggal_pengajuan',
+        'pic_pengaju',
     ];
 
     protected $casts = [
         'target_launch'       => 'date',
+        'tanggal_pengajuan'   => 'date',
         'submitted_at'        => 'datetime',
         'approved_at_om'      => 'datetime',
         'approved_at_gm'      => 'datetime',

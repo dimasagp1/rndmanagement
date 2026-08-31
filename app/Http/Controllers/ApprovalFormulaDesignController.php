@@ -99,6 +99,8 @@ class ApprovalFormulaDesignController extends Controller
             $rules['kategori'] = 'required|string|max:255';
             $rules['artwork_file'] = 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png';
             $rules['product_name'] = 'nullable|string|max:255';
+            $rules['tanggal_pengajuan'] = 'required|date';
+            $rules['pic_pengaju'] = 'required|string|max:255';
         } else {
             $rules = array_merge($rules, $baseRules, ['product_name' => 'required|string|max:255']);
         }

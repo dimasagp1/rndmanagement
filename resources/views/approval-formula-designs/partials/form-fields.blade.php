@@ -18,34 +18,61 @@
 
 @if($isDesign)
 {{-- ── DESIGN MODE ── --}}
-<div class="grid grid-cols-1 gap-4">
+
+{{-- 1. Identitas Produk --}}
+<div class="mb-2"><p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Identitas Produk</p></div>
+<div class="grid grid-cols-1 gap-4 mb-6">
     <div>
-        <label for="artwork_title" class="form-label">product/variant <span class="text-red-500">*</span></label>
+        <label for="artwork_title" class="form-label">Product / Variant <span class="text-red-500">*</span></label>
         <input type="text" id="artwork_title" name="artwork_title" required
                value="{{ old('artwork_title', $form?->artwork_title ?? $form?->product_name) }}"
                placeholder="Contoh: Design Kemasan Serum Brightening Rev 01"
                class="form-input {{ $errors->has('artwork_title') ? 'border-red-400' : '' }}">
         @error('artwork_title')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-        {{-- sinkron product_name otomatis dari judul design --}}
         <input type="hidden" name="product_name" value="{{ old('product_name', $form?->product_name ?? old('artwork_title')) }}" id="hidden_product_name">
     </div>
     <div>
-        <label for="approval_internal" class="form-label">Approval Internal <span class="text-red-500">*</span></label>
-        <select id="approval_internal" name="approval_internal" required class="form-select {{ $errors->has('approval_internal') ? 'border-red-400' : '' }}">
-            <option value="">— Pilih Approval Internal —</option>
-            <option value="Maklon" {{ old('approval_internal', $form?->approval_internal) === 'Maklon' ? 'selected' : '' }}>Maklon</option>
-            <option value="Vitabrand" {{ old('approval_internal', $form?->approval_internal) === 'Vitabrand' ? 'selected' : '' }}>Vitabrand</option>
-        </select>
-        @error('approval_internal')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-    </div>
-    <div>
-        <label for="kategori" class="form-label">jenis kemasan <span class="text-red-500">*</span></label>
+        <label for="kategori" class="form-label">Jenis Kemasan <span class="text-red-500">*</span></label>
         <input type="text" id="kategori" name="kategori" required
                value="{{ old('kategori', $form?->kategori) }}"
                placeholder="Ketik jenis kemasan manual, contoh: Skincare / Herbal"
                class="form-input {{ $errors->has('kategori') ? 'border-red-400' : '' }}">
         @error('kategori')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
     </div>
+</div>
+
+{{-- 2. Informasi Pengajuan --}}
+<div class="mb-2"><p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Informasi Pengajuan</p></div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div>
+        <label for="tanggal_pengajuan" class="form-label">Tanggal Pengajuan <span class="text-red-500">*</span></label>
+        <input type="date" id="tanggal_pengajuan" name="tanggal_pengajuan" required
+               value="{{ old('tanggal_pengajuan', $form?->tanggal_pengajuan?->format('Y-m-d') ?? date('Y-m-d')) }}"
+               class="form-input {{ $errors->has('tanggal_pengajuan') ? 'border-red-400' : '' }}">
+        @error('tanggal_pengajuan')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="pic_pengaju" class="form-label">PIC / Pengaju <span class="text-red-500">*</span></label>
+        <input type="text" id="pic_pengaju" name="pic_pengaju" required
+               value="{{ old('pic_pengaju', $form?->pic_pengaju) }}"
+               placeholder="Nama PIC yang mengajukan"
+               class="form-input {{ $errors->has('pic_pengaju') ? 'border-red-400' : '' }}">
+        @error('pic_pengaju')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="approval_internal" class="form-label">Approval Internal <span class="text-red-500">*</span></label>
+        <select id="approval_internal" name="approval_internal" required class="form-select {{ $errors->has('approval_internal') ? 'border-red-400' : '' }}">
+            <option value="">— Pilih —</option>
+            <option value="Maklon" {{ old('approval_internal', $form?->approval_internal) === 'Maklon' ? 'selected' : '' }}>Maklon</option>
+            <option value="Vitabrand" {{ old('approval_internal', $form?->approval_internal) === 'Vitabrand' ? 'selected' : '' }}>Vitabrand</option>
+        </select>
+        @error('approval_internal')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
+    </div>
+</div>
+
+{{-- 3. Upload File --}}
+<div class="mb-2"><p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">File Design</p></div>
+<div class="grid grid-cols-1 gap-4">
     <div>
         <label for="artwork_file" class="form-label">Upload File <span class="text-red-500">*</span> <span class="text-xs text-gray-400">(pdf/word/img)</span></label>
         @if($form && $form->artwork_file_path)
@@ -56,7 +83,7 @@
         @endif
         <input type="file" id="artwork_file" name="artwork_file" {{ $form ? '' : 'required' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-input text-sm {{ $errors->has('artwork_file') ? 'border-red-400' : '' }}">
         @error('artwork_file')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-        <p class="mt-1 text-xs text-gray-400">Maks 10MB. Jika sudah Approved, hanya GM yang bisa ganti.</p>
+        <p class="mt-1 text-xs text-gray-400">Maks 10MB.</p>
     </div>
 </div>
 <script>document.getElementById('artwork_title')?.addEventListener('input', e=>{const h=document.getElementById('hidden_product_name'); if(h) h.value=e.target.value;});</script>
