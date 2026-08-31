@@ -5,380 +5,384 @@
         </div>
     </x-slot>
 
-    <div class="min-h-screen" x-data="{ view: '{{ in_array(request('view'), ['flow', 'timeline']) ? request('view') : 'flow' }}' }">
+    <div class="min-h-screen" x-data="{ tab: 'pipeline' }">
         {{-- ─── Header ─────────────────────────────────────── --}}
         <header class="flex justify-between items-start mb-8">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded bg-primary text-white flex items-center justify-center font-bold text-sm">
-                    PH
-                </div>
+                <div class="w-10 h-10 rounded bg-primary text-white flex items-center justify-center font-bold text-sm">PH</div>
                 <div>
                     <h1 class="text-sm font-bold text-primary uppercase tracking-wider">RND Herbatech</h1>
-                    <p class="text-sm text-gray-500">Product Platform / NPD Control Center</p>
-                </div>
-            </div>
-            <div class="flex gap-3">
-                <a href="{{ route('timeline.index') }}"
-                   class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors bg-white">
-                    Reset filter
-                </a>
-                <button onclick="window.print()"
-                        class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors">
-                    Export view
-                </button>
-            </div>
-        </header>
-
-        {{-- ─── Hero ──────────────────────────────────────── --}}
-        <section class="mb-8">
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
-                WEEK {{ now()->weekOfYear }} · {{ now()->isoFormat('DD MMM YYYY') }}
-            </div>
-            <div class="flex flex-wrap justify-between items-end gap-4">
-                <div>
-                    <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4 tracking-tight max-w-2xl">
-                        From market signal to shelf.
-                    </h2>
-                    <p class="text-gray-600 max-w-xl text-lg">
-                        Satu sumber kebenaran untuk memantau progres pengembangan produk, keputusan lintas fungsi, dan titik yang butuh dorongan.
+                    <p class="text-sm text-gray-500">
+                        @if($isStaff) Item saya &amp; pipeline NPD
+                        @elseif($isManager) Approval queue &amp; team overview
+                        @elseif($isGM) Approval queue &amp; team overview
+                        @else System overview
+                        @endif
                     </p>
                 </div>
             </div>
-        </section>
+            <div class="flex gap-2">
+                @if($isStaff)
+                <a href="{{ route('formulas.create') }}" class="btn-primary flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Tambah Formula
+                </a>
+                <a href="{{ route('prfs.create') }}" class="btn-primary flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Tambah PRF
+                </a>
+                @endif
+                <a href="{{ route('timeline.index') }}" class="btn-ghost flex-shrink-0">
+                    Reset
+                </a>
+            </div>
+        </header>
 
-
-        {{-- ─── Modul Stats (dari dashboard) ───────────────── --}}
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <a href="{{ route('formulas.index') }}"
-               class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all duration-200">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs text-gray-400 font-medium mb-1">Formula Approved</p>
-                        <p class="text-3xl font-heading font-bold text-ink">{{ $moduleStats['formulaApproved'] }}</p>
-                        <p class="text-xs text-gray-400 mt-1">total disetujui</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition">
-                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-xs text-primary font-medium group-hover:underline">Lihat semua →</span>
-                </div>
+        {{-- ─── Stat Cards ────────────────────────────────── --}}
+        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+            <a href="{{ route('prfs.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">PRF</p>
+                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['prf'] }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Product Request</p>
             </a>
-
-            <a href="{{ route('trial-rms.index') }}"
-               class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all duration-200">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs text-gray-400 font-medium mb-1">Trial RM</p>
-                        <p class="text-3xl font-heading font-bold text-ink">{{ $moduleStats['trialRm'] }}</p>
-                        <p class="text-xs text-gray-400 mt-1">total uji coba bahan baku</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-xs text-blue-600 font-medium group-hover:underline">Lihat semua →</span>
-                </div>
+            <a href="{{ route('npd-proposals.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">NPD Proposal</p>
+                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['npd_proposal'] }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">Proposals</p>
             </a>
-
-            <a href="{{ route('trial-pms.index') }}"
-               class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all duration-200">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs text-gray-400 font-medium mb-1">Trial PM</p>
-                        <p class="text-3xl font-heading font-bold text-ink">{{ $moduleStats['trialPm'] }}</p>
-                        <p class="text-xs text-gray-400 mt-1">total uji bahan kemas</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center group-hover:bg-amber-100 transition">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-xs text-amber-600 font-medium group-hover:underline">Lihat semua →</span>
-                </div>
+            <a href="{{ route('formulas.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Formula Approved</p>
+                <p class="text-2xl font-heading font-bold text-emerald-600">{{ $moduleStats['formula_approved'] }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">disetujui</p>
             </a>
-
-            <a href="{{ route('formulas.index') }}"
-               class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all duration-200">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs text-gray-400 font-medium mb-1">Item Saya</p>
-                        <p class="text-3xl font-heading font-bold text-ink">{{ $moduleStats['myItems'] }}</p>
-                        <p class="text-xs text-gray-400 mt-1">formula yang saya buat</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <span class="text-xs text-violet-600 font-medium">Formula saya</span>
-                </div>
+            <a href="{{ route('trial-rms.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Trial RM</p>
+                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['trial_rm'] }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">uji bahan baku</p>
+            </a>
+            <a href="{{ route('trial-pms.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Trial PM</p>
+                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['trial_pm'] }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">uji kemasan</p>
+            </a>
+            <a href="{{ route('sample-evaluations.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Sample Eval</p>
+                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['sample_evaluation'] }}</p>
+                <p class="text-[11px] text-gray-400 mt-0.5">evaluasi sampel</p>
             </a>
         </section>
 
-             {{-- ─── Summary Cards ─────────────────────────────── --}}
-        <section id="summary-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Total initiatives</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $total }}</div>
-                <p class="text-sm text-primary font-medium">formulasi &amp; trial aktif</p>
+        {{-- ─── Summary Row ────────────────────────────────── --}}
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <div class="card card-body py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Total Items</p>
+                <div class="text-2xl font-bold text-gray-900">{{ $totalItems }}</div>
             </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">On track</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $onTrack }}</div>
-                <p class="text-sm text-primary font-medium">{{ $pipelinePercent }}% of pipeline</p>
+            <div class="card card-body py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Approved / Completed</p>
+                <div class="text-2xl font-bold text-emerald-600">{{ $approved }}</div>
+                <p class="text-[11px] text-primary font-medium">{{ $pipelinePercent }}% pipeline</p>
             </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Completed</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $completed }}</div>
-                <p class="text-sm text-sky-600 font-medium">selesai &amp; siap launch</p>
+            <div class="card card-body py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Pending</p>
+                <div class="text-2xl font-bold text-amber-600">{{ $pending }}</div>
             </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">In review</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $inReview }}</div>
-                <p class="text-sm text-primary font-medium">needs decision</p>
-            </div>
-            <div class="card card-body shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-700 mb-2">Blocked</h3>
-                <div class="text-4xl font-bold text-gray-900 mb-2">{{ $blocked }}</div>
-                <p class="text-sm text-primary font-medium">needs escalation</p>
+            <div class="card card-body py-4">
+                <p class="text-[11px] text-gray-400 font-medium mb-1">Rejected / Draft</p>
+                <div class="text-2xl font-bold text-gray-600">{{ $rejected + $draft }}</div>
             </div>
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {{-- ─── Left Column: Flow / Decision Points ─── --}}
+            {{-- ─── Left Column: Tabs ─────────────────────── --}}
             <div class="lg:col-span-2">
+                {{-- Tab Navigation --}}
+                <div class="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1">
+                    <button @click="tab = 'pipeline'" :class="tab === 'pipeline' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700'" class="flex-1 px-4 py-2 rounded-md text-xs transition">
+                        Pipeline ({{ $totalItems }})
+                    </button>
+                    <button @click="tab = 'pending'" :class="tab === 'pending' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700'" class="flex-1 px-4 py-2 rounded-md text-xs transition">
+                        Pending Saya ({{ $pendingItems->count() }})
+                    </button>
+                    <button @click="tab = 'activity'" :class="tab === 'activity' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700'" class="flex-1 px-4 py-2 rounded-md text-xs transition">
+                        Aktivitas
+                    </button>
+                </div>
 
-                {{-- Product Development Flow (Table view) --}}
-                <div x-show="view === 'flow'" x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                     class="card shadow-sm overflow-hidden flex flex-col mb-6">
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-xl font-bold text-gray-900">Product development flow</h3>
-                            <span class="text-xs font-bold text-primary uppercase tracking-wider">{{ $total }} STAGES</span>
+                {{-- ═══ TAB: Pipeline ═══ --}}
+                <div x-show="tab === 'pipeline'" x-transition>
+                    <div class="card shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <form method="GET" action="{{ route('timeline.index') }}" class="flex gap-3 flex-wrap">
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                       placeholder="Cari nama, kode..."
+                                       class="flex-1 min-w-40 rounded-lg border-gray-300 bg-gray-50 px-3 py-2 text-xs focus:border-primary focus:ring-primary">
+                                <select name="module" onchange="this.form.submit()" class="rounded-lg border-gray-300 bg-gray-50 px-3 py-2 text-xs w-40 focus:border-primary focus:ring-primary">
+                                    <option value="">Semua modul</option>
+                                    @foreach(\App\Http\Controllers\TimelineController::MODULE_META as $key => $meta)
+                                    <option value="{{ $key }}" {{ request('module') === $key ? 'selected' : '' }}>{{ $meta['label'] }}</option>
+                                    @endforeach
+                                </select>
+                                <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 bg-gray-50 px-3 py-2 text-xs w-36 focus:border-primary focus:ring-primary">
+                                    <option value="">Semua status</option>
+                                    <option value="Draft" {{ request('status') === 'Draft' ? 'selected' : '' }}>Draft</option>
+                                    <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="Approved" {{ request('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
+                                    <option value="Rejected" {{ request('status') === 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                                </select>
+                                @if(request()->hasAny(['search', 'module', 'status']))
+                                <a href="{{ route('timeline.index') }}" class="text-xs text-gray-400 hover:text-gray-600 px-2 py-2">Clear</a>
+                                @endif
+                            </form>
                         </div>
-                        <p class="text-sm text-gray-500 mb-6">Status terkini per tahapan, owner, dan target selesai.</p>
-
-                        <form method="GET" action="{{ route('timeline.index') }}"
-                      class="flex gap-4 flex-wrap"
-                      x-on:submit.prevent="timelineFetch($el, view)">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                   placeholder="Cari tahapan, kode, atau owner..."
-                                   x-on:input.debounce.500ms="timelineFetch($el.closest('form'), view)"
-                                   class="flex-1 min-w-40 rounded-lg border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:border-primary focus:ring-primary">
-                            <select name="status" x-on:change="timelineFetch($el.closest('form'), view)"
-                                    class="custom-select rounded-lg border-gray-300 bg-gray-50 px-4 py-2 text-sm w-40 focus:border-primary focus:ring-primary font-medium">
-                                <option value="">Semua status</option>
-                                <option value="on-track" {{ request('status') === 'on-track' ? 'selected' : '' }}>On track</option>
-                                <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="in-review" {{ request('status') === 'in-review' ? 'selected' : '' }}>In review</option>
-                                <option value="blocked" {{ request('status') === 'blocked' ? 'selected' : '' }}>Blocked</option>
-                            </select>
-                            <select name="owner" x-on:change="timelineFetch($el.closest('form'), view)"
-                                    class="custom-select rounded-lg border-primary bg-primary/5 text-primary px-4 py-2 text-sm w-40 focus:border-primary focus:ring-primary font-medium border-2">
-                                <option value="">Semua owner</option>
-                                @foreach($ownerOptions as $o)
-                                <option value="{{ $o->id }}" {{ (string) request('owner') === (string) $o->id ? 'selected' : '' }}>{{ $o->name }}</option>
-                                @endforeach
-                            </select>
-                        </form>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="text-xs text-gray-500 font-bold uppercase tracking-wider bg-white border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-4" scope="col">Stage</th>
-                                    <th class="px-6 py-4" scope="col">Status</th>
-                                    <th class="px-6 py-4" scope="col">Owner</th>
-                                    <th class="px-6 py-4" scope="col">Target</th>
-                                </tr>
-                            </thead>
-                            <tbody id="flow-rows" class="divide-y divide-gray-200 bg-white">
-                                @forelse($rows as $i => $row)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-8 h-8 rounded bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-xs shrink-0">
-                                                {{ $i + 1 }}
-                                            </div>
-                                            <div class="min-w-0">
-                                                <div class="font-bold text-gray-900 text-base">{{ $row['stage'] }}</div>
-                                                <div class="text-gray-500 text-xs mt-0.5 truncate">{{ $row['code'] }} · {{ $row['name'] }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <x-status-badge :status="$row['status']" />
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold text-xs shrink-0">{{ $row['initials'] }}</div>
-                                            <span class="font-medium text-gray-700 truncate">{{ $row['owner'] }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 font-medium text-gray-700 whitespace-nowrap">{{ $row['target'] }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-12 text-center text-gray-400">
-                                        Belum ada data formulasi. Buat formula pertama untuk mulai pipeline.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="text-[11px] text-gray-500 font-bold uppercase tracking-wider bg-gray-50 border-b">
+                                    <tr>
+                                        <th class="px-4 py-3">Modul</th>
+                                        <th class="px-4 py-3">Item</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Owner</th>
+                                        <th class="px-4 py-3 text-right">Updated</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @forelse($items as $item)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3">
+                                            <a href="{{ $item['route'] }}" class="inline-flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-{{ $item['color'] }}-500 shrink-0"></span>
+                                                <span class="text-xs font-semibold text-{{ $item['color'] }}-700">{{ $item['module'] }}</span>
+                                            </a>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <a href="{{ $item['route'] }}" class="hover:text-primary transition">
+                                                <div class="text-sm font-semibold text-ink truncate max-w-xs">{{ $item['name'] }}</div>
+                                                @if($item['code'])
+                                                <div class="text-[11px] text-gray-400 font-mono">{{ $item['code'] }}</div>
+                                                @endif
+                                            </a>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if($item['status'])
+                                                <x-status-badge :status="$item['status']" size="sm" />
+                                            @else
+                                                <span class="text-[11px] text-gray-400">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-xs text-gray-600">{{ $item['owner'] }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            @php
+                                                $diff = now()->diffInDays($item['updated_at']);
+                                                $ageColor = $diff <= 7 ? 'text-gray-500' : ($diff <= 30 ? 'text-amber-600' : 'text-red-500');
+                                            @endphp
+                                            <span class="text-xs {{ $ageColor }} whitespace-nowrap">{{ $item['updated_at']->diffForHumans() }}</span>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
+                                            Belum ada data. Mulai buat item pertama.
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Next Decision Points (Timeline view) --}}
-                <div x-show="view === 'timeline'" x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                     class="card shadow-sm p-8">
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Next decision points</h3>
-                        <p class="text-sm text-gray-500">Urutan momen yang paling berpengaruh ke launch.</p>
+                {{-- ═══ TAB: Pending Saya ═══ --}}
+                <div x-show="tab === 'pending'" x-transition>
+                    <div class="card shadow-sm overflow-hidden">
+                        @if($pendingItems->isEmpty())
+                        <div class="px-6 py-12 text-center text-gray-400 text-sm">
+                            <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Tidak ada item yang perlu aksi saat ini.
+                        </div>
+                        @else
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="text-[11px] text-gray-500 font-bold uppercase tracking-wider bg-gray-50 border-b">
+                                    <tr>
+                                        <th class="px-4 py-3">Modul</th>
+                                        <th class="px-4 py-3">Item</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Aksi Diperlukan</th>
+                                        <th class="px-4 py-3 text-right">Langkah</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach($pendingItems as $pi)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3">
+                                            <span class="text-xs font-semibold text-gray-600">{{ $pi['module'] }}</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <a href="{{ $pi['route'] }}" class="hover:text-primary transition">
+                                                <div class="text-sm font-semibold text-ink truncate max-w-xs">{{ $pi['name'] }}</div>
+                                                @if($pi['code'])
+                                                <div class="text-[11px] text-gray-400 font-mono">{{ $pi['code'] }}</div>
+                                                @endif
+                                            </a>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <x-status-badge :status="$pi['status']" size="sm" />
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">{{ $pi['action'] }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <a href="{{ $pi['route'] }}" class="text-xs text-primary hover:underline font-medium">Buka →</a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @endif
                     </div>
-                    <div id="decision-list" class="relative">
-                        @forelse($decisionPoints as $i => $dp)
-                        <div class="timeline-item relative pl-12 {{ $loop->last ? '' : 'pb-8' }}">
-                            <div class="timeline-line"></div>
-                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm z-10 ring-2 ring-white shadow-sm">{{ $i + 1 }}</div>
-                            <div class="min-h-[2rem] flex items-center">
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <h4 class="font-bold text-gray-900 leading-tight">{{ $dp['stage'] }}</h4>
-                                    <x-status-badge :status="$dp['status']" size="sm" />
+                </div>
+
+                {{-- ═══ TAB: Activity Feed ═══ --}}
+                <div x-show="tab === 'activity'" x-transition>
+                    <div class="card shadow-sm overflow-hidden">
+                        @if($activities->isEmpty())
+                        <div class="px-6 py-12 text-center text-gray-400 text-sm">
+                            <svg class="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Belum ada aktivitas tercatat.
+                        </div>
+                        @else
+                        <div class="divide-y divide-gray-100">
+                            @foreach($activities as $act)
+                            <div class="px-4 py-3 hover:bg-gray-50">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        @if($act->event === 'created')
+                                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        @elseif($act->event === 'updated')
+                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        @elseif($act->event === 'deleted')
+                                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        @else
+                                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm text-ink">
+                                            <span class="font-semibold">{{ $act->causer?->name ?? 'System' }}</span>
+                                            <span class="text-gray-500">{{ $act->description }}</span>
+                                        </p>
+                                        @if($act->subject)
+                                        <p class="text-xs text-gray-400 mt-0.5">
+                                            {{ class_basename($act->subject_type) }}
+                                            @if(method_exists($act->subject, 'getAttribute') && $act->subject->getAttribute('code'))
+                                                <span class="font-mono">#{{ $act->subject->getAttribute('code') }}</span>
+                                            @endif
+                                        </p>
+                                        @endif
+                                        <p class="text-[11px] text-gray-400 mt-0.5">{{ $act->created_at->diffForHumans() }}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <p class="text-sm text-gray-500 mt-1.5 leading-relaxed">
-                                <span class="font-mono text-gray-400">{{ $dp['code'] }}</span>
-                                <span class="mx-1 text-gray-300">·</span>{{ $dp['name'] }}
-                                <span class="mx-1 text-gray-300">·</span>Owner <span class="font-medium text-gray-600">{{ $dp['owner'] }}</span>
-                                <span class="mx-1 text-gray-300">·</span>target <span class="font-medium text-gray-600">{{ $dp['target'] }}</span>
-                            </p>
+                            @endforeach
                         </div>
-                        @empty
-                        <p class="text-sm text-gray-400 text-center py-8">Tidak ada decision point yang menunggu keputusan.</p>
-                        @endforelse
+                        @endif
                     </div>
                 </div>
             </div>
 
-            {{-- ─── Right Column: Stats & Workload ─────────── --}}
+            {{-- ─── Right Column: Sidebar ─────────────────── --}}
             <div class="space-y-6">
                 {{-- Pipeline Health --}}
                 <div class="card card-body shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Pipeline Health</h3>
-                        <button @click="view = view === 'flow' ? 'timeline' : 'flow'"
-                                x-text="view === 'flow' ? 'Timeline view' : 'Table view'"
-                                class="px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors bg-white shadow-sm">
-                        </button>
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-3">Pipeline Health</h3>
+                    <div class="text-2xl font-bold text-gray-900 mb-3">{{ $pipelinePercent }}%</div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: {{ $pipelinePercent }}%"></div>
                     </div>
-                    <div id="pipeline-health-body">
-                    <div class="text-2xl font-bold text-gray-900 mb-4">{{ $pipelinePercent }}% through the flow</div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                        <div class="bg-primary h-2.5 rounded-full transition-all duration-500" style="width: {{ $pipelinePercent }}%"></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-gray-500 font-medium mb-6">
-                        <span>{{ $onTrack + $completed }} on track / completed</span>
-                        <span>{{ $total }} total</span>
-                    </div>
-                    <ul class="space-y-3 text-sm font-medium text-gray-700">
-                        <li class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-600"></span> On track</span>
-                            <span class="font-bold">{{ $onTrack }}</span>
-                        </li>
-                        <li class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-sky-500"></span> Completed</span>
-                            <span class="font-bold">{{ $completed }}</span>
-                        </li>
-                        <li class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span> In review</span>
-                            <span class="font-bold">{{ $inReview }}</span>
-                        </li>
-                        <li class="flex justify-between items-center">
-                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400"></span> Blocked</span>
-                            <span class="font-bold">{{ $blocked }}</span>
-                        </li>
+                    <ul class="space-y-2 text-xs font-medium text-gray-700 mt-4">
+                        <li class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Approved</span><span class="font-bold">{{ $approved }}</span></li>
+                        <li class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Pending</span><span class="font-bold">{{ $pending }}</span></li>
+                        <li class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span> Rejected</span><span class="font-bold">{{ $rejected }}</span></li>
+                        <li class="flex justify-between"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> Draft</span><span class="font-bold">{{ $draft }}</span></li>
                     </ul>
-                    </div>
                 </div>
 
-                {{-- Workload by Owner --}}
+                {{-- Workload by Owner (manager/GM only) --}}
+                @if(!$isStaff && $workload->isNotEmpty())
                 <div class="card card-body shadow-sm">
                     <h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-2">Workload by Owner</h3>
-                    <div class="text-xl font-bold text-gray-900 mb-6">Who is carrying the flow?</div>
                     <ul class="divide-y divide-gray-100">
-                        @forelse($owners as $o)
-                        <li class="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-800 font-bold text-xs">{{ $o['initials'] }}</div>
-                                <div class="min-w-0">
-                                    <div class="font-bold text-sm text-gray-900 truncate">{{ $o['name'] }}</div>
-                                    <div class="text-xs text-gray-500">R&amp;D formulation</div>
-                                </div>
+                        @foreach($workload as $w)
+                        <li class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold text-[10px]">{{ $w['initials'] }}</div>
+                                <span class="text-xs font-medium text-gray-700 truncate">{{ $w['name'] }}</span>
                             </div>
-                            <span class="text-sm font-bold text-primary">{{ $o['total'] }} items</span>
+                            <span class="text-xs font-bold text-primary">{{ $w['total'] }}</span>
                         </li>
-                        @empty
-                        <li class="py-6 text-sm text-gray-400 text-center">Belum ada workload.</li>
-                        @endforelse
+                        @endforeach
                     </ul>
                 </div>
+                @endif
+
+                {{-- Decision Points (manager/GM) --}}
+                @if(!$isStaff && $pendingItems->isNotEmpty())
+                <div class="card card-body shadow-sm">
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-3">Butuh Keputusan</h3>
+                    <ul class="space-y-2">
+                        @foreach($pendingItems->take(8) as $pi)
+                        <li>
+                            <a href="{{ $pi['route'] }}" class="block p-2 rounded-lg hover:bg-gray-50 transition">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-ink truncate">{{ $pi['name'] }}</span>
+                                    <span class="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0 ml-2">{{ $pi['action'] }}</span>
+                                </div>
+                                <div class="text-[11px] text-gray-400 mt-0.5">{{ $pi['module'] }}</div>
+                            </a>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @if($pendingItems->count() > 8)
+                    <a href="{{ route('approval-center.index') }}" class="block text-center text-xs text-primary font-medium mt-3 hover:underline">
+                        Lihat semua di Approval Center →
+                    </a>
+                    @endif
+                </div>
+                @endif
+
+                {{-- Quick Actions (staff) --}}
+                @if($isStaff)
+                <div class="card card-body shadow-sm">
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-3">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <a href="{{ route('formulas.create') }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 font-medium">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Buat Formula
+                        </a>
+                        <a href="{{ route('prfs.create') }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 font-medium">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Buat PRF
+                        </a>
+                        <a href="{{ route('trial-rms.create') }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 font-medium">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Buat Trial RM
+                        </a>
+                        <a href="{{ route('trial-pms.create') }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 font-medium">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Buat Trial PM
+                        </a>
+                        <a href="{{ route('sample-evaluations.create') }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition text-sm text-gray-700 font-medium">
+                            <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Buat Sample Eval
+                        </a>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </div>
-
-    {{-- Filter tanpa reload: fetch HTML dan swap region dinamis --}}
-    <script>
-        window.timelineFetch = function (form, view) {
-            const url = new URL(form.action, window.location.origin);
-            url.searchParams.set('search', form.elements.search.value);
-            url.searchParams.set('status', form.elements.status.value || '');
-            url.searchParams.set('owner', form.elements.owner.value || '');
-            if (view) url.searchParams.set('view', view);
-
-            fetch(url.toString(), {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'same-origin'
-            })
-            .then(r => {
-                if (!r.ok) throw new Error('fetch failed');
-                return r.text();
-            })
-            .then(html => {
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                ['#summary-cards', '#flow-rows', '#decision-list', '#pipeline-health-body'].forEach(sel => {
-                    const cur = document.querySelector(sel);
-                    const nxt = doc.querySelector(sel);
-                    if (cur && nxt && cur.innerHTML !== nxt.innerHTML) {
-                        cur.innerHTML = nxt.innerHTML;
-                    }
-                });
-                history.pushState({}, '', url.pathname + url.search);
-            })
-            .catch(() => {
-                window.location.href = url.toString();
-            });
-        };
-    </script>
 </x-app-layout>
