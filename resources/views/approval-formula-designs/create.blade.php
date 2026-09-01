@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2 text-sm text-gray-500">
-            <a href="{{ route('approval-formula-designs.index') }}" class="hover:text-primary">Approval Formula & Design</a>
+            <a href="{{ route('approval-formula-designs.index', ['type' => $type]) }}" class="hover:text-primary">Approval {{ $type }}</a>
             <span class="text-gray-300">/</span>
             <span class="text-gray-400">Tambah</span>
         </div>
@@ -19,7 +19,7 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <a href="{{ route('approval-formula-designs.index') }}"
+                <a href="{{ route('approval-formula-designs.index', ['type' => $type]) }}"
                    class="px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                     Batal
                 </a>

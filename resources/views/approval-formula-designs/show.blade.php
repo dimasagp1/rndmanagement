@@ -63,10 +63,7 @@
                 </form>
                 @endif
             @endcan
-            <button type="button" onclick="window.print()" class="btn-outline text-gray-700 hover:bg-gray-100">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                Cetak
-            </button>
+          
             <a href="{{ route('approval-formula-designs.index', ['type' => $fa->type]) }}" class="btn-ghost">← Kembali</a>
         </div>
     </div>
@@ -125,42 +122,6 @@
             </div>
             @endif
 
-            {{-- ─── Keputusan GM (Disetujui / Tidak Disetujui + Alasan + Saran) ─── --}}
-            @php($gmDecided = in_array($fa->approval_status, ['Approved', 'Rejected']))
-            <div class="card border-l-4 {{ $gmDecided ? ($fa->approval_status === 'Approved' ? 'border-green-500' : 'border-red-500') : 'border-gray-200' }}">
-                <div class="card-header">
-                    <h2 class="text-sm font-heading font-semibold text-ink">Keputusan GM</h2>
-                    @if($gmDecided)
-                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $fa->approval_status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                        {{ $fa->approval_status === 'Approved' ? '✓ Disetujui' : '✕ Tidak Disetujui' }}
-                    </span>
-                    @else
-                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Menunggu Keputusan</span>
-                    @endif
-                </div>
-                <div class="card-body space-y-3 text-sm">
-                    @if(! $gmDecided)
-                    <p class="text-xs text-gray-400">Belum ada keputusan dari General Manager. Catatan keputusan, alasan, dan saran akan tampil di sini setelah GM memberikan keputusan.</p>
-                    @else
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-gray-400 mb-1">Keputusan oleh</p>
-                            <p class="font-semibold text-ink">{{ $fa->gmApprover?->name ?? '—' }}</p>
-                            <p class="text-xs text-gray-400">{{ $fa->approved_at_gm?->isoFormat('D MMM Y, HH:mm') ?? '—' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400 mb-1">Alasan {{ $fa->approval_status === 'Approved' ? 'Persetujuan' : 'Penolakan' }}</p>
-                            <p class="whitespace-pre-line text-gray-600">{{ $fa->decision_reason ?? $fa->rejection_notes ?? 'Tidak ada catatan.' }}</p>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-gray-100">
-                        <p class="text-xs text-gray-400 mb-1">Saran</p>
-                        <p class="whitespace-pre-line text-gray-600">{{ $fa->gm_suggestions ?? 'Tidak ada saran.' }}</p>
-                    </div>
-                    @endif
-                </div>
-            </div>
-
             {{-- Formula Approval Details --}}
             <div class="card">
                 <div class="card-header">
@@ -176,6 +137,10 @@
                     <div><p class="text-xs text-gray-400 mb-1">Kode Approval</p><p class="font-mono">{{ $fa->code }}</p></div>
                     <div><p class="text-xs text-gray-400 mb-1">Revision Number</p><p class="font-semibold">{{ $fa->revision_label }} ({{ $fa->revision }})</p></div>
                     <div><p class="text-xs text-gray-400 mb-1">Kategori</p><p>{{ $fa->kategori ?? '—' }}</p></div>
+                    @if($isDesign)
+                    <div><p class="text-xs text-gray-400 mb-1">PIC / Pengaju</p><p>{{ $fa->pic_pengaju ?? '—' }}</p></div>
+                    <div><p class="text-xs text-gray-400 mb-1">Tanggal Pengajuan</p><p>{{ $fa->tanggal_pengajuan?->isoFormat('D MMM Y') ?? '—' }}</p></div>
+                    @endif
                 </div>
             </div>
 
@@ -258,6 +223,7 @@
         {{-- SIDEBAR --}}
         <div class="space-y-4">
 
+            @if(!$isDesign)
             {{-- Alur Approval Online --}}
             <div class="card">
                 <div class="card-header">
@@ -323,13 +289,14 @@
             </div>
             @endif
 
-            @if($fa->approval_status === 'Rejected' && $fa->rejection_notes)
+            @if(!$isDesign && $fa->approval_status === 'Rejected' && $fa->rejection_notes)
             <div class="card border-l-4 border-red-400">
                 <div class="card-body">
                     <p class="text-sm font-semibold text-red-600 mb-1">Catatan Penolakan</p>
                     <p class="text-sm text-gray-600">{{ $fa->rejection_notes }}</p>
                 </div>
             </div>
+            @endif
             @endif
 
             {{-- Info Ringkas --}}
