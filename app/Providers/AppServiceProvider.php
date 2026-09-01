@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Formula;
-use App\Models\PackagingDevelopment;
 use App\Models\User;
 use App\Policies\FormulaPolicy;
 use App\Services\FormulaService;
@@ -80,21 +79,18 @@ class AppServiceProvider extends ServiceProvider
                     + TrialRm::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
                     + TrialPm::where('approval_status', 'Pending Approval')->count()
                     + PreformulationStudy::whereIn('approval_status', ['Pending Tahap 1', 'Pending Tahap 2'])->count()
-                    + FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])->count()
-                    + PackagingDevelopment::whereIn('approval_status', ['Pending OM', 'Pending GM'])->count();
+                    + FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])->count();
             } elseif ($user->hasRole('Operational Manager')) {
                 $notifCount = Formula::where('approval_status', 'Pending Tahap 1')->count()
                     + TrialRm::where('approval_status', 'Pending Tahap 1')->count()
                     + TrialPm::where('approval_status', 'Pending Approval')->count()
-                    + PreformulationStudy::where('approval_status', 'Pending Tahap 1')->count()
-                    + PackagingDevelopment::where('approval_status', 'Pending OM')->count();
+                    + PreformulationStudy::where('approval_status', 'Pending Tahap 1')->count();
                 // FormulaApproval GM only — OM tidak dapat notif
             } elseif ($user->hasRole('General Manager')) {
                 $notifCount = Formula::where('approval_status', 'Pending Tahap 2')->count()
                     + TrialRm::where('approval_status', 'Pending Tahap 2')->count()
                     + PreformulationStudy::where('approval_status', 'Pending Tahap 2')->count()
-                    + FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])->count()
-                    + PackagingDevelopment::where('approval_status', 'Pending GM')->count();
+                    + FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])->count();
             }
 
             $view->with('navNotifCount', $notifCount);

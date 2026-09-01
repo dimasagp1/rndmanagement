@@ -14,7 +14,6 @@ class GeneralController extends Controller
         'sample-evaluation'    => 'Sample Evaluation',
         'formula-approval'     => 'Formula Approval',
         'stability-test'       => 'Stability Test',
-        'packaging-development' => 'Packaging Development',
         'approval-formula-design' => 'Approval Formula & Design',
         'regulatory-dossier'   => 'Regulatory Dossier',
         'technology-transfer'  => 'Technology Transfer',
@@ -30,7 +29,6 @@ class GeneralController extends Controller
             'sample-evaluation',
             'formula-approval',
             'stability-test',
-            'packaging-development',
             'approval-formula-design',
             'regulatory-dossier',
             'technology-transfer',
@@ -90,10 +88,6 @@ class GeneralController extends Controller
 
         if ($tab === 'commercial-production') {
             return redirect()->route('commercial-productions.index');
-        }
-
-        if ($tab === 'packaging-development') {
-            return redirect()->route('packaging-developments.index');
         }
 
         return view('general.index', [

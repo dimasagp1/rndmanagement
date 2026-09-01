@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Formula;
 use App\Models\FormulaApprovalForm;
 use App\Models\NpdProposal;
-use App\Models\PackagingDevelopment;
 use App\Models\PreformulationStudy;
 use App\Models\Prf;
 use App\Models\Qbd;
@@ -31,7 +30,6 @@ class TimelineController extends Controller
         'preformulation-study'    => ['label' => 'Preformulasi',     'group' => 'Development','color' => 'indigo',  'route' => 'preformulation-studies.show'],
         'sample-evaluation'       => ['label' => 'Sample Evaluation','group' => 'Evaluation','color' => 'violet',  'route' => 'sample-evaluations.show'],
         'formula-approval'        => ['label' => 'Formula Approval', 'group' => 'Approval',  'color' => 'amber',   'route' => 'formula-approvals.show'],
-        'packaging-development'   => ['label' => 'Packaging Dev',    'group' => 'Packaging', 'color' => 'orange',  'route' => 'packaging-developments.show'],
         'stability-test'          => ['label' => 'Stability Test',   'group' => 'Stability', 'color' => 'teal',    'route' => 'stability-tests.show'],
         'technology-transfer'     => ['label' => 'Tech Transfer',    'group' => 'Transfer',  'color' => 'cyan',    'route' => 'technology-transfers.show'],
         'nie-approval'            => ['label' => 'NIE Approved',     'group' => 'Regulatory','color' => 'rose',    'route' => 'nie-approvals.show'],
@@ -191,14 +189,7 @@ class TimelineController extends Controller
             $items->push($mapItem($m, 'formula-approval', 'product_name', 'approval_status', null));
         }
 
-        // 10. Packaging Development
-        $q = PackagingDevelopment::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'packaging-development', 'product_name', 'approval_status', null));
-        }
-
-        // 11. Stability Test
+        // 10. Stability Test
         $q = StabilityTest::with('creator')->latest();
         if ($userId) $q->where($userField, $userId);
         foreach ($q->get() as $m) {
@@ -353,16 +344,6 @@ class TimelineController extends Controller
                     'route' => route('formula-approvals.show', $a),
                 ]);
             }
-
-            // GM: Pending packaging
-            $pendingPkg = PackagingDevelopment::where('approval_status', 'Pending GM')->latest()->get();
-            foreach ($pendingPkg as $p) {
-                $pending->push([
-                    'module' => 'Packaging Dev', 'name' => $p->product_name, 'code' => null,
-                    'status' => $p->approval_status, 'action' => 'Approve',
-                    'route' => route('packaging-developments.show', $p),
-                ]);
-            }
         }
 
         return $pending->sortByDesc('status')->values();
@@ -389,7 +370,6 @@ class TimelineController extends Controller
             Formula::class, TrialRm::class, TrialPm::class,
             Prf::class, NpdProposal::class, PreformulationStudy::class,
             SampleEvaluation::class, FormulaApprovalForm::class,
-            PackagingDevelopment::class,
         ];
 
         $counts = [];

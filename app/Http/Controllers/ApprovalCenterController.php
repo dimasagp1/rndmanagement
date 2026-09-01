@@ -8,7 +8,6 @@ use App\Models\FormulaApprovalForm;
 use App\Models\TrialRm;
 use App\Models\TrialPm;
 use App\Models\PreformulationStudy;
-use App\Models\PackagingDevelopment;
 use App\Services\FormulaService;
 use App\Services\TrialRmService;
 use App\Services\TrialPmService;
@@ -41,8 +40,6 @@ class ApprovalCenterController extends Controller
         $pendingTrialPms = collect();
         $pendingPreformulationStudies = collect();
         $pendingFormulaApprovals = collect();
-        $pendingApprovalFormulaDesigns = collect();
-        $pendingPackagingDevelopments = collect();
 
         // Antrean Superadmin (Melihat semua)
         if ($user->hasRole('Superadmin')) {
@@ -71,17 +68,6 @@ class ApprovalCenterController extends Controller
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
-
-            $pendingApprovalFormulaDesigns = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
-                ->where('source', 'approval-formula-design')
-                ->with('product.creator', 'omApprover', 'gmApprover')
-                ->latest()
-                ->get();
-
-            $pendingPackagingDevelopments = PackagingDevelopment::whereIn('approval_status', ['Pending OM', 'Pending GM'])
-                ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
-                ->latest()
-                ->get();
         }
         // Antrean Operational Manager (Tahap 1) — Formula Approval tidak lagi di OM, hanya GM
         elseif ($user->hasRole('Operational Manager')) {
@@ -107,11 +93,6 @@ class ApprovalCenterController extends Controller
 
             $pendingFormulaApprovals = collect();
             $pendingApprovalFormulaDesigns = collect();
-
-            $pendingPackagingDevelopments = PackagingDevelopment::where('approval_status', 'Pending OM')
-                ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
-                ->latest()
-                ->get();
         } 
         // Antrean General Manager (Tahap 2) — Formula Approval GM only
         elseif ($user->hasRole('General Manager')) {
@@ -135,20 +116,9 @@ class ApprovalCenterController extends Controller
                 ->with('product.creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
-
-            $pendingApprovalFormulaDesigns = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
-                ->where('source', 'approval-formula-design')
-                ->with('product.creator', 'omApprover', 'gmApprover')
-                ->latest()
-                ->get();
-
-            $pendingPackagingDevelopments = PackagingDevelopment::where('approval_status', 'Pending GM')
-                ->with('product.creator', 'creator', 'omApprover', 'gmApprover', 'suppliers')
-                ->latest()
-                ->get();
         }
 
-        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals', 'pendingApprovalFormulaDesigns', 'pendingPackagingDevelopments'));
+        return view('approval-center.index', compact('pendingFormulas', 'pendingTrialRms', 'pendingTrialPms', 'pendingPreformulationStudies', 'pendingFormulaApprovals'));
     }
 
     // ──────────────────────────────────────────────────────────────
