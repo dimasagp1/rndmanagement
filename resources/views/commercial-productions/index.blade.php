@@ -189,7 +189,7 @@
                         @if($viewMode === 'grid')
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
                                 @foreach($documents as $doc)
-                                    <div class="group border border-gray-100 rounded-2xl p-3 hover:shadow-sm hover:border-gray-200 transition">
+                                    <div class="group border border-gray-100 rounded-2xl p-3 hover:shadow-sm hover:border-gray-200 transition overflow-hidden min-w-0">
                                         <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-2
                                             @if($doc->extension==='pdf') bg-red-50 text-red-600
                                             @elseif(in_array($doc->extension,['doc','docx'])) bg-blue-50 text-blue-600
@@ -268,7 +268,7 @@
                             Browse Files
                             <input type="file" name="files[]" multiple @change="handleFiles($event.target.files)" class="hidden">
                         </label>
-                        <p class="text-xs text-gray-400 mt-2">Max 100MB per file. PDF, DOC, XLS, JPG, PNG, ZIP, RAR.</p>
+                        <p class="text-xs text-gray-400 mt-2">Max 100MB per file. PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, JPG, PNG, GIF, WEBP, ZIP, RAR, TXT.</p>
                     </div>
                 </div>
 
@@ -312,7 +312,23 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9999] space-y-2"></div>
+
     <script>
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            const colors = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+            const icons = type === 'error'
+                ? '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'
+                : '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+            const el = document.createElement('div');
+            el.className = `flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm shadow-lg transition-opacity duration-300 ${colors}`;
+            el.innerHTML = icons + `<span>${message}</span>`;
+            container.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3500);
+        }
+
         document.querySelectorAll('[id$="Modal"]').forEach(m => {
             m.addEventListener('click', e => { if(e.target === m) m.classList.add('hidden'); });
         });
@@ -339,11 +355,11 @@
                     for (let file of fileList) {
                         const ext = file.name.split('.').pop().toLowerCase();
                         if (!allowedTypes.includes(ext)) {
-                            alert(`File "${file.name}" tidak diizinkan. Tipe: ${ext}`);
+                            showToast(`File "${file.name}" tidak diizinkan. Tipe: .${ext} tidak didukung.`);
                             continue;
                         }
                         if (file.size > maxSize) {
-                            alert(`File "${file.name}" melebihi 100MB`);
+                            showToast(`File "${file.name}" melebihi batas 100MB.`);
                             continue;
                         }
                         // Check duplicate
