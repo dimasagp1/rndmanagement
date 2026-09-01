@@ -55,7 +55,7 @@
             <div class="card">
                 <div class="card-header flex justify-between items-center">
                     <h2 class="text-sm font-heading font-semibold text-ink">1. Identitas & Informasi Penerimaan</h2>
-                    @php $stClasses = ['Lulus'=>'bg-emerald-50 text-emerald-700 ring-emerald-600/10','Tidak Lulus'=>'bg-red-50 text-red-700 ring-red-600/10','Proses'=>'bg-blue-50 text-blue-700 ring-blue-600/10','Pending'=>'bg-amber-50 text-amber-700 ring-amber-600/10'][$logbookPm->status_pengujian] ?? ''; @endphp
+                    @php $stClasses = ['Passed'=>'bg-emerald-50 text-emerald-700 ring-emerald-600/10','Rejected'=>'bg-red-50 text-red-700 ring-red-600/10','On Going Trial'=>'bg-blue-50 text-blue-700 ring-blue-600/10','Pending'=>'bg-amber-50 text-amber-700 ring-amber-600/10'][$logbookPm->status_pengujian] ?? ''; @endphp
                     <span class="px-2 py-0.5 rounded text-xs font-semibold ring-1 {{ $stClasses }}">{{ $logbookPm->status_pengujian }}</span>
                 </div>
                 <div class="card-body">

@@ -64,9 +64,9 @@ class LogbookPmController extends Controller
 
         $stats = [
             'total'       => (clone $statQuery)->count(),
-            'pending'     => (clone $statQuery)->where('status_pengujian', 'Pending')->count(),
-            'lulus'       => (clone $statQuery)->where('status_pengujian', 'Lulus')->count(),
-            'tidak_lulus' => (clone $statQuery)->where('status_pengujian', 'Tidak Lulus')->count(),
+                'pending'     => (clone $statQuery)->where('status_pengujian', 'Pending')->count(),
+                'lulus'       => (clone $statQuery)->where('status_pengujian', 'Passed')->count(),
+                'tidak_lulus' => (clone $statQuery)->where('status_pengujian', 'Rejected')->count(),
         ];
 
         return view('logbook-pm.index', compact('entries', 'stats'));
@@ -307,7 +307,7 @@ class LogbookPmController extends Controller
             'kondisi_fisik'        => 'nullable|string|max:50',
             'trial_pm_id'          => 'nullable|exists:trial_pms,id',
             'catatan_trial'        => 'nullable|string',
-            'status_pengujian'     => 'required|in:Pending,Proses,Lulus,Tidak Lulus',
+            'status_pengujian'     => 'required|in:Pending,On Going Trial,Passed,Rejected',
             'lampiran_files'       => 'nullable|array',
             'lampiran_files.*'     => 'file|mimes:jpeg,png,jpg,pdf|max:5120',
             'file_scan_upload'     => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:10240',

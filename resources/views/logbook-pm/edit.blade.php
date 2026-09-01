@@ -228,7 +228,7 @@
                             <div>
                                 <label class="form-label" for="status_pengujian">Status Pengujian *</label>
                                 <select id="status_pengujian" name="status_pengujian" class="form-input" required>
-                                    @foreach(['Pending','Proses','Lulus','Tidak Lulus'] as $opt)
+                                    @foreach(['Pending','On Going Trial','Passed','Rejected'] as $opt)
                                     <option value="{{ $opt }}" {{ old('status_pengujian', $logbookPm->status_pengujian) === $opt ? 'selected' : '' }}>{{ $opt }}</option>
                                     @endforeach
                                 </select>

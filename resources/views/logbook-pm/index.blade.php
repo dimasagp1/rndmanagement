@@ -183,7 +183,7 @@
                             @endif
                         </td>
                         <td class="px-3 py-2.5 text-center">
-                            @php $stClasses = ['Lulus'=>'bg-emerald-50 text-emerald-700 ring-emerald-600/10','Tidak Lulus'=>'bg-red-50 text-red-700 ring-red-600/10','Proses'=>'bg-blue-50 text-blue-700 ring-blue-600/10','Pending'=>'bg-amber-50 text-amber-700 ring-amber-600/10'][$entry->status_pengujian] ?? ''; @endphp
+                            @php $stClasses = ['Passed'=>'bg-emerald-50 text-emerald-700 ring-emerald-600/10','Rejected'=>'bg-red-50 text-red-700 ring-red-600/10','On Going Trial'=>'bg-blue-50 text-blue-700 ring-blue-600/10','Pending'=>'bg-amber-50 text-amber-700 ring-amber-600/10'][$entry->status_pengujian] ?? ''; @endphp
                             <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold ring-1 {{ $stClasses }}">{{ $entry->status_pengujian }}</span>
                         </td>
                         <td class="px-3 py-2.5 text-center text-gray-600">{{ $entry->kondisi_fisik ?? '—' }}</td>
