@@ -21,6 +21,18 @@ class EnsureDossierPermissionsSeeder extends Seeder
             'regulatory_dossier.view',
             'regulatory_dossier.edit',
             'regulatory_dossier.delete',
+            'qbd.create',
+            'qbd.view',
+            'qbd.edit',
+            'qbd.delete',
+            'technology_transfer.create',
+            'technology_transfer.view',
+            'technology_transfer.edit',
+            'technology_transfer.delete',
+            'nie_approval.create',
+            'nie_approval.view',
+            'nie_approval.edit',
+            'nie_approval.delete',
         ];
 
         foreach ($permissions as $permission) {
