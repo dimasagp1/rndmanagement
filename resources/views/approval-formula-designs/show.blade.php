@@ -44,7 +44,7 @@
             <div class="flex items-center gap-2 flex-wrap">
             @can('formula.edit')
                 @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
-                <a href="{{ route('approval-formula-designs.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit Approval</a>
+                <a href="{{ route('approval-formula-designs.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit</a>
                 @endif
                 <form method="POST" action="{{ route('approval-formula-designs.duplicate', $fa) }}" class="inline">
                     @csrf

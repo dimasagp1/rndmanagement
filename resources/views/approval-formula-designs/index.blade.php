@@ -46,17 +46,20 @@
     @php($currentApprovalInternal = request('approval_internal'))
 
     @if($typeFilter === 'Design')
-    <div class="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1 w-fit">
+    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
         <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
-           class="px-4 py-1.5 rounded-md text-xs font-medium transition {{ !$currentApprovalInternal ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap
+                  {{ !$currentApprovalInternal ? 'bg-primary text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-surface border border-gray-200' }}">
             Semua
         </a>
         <a href="{{ route('approval-formula-designs.index', ['type' => 'Design', 'approval_internal' => 'Maklon']) }}"
-           class="px-4 py-1.5 rounded-md text-xs font-medium transition {{ $currentApprovalInternal === 'Maklon' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap
+                  {{ $currentApprovalInternal === 'Maklon' ? 'bg-primary text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-surface border border-gray-200' }}">
             Maklon
         </a>
         <a href="{{ route('approval-formula-designs.index', ['type' => 'Design', 'approval_internal' => 'Vitabrand']) }}"
-           class="px-4 py-1.5 rounded-md text-xs font-medium transition {{ $currentApprovalInternal === 'Vitabrand' ? 'bg-white shadow-sm text-ink font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap
+                  {{ $currentApprovalInternal === 'Vitabrand' ? 'bg-primary text-white shadow-sm' : 'bg-white text-gray-500 hover:bg-surface border border-gray-200' }}">
             Vitabrand
         </a>
     </div>
