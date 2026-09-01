@@ -5,7 +5,7 @@
         </div>
     </x-slot>
 
-    <div class="min-h-screen" x-data="{ tab: 'pipeline' }">
+    <div class="min-h-screen" x-data="{ tab: 'pipeline', pipelineShow: 10, pendingShow: 10, activityShow: 10 }">
         {{-- ─── Header ─────────────────────────────────────── --}}
         <header class="flex justify-between items-start mb-8">
             <div class="flex items-center gap-3">
@@ -147,8 +147,8 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    @forelse($items as $item)
-                                    <tr class="hover:bg-gray-50">
+                                    @forelse($items as $idx => $item)
+                                    <tr class="hover:bg-gray-50" x-show="pipelineShow > {{ $idx }}">
                                         <td class="px-4 py-3">
                                             <a href="{{ $item['route'] }}" class="inline-flex items-center gap-1.5">
                                                 <span class="w-2 h-2 rounded-full bg-{{ $item['color'] }}-500 shrink-0"></span>
@@ -191,6 +191,14 @@
                                 </tbody>
                             </table>
                         </div>
+                        @if($items->count() > 10)
+                        <div class="px-4 py-3 border-t border-gray-100 text-center">
+                            <button @click="pipelineShow += 10" x-show="pipelineShow < {{ $items->count() }}" class="text-xs text-primary hover:underline font-medium">
+                                Muat lainnya ({{ $items->count() }} total)
+                            </button>
+                            <span x-show="pipelineShow >= {{ $items->count() }}" class="text-xs text-gray-400">Semua data sudah dimuat</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -215,8 +223,8 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
-                                    @foreach($pendingItems as $pi)
-                                    <tr class="hover:bg-gray-50">
+                                    @foreach($pendingItems as $idx => $pi)
+                                    <tr class="hover:bg-gray-50" x-show="pendingShow > {{ $idx }}">
                                         <td class="px-4 py-3">
                                             <span class="text-xs font-semibold text-gray-600">{{ $pi['module'] }}</span>
                                         </td>
@@ -242,6 +250,14 @@
                                 </tbody>
                             </table>
                         </div>
+                        @if($pendingItems->count() > 10)
+                        <div class="px-4 py-3 border-t border-gray-100 text-center">
+                            <button @click="pendingShow += 10" x-show="pendingShow < {{ $pendingItems->count() }}" class="text-xs text-primary hover:underline font-medium">
+                                Muat lainnya ({{ $pendingItems->count() }} total)
+                            </button>
+                            <span x-show="pendingShow >= {{ $pendingItems->count() }}" class="text-xs text-gray-400">Semua data sudah dimuat</span>
+                        </div>
+                        @endif
                         @endif
                     </div>
                 </div>
@@ -256,8 +272,8 @@
                         </div>
                         @else
                         <div class="divide-y divide-gray-100">
-                            @foreach($activities as $act)
-                            <div class="px-4 py-3 hover:bg-gray-50">
+                            @foreach($activities as $idx => $act)
+                            <div class="px-4 py-3 hover:bg-gray-50" x-show="activityShow > {{ $idx }}">
                                 <div class="flex items-start gap-3">
                                     <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                                         @if($act->event === 'created')
@@ -289,6 +305,14 @@
                             </div>
                             @endforeach
                         </div>
+                        @if($activities->count() > 10)
+                        <div class="px-4 py-3 border-t border-gray-100 text-center">
+                            <button @click="activityShow += 10" x-show="activityShow < {{ $activities->count() }}" class="text-xs text-primary hover:underline font-medium">
+                                Muat lainnya ({{ $activities->count() }} total)
+                            </button>
+                            <span x-show="activityShow >= {{ $activities->count() }}" class="text-xs text-gray-400">Semua data sudah dimuat</span>
+                        </div>
+                        @endif
                         @endif
                     </div>
                 </div>
