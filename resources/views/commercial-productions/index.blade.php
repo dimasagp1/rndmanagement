@@ -32,14 +32,16 @@
                 </form>
             </div>
 
-            <!-- Add File (green, large, center) -->
-            <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl text-white text-sm font-medium shadow-sm transition" style="background-color: #2F7D46;">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Add File
-            </button>
+            <!-- Right side buttons -->
+            <div class="flex items-center gap-3 ml-auto">
+                <!-- Add File -->
+                <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="inline-flex items-center justify-center gap-2 px-10 py-2.5 rounded-xl text-white text-sm font-medium shadow-sm transition" style="background-color: #2F7D46;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Add File
+                </button>
 
-            <!-- More -->
-            <div class="relative" x-data="{ open: false }">
+                <!-- More -->
+                <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="w-10 h-10 rounded-xl border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 transition">⋯</button>
                 <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-10">
                     <button onclick="document.getElementById('createFolderModal').classList.remove('hidden'); open = false" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
@@ -51,6 +53,7 @@
                         Refresh
                     </button>
                 </div>
+            </div>
             </div>
         </div>
 
