@@ -33,9 +33,11 @@
             </div>
 
             <div>
-                <label for="npd_proposal_id" class="block text-sm font-medium text-gray-700 mb-1">Product Name (Dari NPD Proposal) <span class="text-red-500">*</span></label>
-                <select id="npd_proposal_id" name="npd_proposal_id" class="form-input @error('npd_proposal_id') border-red-400 @enderror" required>
-                    <option value="">— Pilih Produk dari NPD Proposal —</option>
+                <label for="npd_proposal_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    Product Name (Dari NPD Proposal) <span class="text-xs text-gray-400 font-normal">(Opsional)</span>
+                </label>
+                <select id="npd_proposal_id" name="npd_proposal_id" class="form-input @error('npd_proposal_id') border-red-400 @enderror">
+                    <option value="">— Pilih Produk dari NPD Proposal (Opsional) —</option>
                     @foreach($npdProposals as $proposal)
                     <option value="{{ $proposal->id }}" {{ old('npd_proposal_id', $sampleEvaluation->npd_proposal_id) == $proposal->id ? 'selected' : '' }}>
                         {{ $proposal->code }} — {{ $proposal->product_name }}
@@ -43,6 +45,16 @@
                     @endforeach
                 </select>
                 @error('npd_proposal_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">
+                    Product Name (Manual / Keterangan) <span class="text-xs text-gray-400 font-normal">(Opsional jika tidak memilih NPD Proposal)</span>
+                </label>
+                <input type="text" id="product_name" name="product_name" value="{{ old('product_name', $sampleEvaluation->product_name) }}"
+                       placeholder="Nama produk / sampel evaluasi..."
+                       class="form-input @error('product_name') border-red-400 @enderror">
+                @error('product_name') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div>

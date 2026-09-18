@@ -90,16 +90,28 @@ class SampleEvaluationController extends Controller
 
         $validated = $request->validate([
             'sample_id'        => 'required|string|max:255|unique:sample_evaluations,sample_id',
-            'npd_proposal_id'  => 'required|exists:npd_proposals,id',
+            'npd_proposal_id'  => 'nullable|exists:npd_proposals,id',
+            'product_name'     => 'nullable|string|max:255',
             'project_owner_id' => 'required|exists:users,id',
         ]);
 
-        $proposal = NpdProposal::findOrFail($validated['npd_proposal_id']);
+        $productName = $validated['product_name'] ?? null;
+
+        if (! empty($validated['npd_proposal_id'])) {
+            $proposal = NpdProposal::find($validated['npd_proposal_id']);
+            if ($proposal) {
+                $productName = $productName ?: $proposal->product_name;
+            }
+        }
+
+        if (empty($productName)) {
+            $productName = '—';
+        }
 
         $evaluation = SampleEvaluation::create([
             'sample_id'        => $validated['sample_id'],
-            'product_name'     => $proposal->product_name,
-            'npd_proposal_id'  => $validated['npd_proposal_id'],
+            'product_name'     => $productName,
+            'npd_proposal_id'  => $validated['npd_proposal_id'] ?? null,
             'project_owner_id' => $validated['project_owner_id'],
             'status'           => 'In Progress',
             'created_by'       => auth()->id(),
@@ -152,16 +164,28 @@ class SampleEvaluationController extends Controller
 
         $validated = $request->validate([
             'sample_id'        => 'required|string|max:255|unique:sample_evaluations,sample_id,' . $sampleEvaluation->id,
-            'npd_proposal_id'  => 'required|exists:npd_proposals,id',
+            'npd_proposal_id'  => 'nullable|exists:npd_proposals,id',
+            'product_name'     => 'nullable|string|max:255',
             'project_owner_id' => 'required|exists:users,id',
         ]);
 
-        $proposal = NpdProposal::findOrFail($validated['npd_proposal_id']);
+        $productName = $validated['product_name'] ?? null;
+
+        if (! empty($validated['npd_proposal_id'])) {
+            $proposal = NpdProposal::find($validated['npd_proposal_id']);
+            if ($proposal) {
+                $productName = $productName ?: $proposal->product_name;
+            }
+        }
+
+        if (empty($productName)) {
+            $productName = $sampleEvaluation->product_name ?: '—';
+        }
 
         $sampleEvaluation->update([
             'sample_id'        => $validated['sample_id'],
-            'product_name'     => $proposal->product_name,
-            'npd_proposal_id'  => $validated['npd_proposal_id'],
+            'product_name'     => $productName,
+            'npd_proposal_id'  => $validated['npd_proposal_id'] ?? null,
             'project_owner_id' => $validated['project_owner_id'],
         ]);
 
