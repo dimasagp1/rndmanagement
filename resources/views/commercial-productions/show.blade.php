@@ -852,52 +852,43 @@
                     p-5 sm:p-6
                     w-full max-w-md">
 
-
-            <h3 class="font-semibold text-ink">
+            <h3 class="font-semibold text-ink text-base">
                 Pindahkan File
             </h3>
 
-            <p class="text-xs text-gray-400 mt-1">
-                Pilih folder tujuan baru
+            <p class="text-xs text-gray-500 mt-1">
+                Pindahkan file <span class="font-medium text-ink">"{{ $document->original_name }}"</span> ke folder lain.
             </p>
 
+            <form method="POST" action="{{ route('commercial-productions.documents.move', $document) }}" class="mt-4 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Pilih Folder Tujuan</label>
+                    <select name="folder_id" class="w-full rounded-xl border-gray-200 text-sm focus:border-primary focus:ring-primary">
+                        <option value="" {{ is_null($document->folder_id) ? 'selected' : '' }}>📁 Root (Folder Utama)</option>
+                        @foreach($allFolders as $folder)
+                            <option value="{{ $folder->id }}" {{ $document->folder_id == $folder->id ? 'selected' : '' }}>
+                                📁 {{ $folder->name }} {{ $folder->parent ? '('.$folder->parent->name.')' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            {{-- Information --}}
-            <div class="mt-4 p-3
-                        rounded-xl
-                        bg-amber-50
-                        border border-amber-100
-                        text-sm text-amber-700
-                        leading-relaxed">
-
-                Fitur pindah folder akan tersedia di versi berikutnya.
-                Untuk sekarang, hapus dan upload ulang ke folder tujuan.
-
-            </div>
-
-
-            {{-- Close --}}
-            <div class="flex justify-end mt-5">
-
-                <button
-                    type="button"
-                    onclick="document.getElementById('moveModal').classList.add('hidden')"
-                    class="px-4 py-2
-                           rounded-xl
-                           bg-ink
-                           text-white
-                           text-sm
-                           hover:bg-ink/90
-                           transition">
-
-                    Tutup
-
-                </button>
-
-            </div>
-
+                <div class="flex justify-end gap-2 pt-2">
+                    <button
+                        type="button"
+                        onclick="document.getElementById('moveModal').classList.add('hidden')"
+                        class="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">
+                        Batal
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-5 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 transition shadow-sm">
+                        Pindahkan File
+                    </button>
+                </div>
+            </form>
         </div>
-
     </div>
 
 </x-app-layout>

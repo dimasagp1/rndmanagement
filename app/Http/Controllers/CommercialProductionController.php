@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CommercialProductionDocumentsExport;
 use App\Models\CommercialProductionAudit;
 use App\Models\CommercialProductionDocument;
 use App\Models\CommercialProductionDocumentVersion;
@@ -9,6 +10,8 @@ use App\Models\CommercialProductionFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use ZipArchive;
 
 class CommercialProductionController extends Controller
 {
@@ -140,19 +143,34 @@ class CommercialProductionController extends Controller
     // ── Destroy Folder ──
     public function destroyFolder(CommercialProductionFolder $folder)
     {
-        $hasChildren = $folder->children()->exists();
-        $hasDocuments = $folder->documents()->exists();
+        $name = $folder->name;
+        $parentId = $folder->parent_id;
 
-        if ($hasChildren || $hasDocuments) {
-            return back()->with('error', 'Folder tidak dapat dihapus karena masih berisi sub-folder atau dokumen. Pindahkan atau hapus isinya terlebih dahulu.');
+        $this->deleteFolderRecursively($folder);
+
+        CommercialProductionAudit::log('Folder dihapus', null, "Folder \"{$name}\" beserta seluruh isinya dihapus");
+
+        return redirect()->route('commercial-productions.index', $parentId ? ['folder' => $parentId] : [])
+            ->with('success', "Folder \"{$name}\" berhasil dihapus.");
+    }
+
+    private function deleteFolderRecursively(CommercialProductionFolder $folder): void
+    {
+        $folder->loadMissing(['children', 'documents.versions']);
+
+        foreach ($folder->children as $child) {
+            $this->deleteFolderRecursively($child);
         }
 
-        $name = $folder->name;
+        foreach ($folder->documents as $doc) {
+            Storage::disk('public')->delete($doc->file_path);
+            foreach ($doc->versions as $version) {
+                Storage::disk('public')->delete($version->file_path);
+            }
+            $doc->delete();
+        }
+
         $folder->delete();
-
-        CommercialProductionAudit::log('Folder dihapus', null, "Folder \"{$name}\" dihapus");
-
-        return back()->with('success', "Folder \"{$name}\" berhasil dihapus.");
     }
 
     // ── Store Document (upload) ──
@@ -232,8 +250,9 @@ class CommercialProductionController extends Controller
         $document->load(['folder', 'uploader', 'versions.uploader']);
 
         $breadcrumbs = $document->folder ? $document->folder->breadcrumbs() : [];
+        $allFolders  = CommercialProductionFolder::orderBy('name')->get();
 
-        return view('commercial-productions.show', compact('document', 'breadcrumbs'));
+        return view('commercial-productions.show', compact('document', 'breadcrumbs', 'allFolders'));
     }
 
     // ── Update Document (rename / description) ──
@@ -322,5 +341,153 @@ class CommercialProductionController extends Controller
         $path = Storage::disk('public')->path($document->file_path);
 
         return response()->file($path);
+    }
+
+    // ── Export ZIP (download all original files in folder/subfolder/system) ──
+    public function exportZip(Request $request)
+    {
+        $folderId = $request->get('folder');
+        $currentFolder = $folderId ? CommercialProductionFolder::find($folderId) : null;
+
+        $query = CommercialProductionDocument::with(['folder']);
+
+        if ($currentFolder) {
+            $folderIds = $currentFolder->allDescendantIds();
+            $query->whereIn('folder_id', $folderIds);
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('original_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('extension', 'like', "%{$search}%");
+            });
+        }
+
+        if ($type = $request->get('type')) {
+            $query->where('extension', $type);
+        }
+
+        $documents = $query->get();
+
+        if ($documents->isEmpty()) {
+            return back()->with('error', 'Tidak ada dokumen yang dapat diunduh.');
+        }
+
+        $zip = new ZipArchive();
+        $tempFile = tempnam(sys_get_temp_dir(), 'commercial_zip_');
+
+        if ($zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            return back()->with('error', 'Gagal membuat arsip ZIP.');
+        }
+
+        $disk = Storage::disk('public');
+        $usedNames = [];
+        $addedFiles = 0;
+
+        foreach ($documents as $doc) {
+            if (! $disk->exists($doc->file_path)) {
+                continue;
+            }
+
+            $folderPrefix = '';
+            if ($doc->folder) {
+                $folderPrefix = $this->getRelativeZipPath($doc->folder, $currentFolder);
+            } elseif (! $currentFolder) {
+                $folderPrefix = 'Root_Files/';
+            }
+
+            $rawName = $doc->original_name;
+            $zipEntryPath = $folderPrefix . $rawName;
+
+            if (isset($usedNames[$zipEntryPath])) {
+                $usedNames[$zipEntryPath]++;
+                $ext = pathinfo($rawName, PATHINFO_EXTENSION);
+                $base = pathinfo($rawName, PATHINFO_FILENAME);
+                $suffix = $ext ? ".{$ext}" : '';
+                $zipEntryPath = $folderPrefix . "{$base} (v{$doc->version}-{$usedNames[$zipEntryPath]}){$suffix}";
+            } else {
+                $usedNames[$zipEntryPath] = 1;
+            }
+
+            $zip->addFile($disk->path($doc->file_path), $zipEntryPath);
+            $addedFiles++;
+        }
+
+        $zip->close();
+
+        if ($addedFiles === 0) {
+            @unlink($tempFile);
+            return back()->with('error', 'File fisik dokumen tidak ditemukan di penyimpanan server.');
+        }
+
+        $folderSlug = $currentFolder ? Str::slug($currentFolder->name) : 'semua-dokumen';
+        $fileName = "Commercial_Production_{$folderSlug}_" . now()->format('Ymd_His') . ".zip";
+
+        CommercialProductionAudit::log('Export ZIP', null, "Download ZIP {$addedFiles} file dokumen commercial production ({$fileName})");
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
+
+    private function getRelativeZipPath(CommercialProductionFolder $folder, ?CommercialProductionFolder $baseFolder = null): string
+    {
+        $crumbs = $folder->breadcrumbs();
+
+        if ($baseFolder) {
+            $segments = [];
+            $foundBase = false;
+            foreach ($crumbs as $crumb) {
+                if ($crumb->id === $baseFolder->id) {
+                    $foundBase = true;
+                    continue;
+                }
+                if ($foundBase) {
+                    $segments[] = Str::slug($crumb->name, '_');
+                }
+            }
+            return empty($segments) ? '' : implode('/', $segments) . '/';
+        }
+
+        $segments = array_map(fn($f) => Str::slug($f->name, '_'), $crumbs);
+        return empty($segments) ? '' : implode('/', $segments) . '/';
+    }
+
+    // ── Export Excel (metadata of all documents in folder/system) ──
+    public function exportExcel(Request $request)
+    {
+        $folderId = $request->get('folder');
+        $currentFolder = $folderId ? CommercialProductionFolder::find($folderId) : null;
+
+        $query = CommercialProductionDocument::with(['folder', 'uploader']);
+
+        if ($currentFolder) {
+            $folderIds = $currentFolder->allDescendantIds();
+            $query->whereIn('folder_id', $folderIds);
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('original_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('extension', 'like', "%{$search}%");
+            });
+        }
+
+        if ($type = $request->get('type')) {
+            $query->where('extension', $type);
+        }
+
+        $documents = $query->orderBy('original_name')->get();
+
+        if ($documents->isEmpty()) {
+            return back()->with('error', 'Tidak ada dokumen yang dapat diexport.');
+        }
+
+        $folderSlug = $currentFolder ? Str::slug($currentFolder->name) : 'semua-dokumen';
+        $fileName = "Rekap_Commercial_Production_{$folderSlug}_" . now()->format('Ymd_His') . ".xlsx";
+
+        CommercialProductionAudit::log('Export Excel', null, "Export rekap {$documents->count()} dokumen commercial production ({$fileName})");
+
+        return Excel::download(new CommercialProductionDocumentsExport($documents), $fileName);
     }
 }

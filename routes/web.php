@@ -400,6 +400,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/commercial-productions/versions/{version}/download', [CommercialProductionController::class, 'downloadVersion'])
          ->name('commercial-productions.versions.download')
          ->middleware('can:commercial_production.view');
+    Route::get('/commercial-productions/export/zip', [CommercialProductionController::class, 'exportZip'])
+         ->name('commercial-productions.export.zip')
+         ->middleware('can:commercial_production.view');
+    Route::get('/commercial-productions/export/excel', [CommercialProductionController::class, 'exportExcel'])
+         ->name('commercial-productions.export.excel')
+         ->middleware('can:commercial_production.view');
 
     // ── Approval Center ───────────────────────────────────
     Route::get('/approval-center', [ApprovalCenterController::class, 'index'])
