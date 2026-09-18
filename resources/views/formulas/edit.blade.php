@@ -394,21 +394,26 @@
                            class="btn-ghost w-full justify-center text-sm">Batal</a>
 
                         @can('delete', $formula)
-                        <form method="POST" action="{{ route('formulas.destroy', $formula) }}"
-                              onsubmit="return confirm('Hapus formula {{ $formula->code }}? Tindakan ini tidak dapat dibatalkan.')">
-                            @csrf @method('DELETE')
-                            <button type="submit"
-                                    class="w-full text-red-500 hover:text-red-700 text-sm py-2 hover:underline transition"
-                                    id="btn-delete-formula">
-                                Hapus Formula
-                            </button>
-                        </form>
+                        <button type="submit"
+                                form="delete-formula-form"
+                                class="w-full text-red-500 hover:text-red-700 text-sm py-2 hover:underline transition"
+                                id="btn-delete-formula">
+                            Hapus Formula
+                        </button>
                         @endcan
                     </div>
                 </div>
             </div>
         </div>
     </form>
+
+    @can('delete', $formula)
+    <form id="delete-formula-form" method="POST" action="{{ route('formulas.destroy', $formula) }}" class="hidden"
+          onsubmit="return confirm('Hapus formula {{ $formula->code }}? Tindakan ini tidak dapat dibatalkan.')">
+        @csrf
+        @method('DELETE')
+    </form>
+    @endcan
 </x-app-layout>
 
 <script>

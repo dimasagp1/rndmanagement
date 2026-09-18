@@ -148,12 +148,7 @@
                                 </svg>
                                 Unduh
                             </a>
-                            <form method="POST" action="{{ route('npd-proposals.documents.destroy', $doc) }}"
-                                  onsubmit="return confirm('Hapus dokumen {{ addslashes($doc->file_name) }}?')" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-ghost btn-sm text-xs text-red-500 hover:bg-red-50">Hapus</button>
-                            </form>
+                            <button type="submit" form="delete-doc-{{ $doc->id }}" class="btn-ghost btn-sm text-xs text-red-500 hover:bg-red-50">Hapus</button>
                         </div>
                     </div>
                     @endforeach
@@ -202,6 +197,15 @@
                 </button>
             </div>
         </form>
+
+        {{-- Form terpisah untuk hapus dokumen agar tidak terjadi nested form --}}
+        @foreach($npdProposal->documents as $doc)
+        <form id="delete-doc-{{ $doc->id }}" method="POST" action="{{ route('npd-proposals.documents.destroy', $doc) }}" class="hidden"
+              onsubmit="return confirm('Hapus dokumen {{ addslashes($doc->file_name) }}?')">
+            @csrf
+            @method('DELETE')
+        </form>
+        @endforeach
     </div>
 
     <script>

@@ -203,13 +203,9 @@
                         <a href="{{ route('trial-rms.show', $trialRm) }}" class="btn-ghost w-full justify-center text-sm">Batal</a>
 
                         @can('delete', $trialRm)
-                        <form method="POST" action="{{ route('trial-rms.destroy', $trialRm) }}"
-                              onsubmit="return confirm('Hapus catatan trial {{ $trialRm->code }}? Tindakan ini tidak dapat dibatalkan.')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="w-full text-red-500 hover:text-red-700 text-sm py-2 hover:underline transition" id="btn-delete-trial">
-                                🗑 Hapus Trial
-                            </button>
-                        </form>
+                        <button type="submit" form="delete-trial-form" class="w-full text-red-500 hover:text-red-700 text-sm py-2 hover:underline transition" id="btn-delete-trial">
+                            🗑 Hapus Trial
+                        </button>
                         @endcan
                     </div>
                 </div>
@@ -218,6 +214,14 @@
 
         </div>
     </form>
+
+    @can('delete', $trialRm)
+    <form id="delete-trial-form" method="POST" action="{{ route('trial-rms.destroy', $trialRm) }}" class="hidden"
+          onsubmit="return confirm('Hapus catatan trial {{ $trialRm->code }}? Tindakan ini tidak dapat dibatalkan.')">
+        @csrf
+        @method('DELETE')
+    </form>
+    @endcan
 </x-app-layout>
 
 <script>

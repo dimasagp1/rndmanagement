@@ -39,6 +39,7 @@ class PrfService
     public function update(Prf $prf, array $data): Prf
     {
         $prf->update([
+            'code'             => $data['code'] ?? $prf->code,
             'product_concept'  => $data['product_concept'],
             'target_market'    => $data['target_market'] ?? null,
             'product_category' => $data['product_category'] ?? null,

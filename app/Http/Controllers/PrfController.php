@@ -110,7 +110,7 @@ class PrfController extends Controller
             'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
 
-        $this->service->update($prf, $validated);
+        $prf = $this->service->update($prf, $validated);
         $this->storeDocuments($request, $prf);
 
         return redirect()
