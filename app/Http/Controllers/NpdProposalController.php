@@ -131,7 +131,11 @@ class NpdProposalController extends Controller
         $npdProposal->load('documents');
         $teamMembers = $this->teamMembers();
 
-        return view('npd-proposals.edit', ['proposal' => $npdProposal, 'teamMembers' => $teamMembers]);
+        return view('npd-proposals.edit', [
+            'proposal'    => $npdProposal,
+            'npdProposal' => $npdProposal,
+            'teamMembers' => $teamMembers,
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────

@@ -199,7 +199,7 @@
         </form>
 
         {{-- Form terpisah untuk hapus dokumen agar tidak terjadi nested form --}}
-        @foreach($npdProposal->documents as $doc)
+        @foreach($proposal->documents as $doc)
         <form id="delete-doc-{{ $doc->id }}" method="POST" action="{{ route('npd-proposals.documents.destroy', $doc) }}" class="hidden"
               onsubmit="return confirm('Hapus dokumen {{ addslashes($doc->file_name) }}?')">
             @csrf
