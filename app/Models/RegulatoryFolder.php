@@ -63,18 +63,16 @@ class RegulatoryFolder extends Model
     public function allDescendantIds(): array
     {
         $ids = [$this->id];
-        foreach ($this->children as $child) {
+        $children = $this->relationLoaded('children') ? $this->children : $this->children()->get();
+        foreach ($children as $child) {
             $ids = array_merge($ids, $child->allDescendantIds());
         }
-        return $ids;
+        return array_values(array_unique($ids));
     }
 
     public function documentCountRecursive(): int
     {
-        $count = $this->documents()->count();
-        foreach ($this->children as $child) {
-            $count += $child->documentCountRecursive();
-        }
-        return $count;
+        $allIds = $this->allDescendantIds();
+        return RegulatoryDocument::whereIn('folder_id', $allIds)->count();
     }
 }

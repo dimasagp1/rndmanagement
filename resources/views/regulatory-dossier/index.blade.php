@@ -33,7 +33,39 @@
             </div>
 
             <!-- Right side buttons -->
-            <div class="flex items-center gap-3 ml-auto">
+            <div class="flex items-center gap-2 ml-auto">
+                <!-- Export Menu -->
+                <div class="relative" x-data="{ openExport: false }">
+                    <button @click="openExport = !openExport" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium shadow-sm transition" title="Export Semua Dokumen">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Export
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="openExport" @click.outside="openExport = false" x-transition class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-xl py-1.5 z-50 text-xs">
+                        <a href="{{ route('regulatory-dossier.export.zip', array_merge(request()->only('search','type'), $currentFolder ? ['folder' => $currentFolder->id] : [])) }}" class="px-4 py-2.5 text-gray-700 hover:bg-gray-50 flex items-start gap-2.5 transition">
+                            <div class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-ink">Download Berkas (.zip)</p>
+                                <p class="text-[11px] text-gray-400">Unduh seluruh berkas asli {{ $currentFolder ? 'dalam folder ini & sub-foldernya' : 'semua berkas dossier' }}</p>
+                            </div>
+                        </a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <a href="{{ route('regulatory-dossier.export.excel', array_merge(request()->only('search','type'), $currentFolder ? ['folder' => $currentFolder->id] : [])) }}" class="px-4 py-2.5 text-gray-700 hover:bg-gray-50 flex items-start gap-2.5 transition">
+                            <div class="w-7 h-7 rounded-lg bg-green-50 text-green-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-ink">Export Rekap Dokumen (.xlsx)</p>
+                                <p class="text-[11px] text-gray-400">Daftar & metadata seluruh dokumen format Excel</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Add File -->
                 <button onclick="document.getElementById('uploadModal').classList.remove('hidden')" class="inline-flex items-center justify-center gap-2 w-48 py-2.5 rounded-xl text-white text-sm font-medium shadow-sm transition" style="background-color: #2F7D46;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -65,6 +97,15 @@
                             </button>
                         </form>
                         @endcan
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <a href="{{ route('regulatory-dossier.export.zip', ['folder' => $currentFolder->id]) }}" class="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Download Folder Ini (.zip)
+                        </a>
+                        <a href="{{ route('regulatory-dossier.export.excel', ['folder' => $currentFolder->id]) }}" class="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Export Rekap Excel (.xlsx)
+                        </a>
                         <div class="border-t border-gray-100 my-1"></div>
                     @endif
                     <button onclick="location.reload()" class="w-full text-left px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 text-gray-700">
@@ -201,6 +242,10 @@
                                             <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             Buka Folder
                                         </a>
+                                        <a href="{{ route('regulatory-dossier.export.zip', ['folder' => $folder->id]) }}" class="px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                            Download ZIP
+                                        </a>
                                         @can('regulatory_dossier.edit')
                                         <button type="button" @click="open = false; openRenameFolderModal({{ $folder->id }}, '{{ addslashes($folder->name) }}', '{{ addslashes($folder->description ?? '') }}')" class="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                             <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -226,7 +271,7 @@
                                 <p class="text-[15px] font-medium text-ink truncate group-hover:text-primary transition" title="{{ $folder->name }}">{{ $folder->name }}</p>
                                 <div class="flex items-center justify-between text-xs text-gray-400 mt-2">
                                     <span>{{ $folder->children()->count() }} sub-folder</span>
-                                    <span>{{ $folder->documents()->count() }} file</span>
+                                    <span>{{ $folder->documentCountRecursive() }} file</span>
                                 </div>
                             </a>
                         </div>

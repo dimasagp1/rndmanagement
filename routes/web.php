@@ -294,6 +294,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/regulatory-dossier/versions/{version}/download', [RegulatoryDossierController::class, 'downloadVersion'])
          ->name('regulatory-dossier.versions.download')
          ->middleware('can:regulatory_dossier.view');
+    Route::get('/regulatory-dossier/export/zip', [RegulatoryDossierController::class, 'exportZip'])
+         ->name('regulatory-dossier.export.zip')
+         ->middleware('can:regulatory_dossier.view');
+    Route::get('/regulatory-dossier/export/excel', [RegulatoryDossierController::class, 'exportExcel'])
+         ->name('regulatory-dossier.export.excel')
+         ->middleware('can:regulatory_dossier.view');
 
     // ── Technology Transfer ───────────────────────────────────
     Route::get('/technology-transfers', [TechnologyTransferController::class, 'index'])
