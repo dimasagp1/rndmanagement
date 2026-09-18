@@ -69,12 +69,12 @@
                     <h2 class="font-semibold text-ink">Tambah Sesi Evaluasi</h2>
                     <p class="text-xs text-gray-500">Riwayat baru untuk batch percobaan berikutnya</p>
                 </div>
-                <form method="POST" action="{{ route('sample-evaluations.sessions.store', $sampleEvaluation) }}" class="p-6 space-y-5">
+                <form method="POST" action="{{ route('sample-evaluations.sessions.store', $sampleEvaluation) }}" enctype="multipart/form-data" class="p-6 space-y-5">
                     @csrf
                     <div class="grid md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Trial Number <span class="text-red-500">*</span></label>
-                            <input type="number" name="trial_batch" min="1" value="{{ old('trial_batch') }}" required class="form-input">
+                            <input type="text" name="trial_batch" value="{{ old('trial_batch') }}" required placeholder="Contoh: 1, 1A, TR-01..." class="form-input">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Panelis <span class="text-red-500">*</span></label>
@@ -136,8 +136,77 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end gap-2">
-                        <button type="submit" class="btn-primary">Simpan Sesi Evaluasi</button>
+                    {{-- Attachment File (Opsional) --}}
+                    <div x-data="{
+                        files: [],
+                        selectedType: 'Result',
+                        handleFileChange(event) {
+                            this.files = Array.from(event.target.files);
+                        },
+                        removeFile(index) {
+                            this.files.splice(index, 1);
+                            if (this.files.length === 0) {
+                                this.$refs.fileInput.value = '';
+                            }
+                        },
+                        formatSize(bytes) {
+                            if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+                            if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                            return bytes + ' B';
+                        }
+                    }" class="pt-3 border-t border-gray-100">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="flex-1 w-full space-y-2">
+                                <label class="block text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                    </svg>
+                                    Attachment File (Lampiran Sesi)
+                                </label>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <select name="attachment_type" x-model="selectedType" class="form-input text-xs py-2 w-auto max-w-[170px] rounded-lg">
+                                        @foreach(['Form Panel', 'Blind Code', 'Report Panel Test', 'Data Panelis', 'Result'] as $type)
+                                        <option value="{{ $type }}">{{ $type }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <label class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-xs font-medium text-gray-700 cursor-pointer transition shadow-sm">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                        </svg>
+                                        <span>Pilih Berkas Lampiran</span>
+                                        <input type="file" name="attachment_files[]" x-ref="fileInput" @change="handleFileChange($event)" multiple
+                                               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.zip" class="hidden">
+                                    </label>
+                                    <span class="text-[11px] text-gray-400">PDF, JPG, PNG, DOC, XLS, ZIP (Maks 10MB)</span>
+                                </div>
+
+                                {{-- Keterangan saat file sudah dipilih --}}
+                                <div x-show="files.length > 0" x-transition class="mt-2 space-y-1.5">
+                                    <template x-for="(file, index) in files" :key="index">
+                                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 mr-2 mb-1">
+                                            <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <span class="font-medium truncate max-w-[200px]" x-text="file.name"></span>
+                                            <span class="text-[11px] text-emerald-600" x-text="'(' + formatSize(file.size) + ')'"></span>
+                                            <span class="badge bg-emerald-200/60 text-emerald-900 text-[10px] px-1.5 py-0.5" x-text="selectedType"></span>
+                                            <button type="button" @click="removeFile(index)" class="text-emerald-700 hover:text-red-600 ml-1" title="Hapus">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <p class="text-[11px] text-emerald-600 font-medium">✓ File berhasil dipilih dan siap disimpan bersama sesi ini.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-2 sm:pt-0 self-end sm:self-center">
+                                <button type="submit" class="btn-primary flex-shrink-0 shadow-sm">Simpan Sesi Evaluasi</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

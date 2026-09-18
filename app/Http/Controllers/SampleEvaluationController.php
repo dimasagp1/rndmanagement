@@ -196,29 +196,33 @@ class SampleEvaluationController extends Controller
         Gate::authorize('edit', $sampleEvaluation);
 
         $validated = $request->validate([
-            'trial_batch'      => 'required|integer|min:1',
-            'evaluator_type'   => 'required|in:Internal,External',
+            'trial_batch'       => 'required|string|max:100',
+            'evaluator_type'    => 'required|in:Internal,External',
             'evaluation_result' => 'nullable|string|max:10000',
-            'sensory_result'   => 'nullable|string|max:10000',
-            'decision'         => 'nullable|in:Approved,Reform',
-            'parameters'       => 'array',
+            'sensory_result'    => 'nullable|string|max:10000',
+            'decision'          => 'nullable|in:Approved,Reform',
+            'parameters'        => 'array',
             'parameters.*.score' => 'required|string|max:255',
             'parameters.*.note'  => 'nullable|string|max:1000',
+            'attachment_file'   => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,zip',
+            'attachment_type'   => 'nullable|in:Form Panel,Blind Code,Report Panel Test,Data Panelis,Result',
+            'attachment_files'  => 'nullable|array',
+            'attachment_files.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,zip',
         ]);
 
         try {
-            DB::transaction(function () use ($validated, $sampleEvaluation) {
+            DB::transaction(function () use ($request, $validated, $sampleEvaluation) {
                 $sessionNo = $sampleEvaluation->sessions()->max('session_no') + 1;
 
                 $session = $sampleEvaluation->sessions()->create([
-                    'session_no'      => $sessionNo,
-                    'trial_batch'     => $validated['trial_batch'],
-                    'evaluator_type'  => $validated['evaluator_type'],
+                    'session_no'        => $sessionNo,
+                    'trial_batch'       => $validated['trial_batch'],
+                    'evaluator_type'    => $validated['evaluator_type'],
                     'evaluation_result' => $validated['evaluation_result'] ?? null,
-                    'sensory_result'  => $validated['sensory_result'] ?? null,
-                    'decision'        => $validated['decision'] ?? null,
-                    'evaluated_by'    => auth()->id(),
-                    'evaluated_at'    => now(),
+                    'sensory_result'    => $validated['sensory_result'] ?? null,
+                    'decision'          => $validated['decision'] ?? null,
+                    'evaluated_by'      => auth()->id(),
+                    'evaluated_at'      => now(),
                 ]);
 
                 foreach (SampleEvaluation::PARAMETERS as $index => $parameter) {
@@ -227,6 +231,34 @@ class SampleEvaluationController extends Controller
                         'score'     => $validated['parameters'][$parameter]['score'],
                         'note'      => $validated['parameters'][$parameter]['note'] ?? null,
                     ]);
+                }
+
+                if ($request->hasFile('attachment_file')) {
+                    $file = $request->file('attachment_file');
+                    $path = $file->store('sample-evaluations', 'public');
+                    $session->attachments()->create([
+                        'type'          => $validated['attachment_type'] ?? 'Result',
+                        'file_path'     => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'uploaded_by'   => auth()->id(),
+                    ]);
+                }
+
+                if ($request->hasFile('attachment_files')) {
+                    foreach ($request->file('attachment_files') as $idx => $file) {
+                        if ($file->isValid()) {
+                            $path = $file->store('sample-evaluations', 'public');
+                            $type = is_array($request->input('attachment_types')) && isset($request->input('attachment_types')[$idx])
+                                ? $request->input('attachment_types')[$idx]
+                                : ($validated['attachment_type'] ?? 'Result');
+                            $session->attachments()->create([
+                                'type'          => $type,
+                                'file_path'     => $path,
+                                'original_name' => $file->getClientOriginalName(),
+                                'uploaded_by'   => auth()->id(),
+                            ]);
+                        }
+                    }
                 }
 
                 $sampleEvaluation->update(['status' => $this->recalculateStatus($sampleEvaluation)]);
