@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2 text-sm text-gray-500">
-            <a href="{{ route('formula-approvals.index') }}" class="hover:text-primary">Approval Formula & Design</a>
+            <a href="{{ route('formula-approvals.index') }}" class="hover:text-primary">Formula Approval</a>
             <span class="text-gray-300">/</span>
             <span class="text-gray-400">Tambah</span>
         </div>
@@ -9,7 +9,7 @@
 
     <div class="min-h-screen max-w-3xl">
         <header class="mb-8">
-            <h1 class="text-2xl font-heading font-bold text-ink mb-1">Tambah Approval Formula & Design</h1>
+            <h1 class="text-2xl font-heading font-bold text-ink mb-1">Tambah Formula Approval</h1>
             <p class="text-sm text-gray-500">
                 Proses persetujuan final formula & artwork sebelum registrasi & produksi. Lampiran (PDF/Word/Gambar) bersifat opsional. Approval online OM → GM.
             </p>

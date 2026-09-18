@@ -25,7 +25,7 @@ class ApprovalFormulaDesignController extends Controller
     {
         abort_unless(auth()->user()->can('formula.view'), 403);
 
-        $typeFilter = in_array($request->get('type'), FormulaApprovalForm::TYPES) ? $request->get('type') : 'Formula';
+        $typeFilter = in_array($request->get('type'), FormulaApprovalForm::TYPES) ? $request->get('type') : 'Design';
 
         $forms = FormulaApprovalForm::with(['omApprover', 'gmApprover', 'creator', 'formula', 'product', 'trackerUpdater'])
             ->where('source', 'approval-formula-design')

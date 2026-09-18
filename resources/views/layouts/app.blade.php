@@ -175,25 +175,10 @@
                         @endif
 
                         @if($slug === 'approval-formula-design')
-                        <div x-data="{ subOpen: {{ request()->routeIs('approval-formula-designs.*') ? 'true' : 'false' }} }">
-                            <button type="button" @click="subOpen = !subOpen"
-                                    class="sidebar-sub-link w-full justify-between {{ request()->routeIs('approval-formula-designs.*') ? 'active' : '' }}">
-                                <span class="flex-1 truncate">{{ $general::TABS[$slug] }}</span>
-                                <svg class="w-3 h-3 flex-shrink-0 transition-transform duration-200" :class="subOpen ? 'rotate-180' : ''"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div x-show="subOpen" x-transition:enter="transition ease-out duration-150"
-                                 x-transition:enter-start="opacity-0 -translate-y-1"
-                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="ml-4 pl-2 border-l border-white/10">
-                                 <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('approval-formula-designs.*') && request('type') === 'Design' ? 'active' : '' }}">
-                                    <span class="flex-1 truncate">Design</span>
-                                </a>
-                            </div>
-                        </div>
+                        <a href="{{ route('approval-formula-designs.index', ['type' => 'Design']) }}"
+                           class="sidebar-sub-link {{ request()->routeIs('approval-formula-designs.*') ? 'active' : '' }}">
+                            <span class="flex-1 truncate">Design Approval</span>
+                        </a>
                         @continue
                         @endif
 

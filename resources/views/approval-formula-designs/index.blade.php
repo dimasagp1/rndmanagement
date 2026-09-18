@@ -3,17 +3,17 @@
         <div class="flex items-center gap-2 text-sm text-gray-500 min-w-0">
             <a href="{{ route('timeline.index') }}" class="hover:text-primary transition shrink-0">Dashboard</a>
             <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span class="text-ink font-medium min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">Approval Formula & Design</span>
+            <span class="text-ink font-medium min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{{ $typeFilter === 'Design' ? 'Design Approval' : 'Approval Formula & Design' }}</span>
         </div>
     </x-slot>
 
     <div class="page-header flex flex-col gap-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="page-title">Approval Formula & Design</h1>
-                <p class="page-subtitle">Persetujuan final formula & artwork sebelum registrasi & produksi. Revision, approver & approval date terekam otomatis (approval online).</p>
+                <h1 class="page-title">{{ $typeFilter === 'Design' ? 'Design Approval' : 'Approval Formula & Design' }}</h1>
+                <p class="page-subtitle">{{ $typeFilter === 'Design' ? 'Persetujuan final artwork & desain kemasan sebelum registrasi & produksi. Revision, approver & approval date terekam otomatis (approval online).' : 'Persetujuan final formula & artwork sebelum registrasi & produksi. Revision, approver & approval date terekam otomatis (approval online).' }}</p>
             </div>
-            @php($currentType = request('type') === 'Design' ? 'Design' : 'Formula')
+            @php($currentType = request('type', $typeFilter))
             @can('formula.edit')
             <a href="{{ route('approval-formula-designs.create', ['type' => $currentType]) }}" class="btn-primary flex-shrink-0 self-start sm:self-center">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

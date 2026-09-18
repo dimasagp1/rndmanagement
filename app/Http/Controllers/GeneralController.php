@@ -14,7 +14,7 @@ class GeneralController extends Controller
         'sample-evaluation'    => 'Sample Evaluation',
         'formula-approval'     => 'Formula Approval',
         'stability-test'       => 'Stability Test',
-        'approval-formula-design' => 'Approval Formula & Design',
+        'approval-formula-design' => 'Design Approval',
         'regulatory-dossier'   => 'Regulatory Dossier',
         'technology-transfer'  => 'Technology Transfer',
         'nie-approved'         => 'NIE Approved',
@@ -67,7 +67,7 @@ class GeneralController extends Controller
         }
 
         if ($tab === 'approval-formula-design') {
-            return redirect()->route('approval-formula-designs.index', ['type' => 'Formula']);
+            return redirect()->route('approval-formula-designs.index', ['type' => 'Design']);
         }
 
         if ($tab === 'stability-test') {
