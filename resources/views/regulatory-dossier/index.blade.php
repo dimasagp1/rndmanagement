@@ -182,18 +182,21 @@
                 <!-- Folder Grid -->
                 <div class="grid gap-4 mb-8" style="grid-template-columns: repeat(auto-fill, minmax(190px, 220px));">
                     @foreach($folders as $index => $folder)
-                        <div class="group relative bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-sm hover:border-gray-200 transition flex flex-col justify-between" style="min-height: 170px;">
+                        <div x-data="{ open: false }"
+                             class="group relative bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-sm hover:border-gray-200 transition flex flex-col justify-between"
+                             :class="{ 'z-30': open, 'z-0': !open }"
+                             style="min-height: 170px;">
                             <div class="flex items-start justify-between">
                                 <a href="{{ route('regulatory-dossier.index', ['folder' => $folder->id]) }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition hover:scale-105" style="background-color: #F8F8F6;">
                                     <svg class="w-6 h-6" style="color: #1F2A22;" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
                                 </a>
 
                                 <!-- Folder Dropdown Menu -->
-                                <div class="relative" x-data="{ open: false }">
+                                <div class="relative">
                                     <button type="button" @click.stop="open = !open" class="w-7 h-7 rounded-lg text-gray-400 hover:text-ink hover:bg-gray-100 flex items-center justify-center transition" title="Menu Folder">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="10" cy="16" r="2"/></svg>
                                     </button>
-                                    <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-1 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-20 text-xs">
+                                    <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-xl py-1 z-50 text-xs">
                                         <a href="{{ route('regulatory-dossier.index', ['folder' => $folder->id]) }}" class="px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                             <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             Buka Folder
@@ -245,11 +248,14 @@
                         <p class="text-sm text-gray-400">No files in this folder</p>
                     </div>
                 @else
-                    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+                    <div class="bg-white border border-gray-100 rounded-2xl">
                         @if($viewMode === 'grid')
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
                                 @foreach($documents as $doc)
-                                    <div class="group relative border border-gray-100 rounded-2xl p-3 hover:shadow-sm hover:border-gray-200 transition overflow-hidden min-w-0 flex flex-col justify-between" style="min-height: 130px;">
+                                    <div x-data="{ open: false }"
+                                         class="group relative border border-gray-100 rounded-2xl p-3 hover:shadow-sm hover:border-gray-200 transition min-w-0 flex flex-col justify-between"
+                                         :class="{ 'z-30': open, 'z-0': !open }"
+                                         style="min-height: 130px;">
                                         <div class="flex items-start justify-between mb-2">
                                             <div class="w-10 h-10 rounded-xl flex items-center justify-center
                                                 @if($doc->extension==='pdf') bg-red-50 text-red-600
@@ -259,11 +265,11 @@
                                             </div>
 
                                             <!-- File Dropdown Menu -->
-                                            <div class="relative" x-data="{ open: false }">
+                                            <div class="relative">
                                                 <button type="button" @click.stop="open = !open" class="w-7 h-7 rounded-lg text-gray-400 hover:text-ink hover:bg-gray-100 flex items-center justify-center transition" title="Opsi File">
                                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="10" cy="16" r="2"/></svg>
                                                 </button>
-                                                <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-1 w-40 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-20 text-xs">
+                                                <div x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-xl shadow-xl py-1 z-50 text-xs">
                                                     <a href="{{ route('regulatory-dossier.documents.show', $doc) }}" class="px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                                         <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                         Detail File
@@ -330,7 +336,7 @@
                                 @endforeach
                             </div>
                         @endif
-                        <div class="px-4 py-3 border-t bg-gray-50/30 flex items-center justify-between">
+                        <div class="px-4 py-3 border-t bg-gray-50/30 flex items-center justify-between rounded-b-2xl">
                             <span class="text-xs text-gray-400">{{ $documents->total() }} file</span>
                             {{ $documents->links() }}
                         </div>
