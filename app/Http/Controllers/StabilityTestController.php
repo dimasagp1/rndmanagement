@@ -53,7 +53,7 @@ class StabilityTestController extends Controller
         $validated = $request->validate([
             'title'   => 'required|string|max:255',
             'files'   => 'nullable|array',
-            'files.*' => 'file|max:10240|mimes:pdf,doc,docx',
+            'files.*' => 'file|max:20480|mimes:pdf,doc,docx,jpg,jpeg,png,webp,xls,xlsx',
         ]);
 
         $test = StabilityTest::create([
@@ -72,6 +72,35 @@ class StabilityTestController extends Controller
         return redirect()
             ->route('stability-tests.show', $test)
             ->with('success', 'Stability Test "' . $test->title . '" berhasil dibuat.');
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // STORE ATTACHMENT
+    // ──────────────────────────────────────────────────────────────
+    public function storeAttachment(Request $request, StabilityTest $stabilityTest)
+    {
+        abort_unless(auth()->user()->can('stability_test.edit') || auth()->user()->can('stability_test.view'), 403);
+
+        $request->validate([
+            'files'   => 'required|array|min:1',
+            'files.*' => 'file|max:20480|mimes:pdf,doc,docx,jpg,jpeg,png,webp,xls,xlsx',
+        ], [
+            'files.required' => 'Pilih setidaknya satu file untuk diunggah.',
+            'files.*.max'    => 'Ukuran file maksimal 20MB per file.',
+            'files.*.mimes'  => 'Format file didukung: PDF, DOC, DOCX, JPG, PNG, WEBP, XLS, XLSX.',
+        ]);
+
+        foreach ($request->file('files', []) as $file) {
+            $stabilityTest->attachments()->create([
+                'file_path'     => $file->store('stability-tests', 'public'),
+                'original_name' => $file->getClientOriginalName(),
+                'uploaded_by'   => auth()->id(),
+            ]);
+        }
+
+        return redirect()
+            ->route('stability-tests.show', $stabilityTest)
+            ->with('success', 'Lampiran berhasil diunggah.');
     }
 
     // ──────────────────────────────────────────────────────────────

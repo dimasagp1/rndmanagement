@@ -36,10 +36,10 @@
                     <label class="form-label" for="files">
                         Lampiran (PDF/Word, opsional)
                     </label>
-                    <input type="file" id="files" name="files[]" multiple accept=".pdf,.doc,.docx"
+                    <input type="file" id="files" name="files[]" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx"
                            class="form-input text-sm">
                     <p class="mt-1 text-xs text-gray-400">
-                        Maksimal 10MB per file. Format: PDF, DOC, DOCX.
+                        Maksimal 20MB per file. Format: PDF, DOC, DOCX, JPG, PNG, WEBP, XLS, XLSX.
                     </p>
                     @error('files')
                     <p class="mt-1 text-xs text-red-500">{{ $message }}</p>

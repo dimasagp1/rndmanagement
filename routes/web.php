@@ -72,6 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/stability-tests/{stabilityTest}', [StabilityTestController::class, 'destroy'])
          ->name('stability-tests.destroy')
          ->middleware('can:stability_test.view');
+    Route::post('/stability-tests/{stabilityTest}/attachments', [StabilityTestController::class, 'storeAttachment'])
+         ->name('stability-tests.attachments.store')
+         ->middleware('can:stability_test.view');
     Route::delete('/stability-tests/{stabilityTest}/attachments/{attachment}', [StabilityTestController::class, 'destroyAttachment'])
          ->name('stability-tests.attachments.destroy')
          ->middleware('can:stability_test.view');
