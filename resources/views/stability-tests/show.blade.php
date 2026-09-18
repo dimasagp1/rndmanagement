@@ -9,7 +9,9 @@
         </div>
     </x-slot>
 
-    @php($st = $stabilityTest)
+    @php
+        $st = $stabilityTest;
+    @endphp
 
     <div x-data="{
         previewOpen: false,
