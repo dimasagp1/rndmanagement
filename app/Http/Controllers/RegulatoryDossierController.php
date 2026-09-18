@@ -140,19 +140,34 @@ class RegulatoryDossierController extends Controller
     // ── Destroy Folder ──
     public function destroyFolder(RegulatoryFolder $folder)
     {
-        $hasChildren = $folder->children()->exists();
-        $hasDocuments = $folder->documents()->exists();
+        $name = $folder->name;
+        $parentId = $folder->parent_id;
 
-        if ($hasChildren || $hasDocuments) {
-            return back()->with('error', 'Folder tidak dapat dihapus karena masih berisi sub-folder atau dokumen. Pindahkan atau hapus isinya terlebih dahulu.');
+        $this->deleteFolderRecursively($folder);
+
+        RegulatoryAudit::log('Folder dihapus', null, "Folder \"{$name}\" beserta seluruh isinya dihapus");
+
+        return redirect()->route('regulatory-dossier.index', $parentId ? ['folder' => $parentId] : [])
+            ->with('success', "Folder \"{$name}\" berhasil dihapus.");
+    }
+
+    private function deleteFolderRecursively(RegulatoryFolder $folder): void
+    {
+        $folder->loadMissing(['children', 'documents.versions']);
+
+        foreach ($folder->children as $child) {
+            $this->deleteFolderRecursively($child);
         }
 
-        $name = $folder->name;
+        foreach ($folder->documents as $doc) {
+            Storage::disk('public')->delete($doc->file_path);
+            foreach ($doc->versions as $version) {
+                Storage::disk('public')->delete($version->file_path);
+            }
+            $doc->delete();
+        }
+
         $folder->delete();
-
-        RegulatoryAudit::log('Folder dihapus', null, "Folder \"{$name}\" dihapus");
-
-        return back()->with('success', "Folder \"{$name}\" berhasil dihapus.");
     }
 
     // ── Store Document (upload) ──
@@ -232,8 +247,9 @@ class RegulatoryDossierController extends Controller
         $document->load(['folder', 'uploader', 'versions.uploader']);
 
         $breadcrumbs = $document->folder ? $document->folder->breadcrumbs() : [];
+        $allFolders  = RegulatoryFolder::orderBy('name')->get();
 
-        return view('regulatory-dossier.show', compact('document', 'breadcrumbs'));
+        return view('regulatory-dossier.show', compact('document', 'breadcrumbs', 'allFolders'));
     }
 
     // ── Update Document (rename / description) ──
