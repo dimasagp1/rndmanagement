@@ -371,6 +371,42 @@
                 </div>
             </header>
 
+            {{-- ─── Banner Mode Maintenance Aktif (Bagi Superadmin / Whitelist) ─── --}}
+            @if(setting('maintenance_enabled') === '1')
+            <div class="bg-red-600 text-white px-4 sm:px-6 py-2 text-xs flex items-center justify-between shadow-sm flex-shrink-0">
+                <div class="flex items-center gap-2 font-medium">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    <span><strong>PERINGATAN:</strong> Mode Maintenance sedang aktif. Sistem terkunci untuk pengguna umum.</span>
+                </div>
+                @role('Superadmin')
+                <a href="{{ route('settings.index') }}" class="underline hover:text-red-100 font-semibold text-xs ml-4 flex-shrink-0">
+                    Buka Pengaturan &rarr;
+                </a>
+                @endrole
+            </div>
+            @endif
+
+            {{-- ─── Banner Pemberitahuan Pra-Maintenance (Notice Banner) ─── --}}
+            @if(setting('maintenance_notice_enabled') === '1' && setting('maintenance_enabled') !== '1')
+            <div class="bg-amber-500 text-white px-4 sm:px-6 py-2.5 text-xs flex items-center justify-between shadow-sm flex-shrink-0"
+                 x-data="{ bannerOpen: true }" x-show="bannerOpen">
+                <div class="flex items-center gap-2.5 font-medium">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span>{{ setting('maintenance_notice_message', 'Pemberitahuan: Pemeliharaan sistem akan segera dilakukan. Mohon segera simpan pekerjaan dan draft formulasi Anda.') }}</span>
+                </div>
+                <button @click="bannerOpen = false" class="text-white/80 hover:text-white p-1 rounded transition" title="Tutup Pemberitahuan">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            @endif
+
             <!-- Flash Messages -->
             <div class="px-4 sm:px-6 lg:px-8 pt-4">
                 @if(session('success'))

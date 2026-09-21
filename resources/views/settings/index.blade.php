@@ -199,6 +199,124 @@
                         </div>
                     </div>
 
+                    {{-- ─── Mode Pemeliharaan Sistem (Maintenance Mode) ────────── --}}
+                    <div class="pt-6 border-t border-gray-100" x-data="{ 
+                        maintenanceOn: {{ setting('maintenance_enabled', '0') === '1' ? 'true' : 'false' }},
+                        noticeOn: {{ setting('maintenance_notice_enabled', '0') === '1' ? 'true' : 'false' }}
+                    }">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-ink flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    Mode Pemeliharaan (Maintenance Mode)
+                                </h3>
+                                <p class="text-xs text-gray-400">Kendalikan akses pengguna saat proses update atau perawatan sistem.</p>
+                            </div>
+                            <span :class="maintenanceOn ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                  class="text-[11px] font-semibold px-2.5 py-1 rounded-full border">
+                                <span x-text="maintenanceOn ? '🔴 Maintenance Aktif' : '🟢 Sistem Normal'"></span>
+                            </span>
+                        </div>
+
+                        {{-- Card Pengaturan Maintenance --}}
+                        <div class="bg-amber-50/50 border border-amber-200/60 rounded-xl p-4 sm:p-5 space-y-5 mt-4">
+                            {{-- Toggle Utama Maintenance --}}
+                            <div class="flex items-start justify-between gap-4 pb-4 border-b border-amber-200/40">
+                                <div>
+                                    <label class="font-bold text-xs text-ink cursor-pointer" for="maintenance_enabled">
+                                        Aktifkan Mode Pemeliharaan
+                                    </label>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">
+                                        Saat aktif, staf dan pengguna biasa akan dialihkan ke halaman pemeliharaan. <strong>Superadmin tetap dapat mengakses seluruh sistem.</strong>
+                                    </p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    <input type="checkbox" id="maintenance_enabled" name="maintenance_enabled" value="1" 
+                                           class="sr-only peer" x-model="maintenanceOn">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {{-- Maintenance Title --}}
+                                <div>
+                                    <label class="form-label text-xs font-semibold" for="maintenance_title">Judul Halaman Maintenance</label>
+                                    <input type="text" id="maintenance_title" name="maintenance_title"
+                                           value="{{ old('maintenance_title', setting('maintenance_title', 'Sistem Sedang Dalam Pemeliharaan')) }}"
+                                           class="form-input text-xs" placeholder="Contoh: Sistem Sedang Dalam Pemeliharaan">
+                                </div>
+
+                                {{-- Estimated End Time --}}
+                                <div>
+                                    <label class="form-label text-xs font-semibold" for="maintenance_end_time">Estimasi Selesai (Countdown)</label>
+                                    <input type="datetime-local" id="maintenance_end_time" name="maintenance_end_time"
+                                           value="{{ old('maintenance_end_time', setting('maintenance_end_time')) }}"
+                                           class="form-input text-xs">
+                                    <p class="text-[10px] text-gray-400 mt-1">Digunakan untuk hitung mundur waktu di halaman maintenance.</p>
+                                </div>
+                            </div>
+
+                            {{-- Maintenance Message --}}
+                            <div>
+                                <label class="form-label text-xs font-semibold" for="maintenance_message">Pesan Penjelasan Pemeliharaan</label>
+                                <textarea id="maintenance_message" name="maintenance_message" rows="2"
+                                          class="form-input text-xs" placeholder="Tuliskan keterangan perbaikan atau optimasi yang sedang dilakukan...">{{ old('maintenance_message', setting('maintenance_message', 'Saat ini kami sedang melakukan peningkatan sistem dan pemeliharaan berkala untuk kenyamanan Anda. Sistem akan segera dapat diakses kembali.')) }}</textarea>
+                            </div>
+
+                            {{-- Role Whitelist --}}
+                            <div class="pt-3 border-t border-amber-200/40">
+                                <label class="form-label text-xs font-bold text-ink mb-1">Role yang Diizinkan Akses (Bypass):</label>
+                                <p class="text-[11px] text-gray-500 mb-2">Role yang dicentang tetap dapat login dan mengakses menu saat maintenance aktif.</p>
+                                
+                                @php
+                                    $allowedRoles = json_decode(setting('maintenance_allowed_roles', '[]'), true) ?: [];
+                                @endphp
+                                <div class="flex flex-wrap gap-4 pt-1">
+                                    <label class="inline-flex items-center gap-2 text-xs font-medium text-gray-700 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200">
+                                        <input type="checkbox" checked disabled class="rounded text-primary focus:ring-primary h-4 w-4">
+                                        <span>Superadmin <span class="text-[10px] text-gray-400">(Wajib / Default)</span></span>
+                                    </label>
+                                    @foreach($roles as $role)
+                                    <label class="inline-flex items-center gap-2 text-xs font-medium text-gray-700 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox" name="maintenance_allowed_roles[]" value="{{ $role->name }}"
+                                               {{ in_array($role->name, $allowedRoles) ? 'checked' : '' }}
+                                               class="rounded text-primary focus:ring-primary h-4 w-4">
+                                        <span>{{ $role->name }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ─── Banner Peringatan Pra-Maintenance ────────── --}}
+                        <div class="bg-blue-50/50 border border-blue-200/60 rounded-xl p-4 sm:p-5 space-y-4 mt-4">
+                            <div class="flex items-start justify-between gap-4 pb-3 border-b border-blue-200/40">
+                                <div>
+                                    <label class="font-bold text-xs text-ink cursor-pointer" for="maintenance_notice_enabled">
+                                        Tampilkan Banner Peringatan Dini (Pre-Maintenance Notice)
+                                    </label>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">
+                                        Menampilkan pengumuman kuning/oranye di bagian atas halaman seluruh pengguna sebelum maintenance dimulai, agar staf sempat menyimpan form pekerjaannya.
+                                    </p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    <input type="checkbox" id="maintenance_notice_enabled" name="maintenance_notice_enabled" value="1" 
+                                           class="sr-only peer" x-model="noticeOn">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label class="form-label text-xs font-semibold" for="maintenance_notice_message">Isi Pesan Peringatan Banner</label>
+                                <input type="text" id="maintenance_notice_message" name="maintenance_notice_message"
+                                       value="{{ old('maintenance_notice_message', setting('maintenance_notice_message', 'Pemberitahuan: Pemeliharaan sistem akan segera dilakukan. Mohon segera simpan pekerjaan dan draft formulasi Anda.')) }}"
+                                       class="form-input text-xs" placeholder="Contoh: Pemeliharaan sistem dijadwalkan pukul 17:00 WIB. Mohon segera simpan form Anda.">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="pt-6 border-t border-gray-100 flex justify-end gap-2">
                         <button type="submit" class="btn-primary" id="btn-save-settings">
                             Simpan Perubahan
