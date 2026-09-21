@@ -60,6 +60,13 @@ class FormulaApprovalForm extends Model
         'tracker_updated_at',
         'tanggal_pengajuan',
         'pic_pengaju',
+        'proposal_number',
+        'organoleptic_data',
+        'panel_result',
+        'owner_decision',
+        'owner_decision_reason',
+        'approval_company',
+        'approval_signers',
     ];
 
     protected $casts = [
@@ -72,8 +79,43 @@ class FormulaApprovalForm extends Model
         'final_approved_at'   => 'datetime',
         'tracker_updated_at'  => 'datetime',
         'tracker_history'     => 'array',
+        'organoleptic_data'   => 'array',
+        'approval_signers'    => 'array',
         'revision'            => 'integer',
     ];
+
+    public function getApprovalSignersListAttribute(): array
+    {
+        if (!empty($this->approval_signers) && is_array($this->approval_signers)) {
+            return $this->approval_signers;
+        }
+
+        $pgmTitle = 'PGM ' . ($this->product_name ? \Illuminate\Support\Str::words($this->product_name, 2, '') : 'Vitameal');
+
+        return [
+            ['title' => 'Product Innovation', 'name' => ''],
+            ['title' => $pgmTitle, 'name' => ''],
+            ['title' => 'GM Marketing & Sales', 'name' => ''],
+            ['title' => 'Chief Business Officer', 'name' => ''],
+            ['title' => 'Chief Executive Officer', 'name' => ''],
+        ];
+    }
+
+    public function getOrganolepticDetailsAttribute(): array
+    {
+        $default = [
+            'bentuk' => $this->bentuk_sediaan ?? '',
+            'warna'  => '',
+            'aroma'  => '',
+            'rasa'   => '',
+        ];
+
+        if (!empty($this->organoleptic_data) && is_array($this->organoleptic_data)) {
+            return array_merge($default, $this->organoleptic_data);
+        }
+
+        return $default;
+    }
 
     public function product(): BelongsTo
     {

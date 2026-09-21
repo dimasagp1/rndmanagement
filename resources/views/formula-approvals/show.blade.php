@@ -11,6 +11,8 @@
 
     @php($fa = $formApproval)
 
+    <div x-data="{ showPrintModal: false }">
+
     {{-- Flash --}}
     @if(session('success'))
     <div class="alert-success mb-4 flash-success" role="alert">
@@ -62,7 +64,7 @@
                 </form>
                 @endif
             @endcan
-            <button type="button" onclick="window.print()" class="btn-outline text-gray-700 hover:bg-gray-100">
+            <button type="button" x-on:click="showPrintModal = true; document.getElementById('printPreviewFrame').src = '{{ route('formula-approvals.print', $fa) }}'" class="btn-outline text-gray-700 hover:bg-gray-100 flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Cetak
             </button>
@@ -342,4 +344,71 @@
         </div>
     </div>
 
+    {{-- ══════════════════════════════════════════════════════
+         PRINT PREVIEW MODAL — Sample Approval Form (CM-06/RD/001-05.00)
+    ════════════════════════════════════════════════════════ --}}
+    <style>
+        .print-modal-backdrop { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); }
+        .print-modal-container { width: 95vw; max-width: 1200px; height: 92vh; }
+        .print-iframe-wrapper { background: #475569; overflow: auto; display: flex; justify-content: center; padding: 20px; }
+        .print-iframe-wrapper iframe { width: 794px; min-height: 1123px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border-radius: 4px; background: #fff; flex-shrink: 0; }
+        .btn-toolbar { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.15s; border: none; cursor: pointer; }
+        .btn-toolbar svg { width: 15px; height: 15px; }
+        .btn-print-action { background: #16a34a; color: #fff; }
+        .btn-print-action:hover { background: #15803d; }
+        .btn-download-action { background: #0284c7; color: #fff; }
+        .btn-download-action:hover { background: #0369a1; }
+        .btn-close-action { background: #ef4444; color: #fff; }
+        .btn-close-action:hover { background: #dc2626; }
+    </style>
+
+    <div x-show="showPrintModal"
+         x-transition:enter="ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="print-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="display: none;"
+         @keydown.escape.window="showPrintModal = false">
+
+        <div x-show="showPrintModal"
+             x-transition:enter="ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="print-modal-container bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden">
+
+            <div class="flex items-center justify-between px-5 py-3 bg-slate-800 text-white rounded-t-xl flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="font-semibold text-sm tracking-wide">Pratinjau Cetak — Sample Approval Form ({{ $fa->code }})</span>
+                    <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-mono">No. CM-06/RD/001-05.00</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="document.getElementById('printPreviewFrame').contentWindow.print()" class="btn-toolbar btn-print-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        Print / PDF
+                    </button>
+                    <a href="{{ route('formula-approvals.print', $fa) }}" target="_blank" class="btn-toolbar btn-download-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        Buka Tab Baru
+                    </a>
+                    <button type="button" x-on:click="showPrintModal = false" class="btn-toolbar btn-close-action">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Tutup
+                    </button>
+                </div>
+            </div>
+
+            <div class="print-iframe-wrapper flex-1">
+                <iframe id="printPreviewFrame" src="" frameborder="0" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
+    </div>
 </x-app-layout>
+

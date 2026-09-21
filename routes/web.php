@@ -182,6 +182,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/formula-approvals/{formApproval}', [FormulaApprovalController::class, 'show'])
          ->name('formula-approvals.show')
          ->middleware('can:formula.view');
+    Route::get('/formula-approvals/{formApproval}/print', [FormulaApprovalController::class, 'print'])
+         ->name('formula-approvals.print')
+         ->middleware('can:formula.view');
     Route::get('/formula-approvals/{formApproval}/edit', [FormulaApprovalController::class, 'edit'])
          ->name('formula-approvals.edit')
          ->middleware('can:formula.view');
