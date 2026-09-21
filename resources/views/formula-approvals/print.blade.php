@@ -325,13 +325,44 @@
             line-height: 1;
         }
 
-        /* ── Attachment Preview ───────────────────────────── */
-        .attachment-preview-img {
-            max-width: 85%;
-            max-height: 36mm;
+        /* ── Attachment Gallery (Section D) ──────── */
+        .attachment-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5mm;
+            margin-top: 1.5mm;
+            justify-content: flex-start;
+        }
+
+        .attachment-card {
+            border: 1px solid #d0d0d0;
+            border-radius: 1mm;
+            padding: 1.2mm;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .attachment-card img {
+            max-height: 34mm;
+            max-width: 100%;
             object-fit: contain;
-            border: 1px solid #ccc;
-            border-radius: 2px;
+            display: block;
+            border-radius: 0.8mm;
+            background: #fff;
+        }
+
+        .attachment-card .caption {
+            font-size: 7pt;
+            color: #444;
+            margin-top: 0.8mm;
+            text-align: center;
+            max-width: 55mm;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* ── Approval Table (Section E) ───────────────────── */
@@ -568,25 +599,53 @@
                 {{-- D. LAMPIRAN --}}
                 <div class="section-header">D. LAMPIRAN</div>
                 <div style="padding-left: 2mm; font-size: 8pt;">
-                    <ul style="list-style-type: disc; margin-left: 4mm;">
+                    <ul style="list-style-type: disc; margin-left: 4mm; margin-bottom: 1.5mm;">
                         <li>Hasil panel sampel {{ $formApproval->product_name }} ({{ $formApproval->sample_code ?? '—' }})</li>
                         @foreach($formApproval->attachments as $att)
                             <li>{{ $att->original_name }} ({{ $att->document_type }})</li>
                         @endforeach
+                        @if($formApproval->artwork_file_path && !$formApproval->attachments->contains('file_path', $formApproval->artwork_file_path))
+                            <li>{{ $formApproval->artwork_original_name ?? 'Artwork/Design' }} (Artwork)</li>
+                        @endif
                     </ul>
 
-                    {{-- Preview Gambar Lampiran jika ada --}}
+                    {{-- Preview Gambar Lampiran (Semua Foto / Gambar) --}}
                     @php
-                        $imageAttachment = $formApproval->attachments->first(function($a) {
-                            $ext = strtolower(pathinfo($a->original_name, PATHINFO_EXTENSION));
-                            return in_array($ext, ['jpg', 'jpeg', 'png', 'webp']);
-                        });
+                        $imageAttachments = collect();
+
+                        foreach ($formApproval->attachments as $att) {
+                            $ext = strtolower(pathinfo($att->original_name ?: $att->file_path, PATHINFO_EXTENSION));
+                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                                $imageAttachments->push([
+                                    'url'   => asset('storage/' . $att->file_path),
+                                    'name'  => $att->original_name,
+                                    'type'  => $att->document_type,
+                                ]);
+                            }
+                        }
+
+                        if ($formApproval->artwork_file_path && !$formApproval->attachments->contains('file_path', $formApproval->artwork_file_path)) {
+                            $artExt = strtolower(pathinfo($formApproval->artwork_original_name ?: $formApproval->artwork_file_path, PATHINFO_EXTENSION));
+                            if (in_array($artExt, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                                $imageAttachments->push([
+                                    'url'   => asset('storage/' . $formApproval->artwork_file_path),
+                                    'name'  => $formApproval->artwork_original_name ?? 'Artwork',
+                                    'type'  => 'Artwork',
+                                ]);
+                            }
+                        }
                     @endphp
-                    @if($imageAttachment)
-                        <div style="margin-top: 1.5mm; text-align: center;">
-                            <img src="{{ asset('storage/' . $imageAttachment->file_path) }}"
-                                 class="attachment-preview-img"
-                                 alt="Lampiran">
+
+                    @if($imageAttachments->isNotEmpty())
+                        <div class="attachment-gallery">
+                            @foreach($imageAttachments as $img)
+                                <div class="attachment-card" style="{{ $imageAttachments->count() > 1 ? 'flex: 1 1 0; min-width: 30mm; max-width: 55mm;' : 'max-width: 85mm;' }}">
+                                    <img src="{{ $img['url'] }}" alt="{{ $img['name'] }}">
+                                    <div class="caption" title="{{ $img['name'] }}">
+                                        {{ $img['name'] }}
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     @endif
                 </div>
