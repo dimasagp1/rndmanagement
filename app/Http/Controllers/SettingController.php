@@ -50,14 +50,14 @@ class SettingController extends Controller
         Setting::updateOrCreate(['key' => 'company_name'], ['value' => $request->company_name]);
 
         // Save Maintenance Mode Settings
-        $maintenanceEnabled = $request->has('maintenance_enabled') ? '1' : '0';
+        $maintenanceEnabled = $request->input('maintenance_enabled') === '1' ? '1' : '0';
         Setting::updateOrCreate(['key' => 'maintenance_enabled'], ['value' => $maintenanceEnabled]);
         Setting::updateOrCreate(['key' => 'maintenance_title'], ['value' => $request->maintenance_title ?? 'Sistem Dalam Pemeliharaan']);
         Setting::updateOrCreate(['key' => 'maintenance_message'], ['value' => $request->maintenance_message ?? 'Saat ini kami sedang melakukan peningkatan sistem dan pemeliharaan berkala untuk kenyamanan Anda. Sistem akan segera dapat diakses kembali.']);
         Setting::updateOrCreate(['key' => 'maintenance_end_time'], ['value' => $request->maintenance_end_time]);
 
         // Save Pre-maintenance Notice Settings
-        $noticeEnabled = $request->has('maintenance_notice_enabled') ? '1' : '0';
+        $noticeEnabled = $request->input('maintenance_notice_enabled') === '1' ? '1' : '0';
         Setting::updateOrCreate(['key' => 'maintenance_notice_enabled'], ['value' => $noticeEnabled]);
         Setting::updateOrCreate(['key' => 'maintenance_notice_message'], ['value' => $request->maintenance_notice_message]);
 

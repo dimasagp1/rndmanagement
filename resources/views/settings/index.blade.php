@@ -225,18 +225,27 @@
                             {{-- Toggle Utama Maintenance --}}
                             <div class="flex items-start justify-between gap-4 pb-4 border-b border-amber-200/40">
                                 <div>
-                                    <label class="font-bold text-xs text-ink cursor-pointer" for="maintenance_enabled">
-                                        Aktifkan Mode Pemeliharaan
+                                    <label class="font-bold text-xs text-ink cursor-pointer" @click="maintenanceOn = !maintenanceOn">
+                                        Status Mode Pemeliharaan
                                     </label>
                                     <p class="text-[11px] text-gray-500 mt-0.5">
-                                        Saat aktif, staf dan pengguna biasa akan dialihkan ke halaman pemeliharaan. <strong>Superadmin tetap dapat mengakses seluruh sistem.</strong>
+                                        Saat <strong>ON</strong>, staf dan pengguna biasa akan dialihkan ke halaman pemeliharaan. <strong>Superadmin tetap dapat mengakses seluruh sistem.</strong>
                                     </p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                                    <input type="checkbox" id="maintenance_enabled" name="maintenance_enabled" value="1" 
-                                           class="sr-only peer" x-model="maintenanceOn">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
-                                </label>
+                                <div class="flex items-center gap-2.5 flex-shrink-0">
+                                    <button type="button"
+                                            @click="maintenanceOn = !maintenanceOn"
+                                            :class="maintenanceOn ? 'bg-amber-600' : 'bg-gray-300'"
+                                            class="relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-inner items-center"
+                                            aria-label="Toggle Mode Maintenance">
+                                        <span :class="maintenanceOn ? 'translate-x-7' : 'translate-x-0.5'"
+                                              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"></span>
+                                    </button>
+                                    <span x-text="maintenanceOn ? 'AKTIF (ON)' : 'MATI (OFF)'"
+                                          :class="maintenanceOn ? 'text-amber-800 bg-amber-200/70 border-amber-300' : 'text-gray-500 bg-gray-100 border-gray-200'"
+                                          class="text-[10px] font-bold px-2 py-0.5 rounded border select-none w-20 text-center"></span>
+                                    <input type="hidden" name="maintenance_enabled" :value="maintenanceOn ? '1' : '0'">
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -294,18 +303,27 @@
                         <div class="bg-blue-50/50 border border-blue-200/60 rounded-xl p-4 sm:p-5 space-y-4 mt-4">
                             <div class="flex items-start justify-between gap-4 pb-3 border-b border-blue-200/40">
                                 <div>
-                                    <label class="font-bold text-xs text-ink cursor-pointer" for="maintenance_notice_enabled">
+                                    <label class="font-bold text-xs text-ink cursor-pointer" @click="noticeOn = !noticeOn">
                                         Tampilkan Banner Peringatan Dini (Pre-Maintenance Notice)
                                     </label>
                                     <p class="text-[11px] text-gray-500 mt-0.5">
                                         Menampilkan pengumuman kuning/oranye di bagian atas halaman seluruh pengguna sebelum maintenance dimulai, agar staf sempat menyimpan form pekerjaannya.
                                     </p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                                    <input type="checkbox" id="maintenance_notice_enabled" name="maintenance_notice_enabled" value="1" 
-                                           class="sr-only peer" x-model="noticeOn">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                                <div class="flex items-center gap-2.5 flex-shrink-0">
+                                    <button type="button"
+                                            @click="noticeOn = !noticeOn"
+                                            :class="noticeOn ? 'bg-blue-600' : 'bg-gray-300'"
+                                            class="relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-inner items-center"
+                                            aria-label="Toggle Banner Peringatan">
+                                        <span :class="noticeOn ? 'translate-x-7' : 'translate-x-0.5'"
+                                              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"></span>
+                                    </button>
+                                    <span x-text="noticeOn ? 'AKTIF (ON)' : 'MATI (OFF)'"
+                                          :class="noticeOn ? 'text-blue-800 bg-blue-200/70 border-blue-300' : 'text-gray-500 bg-gray-100 border-gray-200'"
+                                          class="text-[10px] font-bold px-2 py-0.5 rounded border select-none w-20 text-center"></span>
+                                    <input type="hidden" name="maintenance_notice_enabled" :value="noticeOn ? '1' : '0'">
+                                </div>
                             </div>
 
                             <div>
