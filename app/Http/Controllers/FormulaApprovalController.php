@@ -227,12 +227,14 @@ class FormulaApprovalController extends Controller
         $isDesign = $formApproval->type === 'Design';
         $rules = $isDesign ? [
             'artwork_title' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255',
-            'artwork_file' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png',
+            'kategori'      => 'required|string|max:255',
+            'artwork_file'  => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png',
         ] : [
             ...$this->rules($formApproval),
             'product_name' => 'required|string|max:255',
-            'product_id' => 'nullable|exists:products,id',
+            'product_id'   => 'nullable|exists:products,id',
+            'files'        => 'nullable|array',
+            'files.*'      => 'file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png',
         ];
 
         $validated = $request->validate($rules);
@@ -251,7 +253,21 @@ class FormulaApprovalController extends Controller
             $validated['product_id'] = $validated['product_id'] ?? null;
         }
 
-        $formApproval->update($validated);
+        $updateData = collect($validated)->except(['files', 'files.*'])->toArray();
+        $formApproval->update($updateData);
+
+        if (!$isDesign && $request->hasFile('files')) {
+            foreach ($request->file('files', []) as $file) {
+                $formApproval->attachments()->create([
+                    'file_path'       => $file->store('formula-approvals', 'public'),
+                    'original_name'   => $file->getClientOriginalName(),
+                    'uploaded_by'     => auth()->id(),
+                    'revision_label'  => $formApproval->revision_label,
+                    'document_type'   => 'Supporting',
+                    'is_final_document' => false,
+                ]);
+            }
+        }
 
         if ($isDesign && isset($validated['artwork_file_path'])) {
             $formApproval->attachments()->create([
@@ -378,7 +394,7 @@ class FormulaApprovalController extends Controller
             'komoditi'              => 'nullable|string|max:255',
             'sample_code'           => 'nullable|string|max:100',
             'proposal_number'       => 'nullable|string|max:100',
-            'bentuk_sediaan'        => 'nullable|in:' . ProductCategory::pluck('name')->implode(','),
+            'bentuk_sediaan'        => 'nullable|string|max:255',
             'manufactured'          => 'nullable|string|max:255',
             'klaim_product'         => 'nullable|string|max:2000',
             'komposisi'             => 'nullable|string|max:3000',

@@ -293,14 +293,24 @@
             <a href="{{ Storage::url($att->file_path) }}" target="_blank" class="text-sm text-primary hover:underline truncate">
                 📄 {{ \Illuminate\Support\Str::limit($att->original_name, 40) }}
             </a>
-            <form method="POST" action="{{ route('formula-approvals.attachments.destroy', [$form, $att]) }}"
-                  onsubmit="return confirm('Hapus lampiran ini?')">
-                @csrf @method('DELETE')
-                <button type="submit" class="text-xs text-red-500 hover:text-red-700">Hapus</button>
-            </form>
+            <button type="button" onclick="deleteFormulaAttachment('{{ route('formula-approvals.attachments.destroy', [$form, $att]) }}')"
+                    class="text-xs text-red-500 hover:text-red-700">Hapus</button>
         </li>
         @endforeach
     </ul>
+    <script>
+    if (typeof deleteFormulaAttachment === 'undefined') {
+        function deleteFormulaAttachment(url) {
+            if (!confirm('Hapus lampiran ini?')) return;
+            const f = document.createElement('form');
+            f.method = 'POST';
+            f.action = url;
+            f.innerHTML = `@csrf @method('DELETE')`;
+            document.body.appendChild(f);
+            f.submit();
+        }
+    }
+    </script>
     @endif
 
     <input type="file" id="files" name="files[]" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-input text-sm">

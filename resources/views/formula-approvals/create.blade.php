@@ -15,6 +15,26 @@
             </p>
         </header>
 
+        {{-- Flash & Error Alerts --}}
+        @if ($errors->any())
+        <div class="alert-danger mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700" role="alert">
+            <div class="font-semibold mb-1 flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Gagal menyimpan data. Harap periksa kolom berikut:</span>
+            </div>
+            <ul class="list-disc list-inside text-sm space-y-0.5 ml-6">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+        @if (session('error'))
+        <div class="alert-danger mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700" role="alert">
+            <p>{{ session('error') }}</p>
+        </div>
+        @endif
+
         <form method="POST" action="{{ route('formula-approvals.store') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
             <div class="card card-body space-y-5">
