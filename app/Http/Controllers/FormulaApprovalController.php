@@ -58,6 +58,27 @@ class FormulaApprovalController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────
+    // PRINT
+    // ──────────────────────────────────────────────────────────────
+    public function print(FormulaApprovalForm $formApproval)
+    {
+        abort_unless(auth()->user()->can('formula.view'), 403);
+
+        $formApproval->load([
+            'omApprover',
+            'gmApprover',
+            'creator',
+            'attachments.uploader',
+            'formula.materials.material',
+            'formula.materials.supplier',
+            'product',
+        ]);
+
+        return view('formula-approvals.print', compact('formApproval'));
+    }
+
+
+    // ──────────────────────────────────────────────────────────────
     // CREATE
     // ──────────────────────────────────────────────────────────────
     public function create(Request $request)
@@ -353,16 +374,27 @@ class FormulaApprovalController extends Controller
     private function rules(?FormulaApprovalForm $formApproval = null): array
     {
         return [
-            'kategori'        => 'required|string|max:255',
-            'komoditi'        => 'nullable|string|max:255',
-            'sample_code'     => 'nullable|string|max:100',
-            'bentuk_sediaan'  => 'nullable|in:' . ProductCategory::pluck('name')->implode(','),
-            'manufactured'    => 'nullable|string|max:255',
-            'klaim_product'   => 'nullable|string|max:2000',
-            'aturan_pakai'    => 'nullable|string|max:255',
-            'packaging'       => 'nullable|string|max:255',
-            'sensory_product' => 'nullable|string|max:2000',
-            'target_launch'   => 'nullable|date',
+            'kategori'              => 'required|string|max:255',
+            'komoditi'              => 'nullable|string|max:255',
+            'sample_code'           => 'nullable|string|max:100',
+            'proposal_number'       => 'nullable|string|max:100',
+            'bentuk_sediaan'        => 'nullable|in:' . ProductCategory::pluck('name')->implode(','),
+            'manufactured'          => 'nullable|string|max:255',
+            'klaim_product'         => 'nullable|string|max:2000',
+            'komposisi'             => 'nullable|string|max:3000',
+            'aturan_pakai'          => 'nullable|string|max:255',
+            'packaging'             => 'nullable|string|max:255',
+            'sensory_product'       => 'nullable|string|max:2000',
+            'target_launch'         => 'nullable|date',
+            'organoleptic_data'     => 'nullable|array',
+            'organoleptic_data.*'   => 'nullable|string|max:255',
+            'panel_result'          => 'nullable|string|max:3000',
+            'owner_decision'        => 'nullable|string|max:255',
+            'owner_decision_reason' => 'nullable|string|max:2000',
+            'approval_company'      => 'nullable|string|max:255',
+            'approval_signers'      => 'nullable|array',
+            'approval_signers.*.title' => 'nullable|string|max:255',
+            'approval_signers.*.name'  => 'nullable|string|max:255',
         ];
     }
 
