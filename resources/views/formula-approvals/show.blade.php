@@ -350,8 +350,8 @@
     <style>
         .print-modal-backdrop { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); }
         .print-modal-container { width: 95vw; max-width: 1200px; height: 92vh; }
-        .print-iframe-wrapper { background: #475569; overflow: auto; display: flex; justify-content: center; padding: 20px; }
-        .print-iframe-wrapper iframe { width: 794px; min-height: 1123px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border-radius: 4px; background: #fff; flex-shrink: 0; }
+        .print-iframe-wrapper { background: #334155; overflow: auto; display: flex; justify-content: center; padding: 12px; }
+        .print-iframe-wrapper iframe { width: 860px; max-width: 100%; height: 100%; min-height: 650px; border: none; background: transparent; flex-shrink: 0; }
         .btn-toolbar { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; transition: all 0.15s; border: none; cursor: pointer; }
         .btn-toolbar svg { width: 15px; height: 15px; }
         .btn-print-action { background: #16a34a; color: #fff; }
