@@ -169,7 +169,7 @@
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 <a href="{{ route('approval-formula-designs.show', ['formApproval' => $form, 'type' => $form->type]) }}" class="btn-ghost btn-sm text-primary">Detail</a>
-                                @can('formula.edit')
+                                @can('edit', $form)
                                     @if(!in_array($form->approval_status, ['Pending','Approved']) || ($form->type === 'Design' && $form->approval_status === 'Approved'))
                                         <a href="{{ route('approval-formula-designs.edit', ['formApproval' => $form, 'type' => $form->type]) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                     @endif

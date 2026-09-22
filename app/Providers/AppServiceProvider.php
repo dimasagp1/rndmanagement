@@ -28,6 +28,17 @@ use App\Models\PreformulationStudy;
 use App\Policies\PreformulationStudyPolicy;
 use App\Services\PreformulationStudyService;
 use App\Models\FormulaApprovalForm;
+use App\Policies\FormulaApprovalFormPolicy;
+use App\Models\SampleEvaluation;
+use App\Policies\SampleEvaluationPolicy;
+use App\Models\StabilityTest;
+use App\Policies\StabilityTestPolicy;
+use App\Models\TechnologyTransfer;
+use App\Policies\TechnologyTransferPolicy;
+use App\Models\NieApproval;
+use App\Policies\NieApprovalPolicy;
+use App\Models\Qbd;
+use App\Policies\QbdPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -59,6 +70,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Prf::class, PrfPolicy::class);
         Gate::policy(NpdProposal::class, NpdProposalPolicy::class);
         Gate::policy(PreformulationStudy::class, PreformulationStudyPolicy::class);
+        Gate::policy(FormulaApprovalForm::class, FormulaApprovalFormPolicy::class);
+        Gate::policy(SampleEvaluation::class, SampleEvaluationPolicy::class);
+        Gate::policy(StabilityTest::class, StabilityTestPolicy::class);
+        Gate::policy(TechnologyTransfer::class, TechnologyTransferPolicy::class);
+        Gate::policy(NieApproval::class, NieApprovalPolicy::class);
+        Gate::policy(Qbd::class, QbdPolicy::class);
 
         // Implicitly grant "Superadmin" role all permission checks
         Gate::before(function ($user, $ability) {

@@ -13,7 +13,7 @@
             <p class="page-subtitle">Detail Technology Transfer dan lampiran dokumen.</p>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
-            @can('technology_transfer.edit')
+            @can('edit', $technologyTransfer)
             <a href="{{ route('technology-transfers.edit', $technologyTransfer) }}" class="btn-outline">Edit</a>
             <form method="POST" action="{{ route('technology-transfers.destroy', $technologyTransfer) }}" class="inline" onsubmit="return confirm('Hapus Technology Transfer ini?')">
                 @csrf @method('DELETE')
@@ -52,7 +52,7 @@
             <div class="card">
                 <div class="card-header flex items-center justify-between">
                     <h2 class="card-title">Lampiran Dokumen</h2>
-                    @can('technology_transfer.edit')
+                    @can('edit', $technologyTransfer)
                     <button onclick="document.getElementById('uploadAttachmentModal').classList.remove('hidden')" class="btn-primary btn-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Tambah File
@@ -86,7 +86,7 @@
                             <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" class="btn-ghost btn-sm text-primary">Preview</a>
                             @endif
                             <a href="{{ Storage::url($attachment->file_path) }}" download class="btn-ghost btn-sm text-primary">Download</a>
-                            @can('technology_transfer.edit')
+                            @can('edit', $technologyTransfer)
                             <form method="POST" action="{{ route('technology-transfers.attachments.destroy', [$technologyTransfer, $attachment]) }}" onsubmit="return confirm('Hapus lampiran ini?')" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-ghost btn-sm text-red-500 hover:bg-red-50">Hapus</button>

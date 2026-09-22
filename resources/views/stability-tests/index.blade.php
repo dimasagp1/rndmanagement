@@ -61,7 +61,7 @@
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 <a href="{{ route('stability-tests.show', $test) }}" class="btn-ghost btn-sm text-primary">Detail</a>
-                                @can('stability_test.edit')
+                                @can('edit', $test)
                                 <a href="{{ route('stability-tests.edit', $test) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 <form method="POST" action="{{ route('stability-tests.destroy', $test) }}"
                                       onsubmit="return confirm('Hapus Stability Test "{{ $test->title }}"?')">

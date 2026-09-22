@@ -160,7 +160,7 @@ class PreformulationStudyController extends Controller
 
     public function submit(PreformulationStudy $preformulationStudy)
     {
-        Gate::authorize('edit', $preformulationStudy);
+        Gate::authorize('submit', $preformulationStudy);
 
         try {
             $this->service->submitForApproval($preformulationStudy);

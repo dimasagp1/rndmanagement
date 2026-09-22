@@ -61,7 +61,7 @@
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 <a href="{{ route('nie-approvals.show', $approval) }}" class="btn-ghost btn-sm text-primary">Detail</a>
-                                @can('nie_approval.edit')
+                                @can('edit', $approval)
                                 <a href="{{ route('nie-approvals.edit', $approval) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 <form method="POST" action="{{ route('nie-approvals.destroy', $approval) }}"
                                       onsubmit="return confirm('Hapus NIE Approved "{{ $approval->product_name }}"?')">

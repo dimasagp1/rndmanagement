@@ -42,7 +42,7 @@
             <p class="page-subtitle">Approval dibuat {{ $fa->created_at?->isoFormat('D MMM Y, HH:mm') ?? '—' }} oleh {{ $fa->creator?->name ?? '—' }} — untuk registrasi & produksi</p>
         </div>
             <div class="flex items-center gap-2 flex-wrap">
-            @can('formula.edit')
+            @can('edit', $fa)
                 @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                 <a href="{{ route('approval-formula-designs.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit</a>
                 @endif
@@ -50,12 +50,16 @@
                     @csrf
                     <button type="submit" class="btn-outline text-primary border-primary/20 hover:bg-primary/5" onclick="return confirm('Buat revisi baru dari {{ $fa->revision_label }}?')">Duplikasi → Revisi {{ str_pad((string)((int)$fa->revision+1),2,'0',STR_PAD_LEFT) }}</button>
                 </form>
+            @endcan
+            @can('submit', $fa)
                 @if(in_array($fa->approval_status, ['Draft','Rejected']) && !$isDesign)
                 <form method="POST" action="{{ route('approval-formula-designs.submit', $fa) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-primary">Ajukan Approval (Online)</button>
                 </form>
                 @endif
+            @endcan
+            @can('delete', $fa)
                 @if(in_array($fa->approval_status, ['Draft','Rejected']))
                 <form method="POST" action="{{ route('approval-formula-designs.destroy', $fa) }}" class="inline" onsubmit="return confirm('Hapus {{ $fa->product_name }} {{ $fa->revision_label }}?')">
                     @csrf @method('DELETE')
@@ -126,7 +130,7 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="text-sm font-heading font-semibold text-ink">{{ $fa->type === 'Design' ? 'Design' : 'Formula' }} — Detail Produk</h2>
-                    @can('formula.edit')
+                    @can('edit', $fa)
                         @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                         <a href="{{ route('approval-formula-designs.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline btn-sm">Edit</a>
                         @endif
@@ -150,7 +154,7 @@
                     <h2 class="text-sm font-heading font-semibold text-ink">Lampiran — Upload File (PDF/Word/Gambar, opsional)</h2>
                 </div>
                 <div class="card-body">
-                    @can('formula.edit')
+                    @can('edit', $fa)
                         @if(!in_array($fa->approval_status, ['Approved','Pending']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                         <form method="POST" action="{{ route('approval-formula-designs.attachments.store', $fa) }}" enctype="multipart/form-data" class="flex items-center gap-2 mb-4 flex-wrap">
                             @csrf
@@ -179,7 +183,7 @@
                             </a>
                             <div class="flex items-center gap-3 flex-shrink-0">
                                 <span class="text-xs text-gray-400">{{ $attachment->uploader?->name ?? '—' }} · {{ $attachment->created_at?->format('d/m/y') }}</span>
-                                @can('formula.edit')
+                                @can('edit', $fa)
                                     @if(!in_array($fa->approval_status, ['Pending','Approved']))
                                     <form method="POST" action="{{ route('approval-formula-designs.attachments.destroy', [$fa, $attachment]) }}" onsubmit="return confirm('Hapus lampiran {{ $attachment->original_name }}?')">
                                         @csrf @method('DELETE')

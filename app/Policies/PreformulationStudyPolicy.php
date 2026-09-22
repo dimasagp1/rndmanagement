@@ -28,7 +28,8 @@ class PreformulationStudyPolicy
             return false;
         }
 
-        return $study->created_by === $user->id;
+        return $study->created_by === $user->id
+            && in_array($study->approval_status, ['Draft', 'Rejected']);
     }
 
     public function update(User $user, PreformulationStudy $study): bool
@@ -36,9 +37,17 @@ class PreformulationStudyPolicy
         return $this->edit($user, $study);
     }
 
+    public function submit(User $user, PreformulationStudy $study): bool
+    {
+        return $study->created_by === $user->id
+            && in_array($study->approval_status, ['Draft', 'Rejected'])
+            && $user->can('npd_proposal.edit');
+    }
+
     public function delete(User $user, PreformulationStudy $study): bool
     {
         return $study->created_by === $user->id
+            && $study->approval_status === 'Draft'
             && $user->can('npd_proposal.delete');
     }
 }

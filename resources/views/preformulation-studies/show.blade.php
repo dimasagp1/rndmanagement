@@ -28,22 +28,22 @@
             </p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-            @if(in_array($study->approval_status, ['Draft', 'Rejected']) && ($study->created_by === auth()->id() || auth()->hasRole('Superadmin')))
+            @can('edit', $study)
             <a href="{{ route('preformulation-studies.edit', $study) }}" class="btn-outline">Edit</a>
             <form method="POST" action="{{ route('preformulation-studies.submit', $study) }}" class="inline">
                 @csrf
                 <button type="submit" class="btn-outline">Ajukan untuk Approval</button>
             </form>
-            @endif
+            @endcan
 
-            @if($study->approval_status === 'Draft' && ($study->created_by === auth()->id() || auth()->hasRole('Superadmin')))
+            @can('delete', $study)
             <form method="POST" action="{{ route('preformulation-studies.destroy', $study) }}" class="inline"
                   onsubmit="return confirm('Hapus study {{ $study->code }}?')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn-outline text-red-600 border-red-200 hover:bg-red-50">Hapus</button>
             </form>
-            @endif
+            @endcan
 
             <a href="{{ route('preformulation-studies.index') }}" class="btn-ghost">← Kembali</a>
         </div>

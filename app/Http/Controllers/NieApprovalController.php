@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\NieApproval;
 use App\Models\NieApprovalAttachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class NieApprovalController extends Controller
@@ -79,7 +80,7 @@ class NieApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function edit(NieApproval $nieApproval)
     {
-        abort_unless(auth()->user()->can('nie_approval.edit'), 403);
+        Gate::authorize('edit', $nieApproval);
 
         return view('nie-approvals.edit', compact('nieApproval'));
     }
@@ -89,7 +90,7 @@ class NieApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function update(Request $request, NieApproval $nieApproval)
     {
-        abort_unless(auth()->user()->can('nie_approval.edit'), 403);
+        Gate::authorize('update', $nieApproval);
 
         $validated = $request->validate([
             'product_name' => 'required|string|max:255',
@@ -107,7 +108,7 @@ class NieApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroy(NieApproval $nieApproval)
     {
-        abort_unless(auth()->user()->can('nie_approval.edit'), 403);
+        Gate::authorize('delete', $nieApproval);
 
         $name = $nieApproval->product_name;
 
@@ -127,7 +128,7 @@ class NieApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function storeAttachment(Request $request, NieApproval $nieApproval)
     {
-        abort_unless(auth()->user()->can('nie_approval.edit'), 403);
+        Gate::authorize('edit', $nieApproval);
 
         $request->validate([
             'files'   => 'required|array|min:1',
@@ -147,7 +148,7 @@ class NieApprovalController extends Controller
 
     public function destroyAttachment(NieApproval $nieApproval, NieApprovalAttachment $attachment)
     {
-        abort_unless(auth()->user()->can('nie_approval.edit'), 403);
+        Gate::authorize('edit', $nieApproval);
 
         if ($attachment->nie_approval_id !== $nieApproval->id) {
             abort(404);

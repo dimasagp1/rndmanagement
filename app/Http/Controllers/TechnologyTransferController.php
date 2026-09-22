@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TechnologyTransfer;
 use App\Models\TechnologyTransferAttachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class TechnologyTransferController extends Controller
@@ -79,7 +80,7 @@ class TechnologyTransferController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function edit(TechnologyTransfer $technologyTransfer)
     {
-        abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
+        Gate::authorize('edit', $technologyTransfer);
 
         return view('technology-transfers.edit', compact('technologyTransfer'));
     }
@@ -89,7 +90,7 @@ class TechnologyTransferController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function update(Request $request, TechnologyTransfer $technologyTransfer)
     {
-        abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
+        Gate::authorize('update', $technologyTransfer);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -107,7 +108,7 @@ class TechnologyTransferController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroy(TechnologyTransfer $technologyTransfer)
     {
-        abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
+        Gate::authorize('delete', $technologyTransfer);
 
         $title = $technologyTransfer->title;
 
@@ -127,7 +128,7 @@ class TechnologyTransferController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function storeAttachment(Request $request, TechnologyTransfer $technologyTransfer)
     {
-        abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
+        Gate::authorize('edit', $technologyTransfer);
 
         $request->validate([
             'files'   => 'required|array|min:1',
@@ -147,7 +148,7 @@ class TechnologyTransferController extends Controller
 
     public function destroyAttachment(TechnologyTransfer $technologyTransfer, TechnologyTransferAttachment $attachment)
     {
-        abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
+        Gate::authorize('edit', $technologyTransfer);
 
         if ($attachment->technology_transfer_id !== $technologyTransfer->id) {
             abort(404);

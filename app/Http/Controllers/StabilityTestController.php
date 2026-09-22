@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\StabilityTest;
 use App\Models\StabilityTestAttachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class StabilityTestController extends Controller
@@ -79,7 +80,7 @@ class StabilityTestController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function storeAttachment(Request $request, StabilityTest $stabilityTest)
     {
-        abort_unless(auth()->user()->can('stability_test.edit') || auth()->user()->can('stability_test.view'), 403);
+        Gate::authorize('edit', $stabilityTest);
 
         $request->validate([
             'files'   => 'required|array|min:1',
@@ -108,7 +109,7 @@ class StabilityTestController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function edit(StabilityTest $stabilityTest)
     {
-        abort_unless(auth()->user()->can('stability_test.edit'), 403);
+        Gate::authorize('edit', $stabilityTest);
 
         return view('stability-tests.edit', compact('stabilityTest'));
     }
@@ -118,7 +119,7 @@ class StabilityTestController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function update(Request $request, StabilityTest $stabilityTest)
     {
-        abort_unless(auth()->user()->can('stability_test.edit'), 403);
+        Gate::authorize('update', $stabilityTest);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -136,7 +137,7 @@ class StabilityTestController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroy(StabilityTest $stabilityTest)
     {
-        abort_unless(auth()->user()->can('stability_test.edit'), 403);
+        Gate::authorize('delete', $stabilityTest);
 
         $title = $stabilityTest->title;
 
@@ -156,7 +157,7 @@ class StabilityTestController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroyAttachment(StabilityTest $stabilityTest, StabilityTestAttachment $attachment)
     {
-        abort_unless(auth()->user()->can('stability_test.edit'), 403);
+        Gate::authorize('edit', $stabilityTest);
 
         if ($attachment->stability_test_id !== $stabilityTest->id) {
             abort(404);

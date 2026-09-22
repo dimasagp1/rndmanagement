@@ -30,7 +30,7 @@
                 <p class="page-subtitle">Detail uji stabilitas dan lampiran dokumen.</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
-                @can('stability_test.edit')
+                @can('edit', $st)
                 <a href="{{ route('stability-tests.edit', $st) }}" class="btn-outline">Edit</a>
                 <form method="POST" action="{{ route('stability-tests.destroy', $st) }}" class="inline" onsubmit="return confirm('Hapus Stability Test ini?')">
                     @csrf @method('DELETE')
@@ -95,7 +95,7 @@
                 <div class="card">
                     <div class="card-header flex items-center justify-between">
                         <h2 class="card-title">Lampiran Dokumen</h2>
-                        @can('stability_test.edit')
+                        @can('edit', $st)
                         <button type="button" @click="uploadModalOpen = true" class="btn-primary btn-sm flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             + Tambah File
@@ -139,7 +139,7 @@
                                 <a href="{{ Storage::url($attachment->file_path) }}" download="{{ $attachment->original_name }}" class="btn-ghost btn-sm text-primary">
                                     Download
                                 </a>
-                                @can('stability_test.edit')
+                                @can('edit', $st)
                                 <form method="POST" action="{{ route('stability-tests.attachments.destroy', [$st, $attachment]) }}" onsubmit="return confirm('Hapus lampiran ini?')" class="inline">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn-ghost btn-sm text-red-500 hover:bg-red-50">Hapus</button>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Qbd;
 use App\Models\QbdAttachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class QbdController extends Controller
@@ -79,7 +80,7 @@ class QbdController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function edit(Qbd $qbd)
     {
-        abort_unless(auth()->user()->can('qbd.edit'), 403);
+        Gate::authorize('edit', $qbd);
 
         return view('qbds.edit', compact('qbd'));
     }
@@ -89,7 +90,7 @@ class QbdController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function update(Request $request, Qbd $qbd)
     {
-        abort_unless(auth()->user()->can('qbd.edit'), 403);
+        Gate::authorize('update', $qbd);
 
         $validated = $request->validate([
             'product_name' => 'required|string|max:255',
@@ -107,7 +108,7 @@ class QbdController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroy(Qbd $qbd)
     {
-        abort_unless(auth()->user()->can('qbd.edit'), 403);
+        Gate::authorize('delete', $qbd);
 
         $name = $qbd->product_name;
 
@@ -127,7 +128,7 @@ class QbdController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function storeAttachment(Request $request, Qbd $qbd)
     {
-        abort_unless(auth()->user()->can('qbd.edit'), 403);
+        Gate::authorize('edit', $qbd);
 
         $request->validate([
             'files'   => 'required|array|min:1',
@@ -147,7 +148,7 @@ class QbdController extends Controller
 
     public function destroyAttachment(Qbd $qbd, QbdAttachment $attachment)
     {
-        abort_unless(auth()->user()->can('qbd.edit'), 403);
+        Gate::authorize('edit', $qbd);
 
         if ($attachment->qbd_id !== $qbd->id) {
             abort(404);

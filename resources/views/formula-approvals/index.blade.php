@@ -123,7 +123,7 @@
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 <a href="{{ route('formula-approvals.show', $form) }}" class="btn-ghost btn-sm text-primary">Detail</a>
-                                @can('formula.edit')
+                                @can('edit', $form)
                                     @if(!in_array($form->approval_status, ['Pending','Approved']))
                                         <a href="{{ route('formula-approvals.edit', $form) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                     @endif

@@ -61,7 +61,7 @@
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 <a href="{{ route('technology-transfers.show', $transfer) }}" class="btn-ghost btn-sm text-primary">Detail</a>
-                                @can('technology_transfer.edit')
+                                @can('edit', $transfer)
                                 <a href="{{ route('technology-transfers.edit', $transfer) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 <form method="POST" action="{{ route('technology-transfers.destroy', $transfer) }}"
                                       onsubmit="return confirm('Hapus Technology Transfer "{{ $transfer->title }}"?')">

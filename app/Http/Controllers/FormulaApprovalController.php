@@ -8,6 +8,7 @@ use App\Models\FormulaApprovalForm;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class FormulaApprovalController extends Controller
@@ -205,8 +206,7 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function edit(FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
-        abort_unless($this->canMutate($formApproval), 403, 'Dokumen yang sudah diajukan/Approved tidak dapat diedit langsung. Buat revisi baru.');
+        Gate::authorize('edit', $formApproval);
 
         return view('formula-approvals.edit', [
             'formApproval' => $formApproval,
@@ -221,8 +221,7 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function update(Request $request, FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
-        abort_unless($this->canMutate($formApproval), 403, 'Dokumen tidak dapat diubah pada status ini.');
+        Gate::authorize('update', $formApproval);
 
         $isDesign = $formApproval->type === 'Design';
         $rules = $isDesign ? [
@@ -342,8 +341,7 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function submit(FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
-        abort_unless(in_array($formApproval->approval_status, ['Draft', 'Rejected']), 422, 'Hanya dokumen Draft/Rejected yang dapat diajukan.');
+        Gate::authorize('submit', $formApproval);
 
         $formApproval->update([
             'approval_status' => 'Pending',
@@ -365,8 +363,7 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroy(FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
-        abort_unless(in_array($formApproval->approval_status, ['Draft', 'Rejected']), 403, 'Hanya dokumen Draft atau Rejected yang dapat dihapus.');
+        Gate::authorize('delete', $formApproval);
 
         $name = $formApproval->product_name;
 
@@ -419,12 +416,7 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function destroyAttachment(FormulaApprovalForm $formApproval, FormulaApprovalAttachment $attachment)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
-        // History Design Approved tidak boleh dihapus
-        if ($formApproval->type === 'Design' && $formApproval->approval_status === 'Approved') {
-            abort(403, 'History file Design tidak boleh dihapus.');
-        }
-        abort_unless($this->canMutate($formApproval), 403, 'Lampiran tidak dapat dihapus pada status ini.');
+        Gate::authorize('edit', $formApproval);
 
         if ($attachment->formula_approval_id !== $formApproval->id) {
             abort(404);
@@ -438,8 +430,7 @@ class FormulaApprovalController extends Controller
 
     public function storeAttachment(Request $request, FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
-        abort_unless($this->canMutate($formApproval), 403, 'Lampiran tidak dapat ditambah pada status ini.');
+        Gate::authorize('edit', $formApproval);
 
         $request->validate([
             'file'          => 'required|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png',

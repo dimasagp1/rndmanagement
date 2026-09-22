@@ -43,26 +43,26 @@
             <p class="page-subtitle">Approval dibuat {{ $fa->created_at?->isoFormat('D MMM Y, HH:mm') ?? '—' }} oleh {{ $fa->creator?->name ?? '—' }} — untuk registrasi & produksi</p>
         </div>
             <div class="flex items-center gap-2 flex-wrap">
-            @can('formula.edit')
-                @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
+            @can('edit', $fa)
                 <a href="{{ route('formula-approvals.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit Approval</a>
-                @endif
+            @endcan
+            @can('formula.create')
                 <form method="POST" action="{{ route('formula-approvals.duplicate', $fa) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-outline text-primary border-primary/20 hover:bg-primary/5" onclick="return confirm('Buat revisi baru dari {{ $fa->revision_label }}?')">Duplikasi → Revisi {{ str_pad((string)((int)$fa->revision+1),2,'0',STR_PAD_LEFT) }}</button>
                 </form>
-                @if(in_array($fa->approval_status, ['Draft','Rejected']))
+            @endcan
+            @can('submit', $fa)
                 <form method="POST" action="{{ route('formula-approvals.submit', $fa) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-primary">Ajukan Approval (Online)</button>
                 </form>
-                @endif
-                @if(in_array($fa->approval_status, ['Draft','Rejected']))
+            @endcan
+            @can('delete', $fa)
                 <form method="POST" action="{{ route('formula-approvals.destroy', $fa) }}" class="inline" onsubmit="return confirm('Hapus {{ $fa->product_name }} {{ $fa->revision_label }}?')">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn-outline text-red-600 border-red-200 hover:bg-red-50">Hapus</button>
                 </form>
-                @endif
             @endcan
             <button type="button" x-on:click="showPrintModal = true; document.getElementById('printPreviewFrame').src = '{{ route('formula-approvals.print', $fa) }}'" class="btn-outline text-gray-700 hover:bg-gray-100 flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -164,7 +164,7 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="text-sm font-heading font-semibold text-ink">{{ $fa->type === 'Design' ? 'Design' : 'Formula' }} — Detail Produk</h2>
-                    @can('formula.edit')
+                    @can('edit', $fa)
                         @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                         <a href="{{ route('formula-approvals.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline btn-sm">Edit</a>
                         @endif
@@ -184,7 +184,7 @@
                     <h2 class="text-sm font-heading font-semibold text-ink">Lampiran — Upload File (PDF/Word/Gambar, opsional)</h2>
                 </div>
                 <div class="card-body">
-                    @can('formula.edit')
+                    @can('edit', $fa)
                         @if(!in_array($fa->approval_status, ['Approved','Pending']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                         <form method="POST" action="{{ route('formula-approvals.attachments.store', $fa) }}" enctype="multipart/form-data" class="flex items-center gap-2 mb-4 flex-wrap">
                             @csrf
@@ -213,7 +213,7 @@
                             </a>
                             <div class="flex items-center gap-3 flex-shrink-0">
                                 <span class="text-xs text-gray-400">{{ $attachment->uploader?->name ?? '—' }} · {{ $attachment->created_at?->format('d/m/y') }}</span>
-                                @can('formula.edit')
+                                @can('edit', $fa)
                                     @if(!in_array($fa->approval_status, ['Pending','Approved']))
                                     <form method="POST" action="{{ route('formula-approvals.attachments.destroy', [$fa, $attachment]) }}" onsubmit="return confirm('Hapus lampiran {{ $attachment->original_name }}?')">
                                         @csrf @method('DELETE')

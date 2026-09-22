@@ -61,7 +61,7 @@
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 <a href="{{ route('qbds.show', $qbd) }}" class="btn-ghost btn-sm text-primary">Detail</a>
-                                @can('qbd.edit')
+                                @can('edit', $qbd)
                                 <a href="{{ route('qbds.edit', $qbd) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 <form method="POST" action="{{ route('qbds.destroy', $qbd) }}"
                                       onsubmit="return confirm('Hapus QbD "{{ $qbd->product_name }}"?')">
