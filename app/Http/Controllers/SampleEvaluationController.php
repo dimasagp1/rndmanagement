@@ -25,9 +25,7 @@ class SampleEvaluationController extends Controller
         // Base query: scope user + filter search & product (tanpa status, untuk hitungan tab)
         $base = SampleEvaluation::query();
 
-        if (auth()->user()->hasRole('Staff R&D')) {
-            $base->where('created_by', auth()->id());
-        }
+
 
         if ($search = $request->get('search')) {
             $base->where(function ($q) use ($search) {

@@ -44,7 +44,7 @@ class TimelineController extends Controller
         $staffScope = $isStaff ? $user->id : null;
 
         // ── 1. Collect items from all 13 modules ──────────────
-        $items = $this->collectAllItems($staffScope);
+        $items = $this->collectAllItems(null);
 
         // ── 2. Filtering ──────────────────────────────────────
         $moduleFilter = $request->get('module');
@@ -78,7 +78,7 @@ class TimelineController extends Controller
         $pipelinePercent = $totalItems > 0 ? round($approved / $totalItems * 100) : 0;
 
         // ── 4. Module stat cards ──────────────────────────────
-        $moduleStats = $this->getModuleStats($staffScope);
+        $moduleStats = $this->getModuleStats(null);
 
         // ── 5. Pending action items (role-based) ──────────────
         $pendingItems = $this->getPendingItems($user, $isStaff, $isManager, $isGM, $staffScope);

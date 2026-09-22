@@ -18,9 +18,7 @@ class PrfController extends Controller
         $user = auth()->user();
         $query = Prf::with('creator')->latest();
 
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            $query->where('created_by', $user->id);
-        }
+
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -33,9 +31,6 @@ class PrfController extends Controller
         $prfs = $query->paginate(15)->withQueryString();
 
         $countQuery = Prf::query();
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            $countQuery->where('created_by', $user->id);
-        }
 
         $counts = [
             'all' => (clone $countQuery)->count(),

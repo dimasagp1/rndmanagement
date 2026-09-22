@@ -24,9 +24,7 @@ class FormulaController extends Controller
         $user = auth()->user();
         $query = Formula::with('creator')->latest();
 
-        if ($user->hasRole('Staff R&D')) {
-            $query->where('created_by', $user->id);
-        }
+
 
         // Search
         if ($search = $request->get('search')) {
@@ -55,9 +53,6 @@ class FormulaController extends Controller
 
         // Summary counts for filter badges
         $countQuery = Formula::query();
-        if ($user->hasRole('Staff R&D')) {
-            $countQuery->where('created_by', $user->id);
-        }
 
         $counts = [
             'all'      => (clone $countQuery)->count(),

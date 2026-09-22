@@ -22,9 +22,7 @@ class TrialPmController extends Controller
         $user = auth()->user();
         $query = TrialPm::with(['creator', 'departmentApprovals.approver'])->latest();
 
-        if ($user->hasRole('Staff R&D')) {
-            $query->where('created_by', $user->id);
-        }
+
 
         // Search
         if ($search = $request->get('search')) {

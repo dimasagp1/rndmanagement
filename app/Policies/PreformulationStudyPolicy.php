@@ -14,10 +14,6 @@ class PreformulationStudyPolicy
 
     public function view(User $user, PreformulationStudy $study): bool
     {
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            return $study->created_by === $user->id;
-        }
-
         return $user->can('npd_proposal.view');
     }
 

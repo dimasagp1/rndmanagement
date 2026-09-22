@@ -14,10 +14,6 @@ class PrfPolicy
 
     public function view(User $user, Prf $prf): bool
     {
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            return $prf->created_by === $user->id;
-        }
-
         return $user->can('prf.view');
     }
 

@@ -20,9 +20,7 @@ class PreformulationStudyController extends Controller
         $user = auth()->user();
         $query = PreformulationStudy::with('creator', 'npdProposal')->latest();
 
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            $query->where('created_by', $user->id);
-        }
+
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -39,9 +37,6 @@ class PreformulationStudyController extends Controller
         $studies = $query->paginate(15)->withQueryString();
 
         $countQuery = PreformulationStudy::query();
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            $countQuery->where('created_by', $user->id);
-        }
 
         $counts = [
             'all'         => (clone $countQuery)->count(),

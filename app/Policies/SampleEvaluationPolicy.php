@@ -14,10 +14,6 @@ class SampleEvaluationPolicy
 
     public function view(User $user, SampleEvaluation $evaluation): bool
     {
-        if ($user->hasRole('Staff R&D')) {
-            return $evaluation->created_by === $user->id;
-        }
-
         return $user->can('sample_evaluation.view');
     }
 

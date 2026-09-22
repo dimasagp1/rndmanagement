@@ -14,10 +14,6 @@ class NpdProposalPolicy
 
     public function view(User $user, NpdProposal $proposal): bool
     {
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            return $proposal->created_by === $user->id;
-        }
-
         return $user->can('npd_proposal.view');
     }
 

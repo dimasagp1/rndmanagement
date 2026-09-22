@@ -21,9 +21,7 @@ class LogbookPmController extends Controller
         $user = auth()->user();
         $query = LogbookPm::with(['supplier', 'trialPm', 'creator', 'omApprover'])->latest('tanggal_terima');
 
-        if ($user->hasRole('Staff R&D')) {
-            $query->where('created_by', $user->id);
-        }
+
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -58,9 +56,6 @@ class LogbookPmController extends Controller
         $entries = $query->paginate(20)->withQueryString();
 
         $statQuery = LogbookPm::query();
-        if ($user->hasRole('Staff R&D')) {
-            $statQuery->where('created_by', $user->id);
-        }
 
         $stats = [
             'total'       => (clone $statQuery)->count(),

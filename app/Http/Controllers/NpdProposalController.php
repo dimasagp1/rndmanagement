@@ -23,9 +23,7 @@ class NpdProposalController extends Controller
         $user = auth()->user();
         $query = NpdProposal::with('creator', 'prf')->latest();
 
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            $query->where('created_by', $user->id);
-        }
+
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -46,9 +44,6 @@ class NpdProposalController extends Controller
         $proposals = $query->paginate(15)->withQueryString();
 
         $countQuery = NpdProposal::query();
-        if ($user->hasRole('Staff R&D') || $user->hasRole('Staff Packdev')) {
-            $countQuery->where('created_by', $user->id);
-        }
 
         $counts = [
             'all'        => (clone $countQuery)->count(),

@@ -11,7 +11,10 @@
 | **Operational Manager** | ❌ | ✅ Semua modul | ❌ | ❌ | ✅ Approval Tahap 1 |
 | **General Manager (Ibu Lisa)** | ❌ | ✅ Read-only penuh (riwayat) | ✅ khusus approval final | ❌ | ✅ Approval Tahap 2 (final) |
 
-**Catatan implementasi:** setelah suatu record berstatus selain Draf/Pending revisi, field-field input untuk Staff R&D otomatis terkunci (`disabled`) — validasi dilakukan di layer Policy, bukan hanya UI.
+**Catatan implementasi:**
+1. **Open Read (Transparansi):** Semua role dapat melihat (*read-only*) seluruh data lintas staff/modul tanpa pembatasan, guna mendukung transparansi dan kolaborasi tim.
+2. **Restricted Write (Kepemilikan):** Modifikasi data (*update/edit/delete*) hanya dapat dilakukan oleh user pembuat data (`created_by === user.id`) dan hanya saat record berstatus Draf atau Perlu Revisi / Rejected.
+3. **User Marking & Audit Trail:** Setiap pembuatan baru dan mutasi data otomatis mencatat identitas user (`created_by`) dan terekam dalam Activity Log. Setelah suatu record disetujui (Approved), data terkunci secara permanen di layer Policy.
 
 ---
 
