@@ -143,12 +143,12 @@
                                  class="ml-4 pl-2 border-l border-white/10">
                                 <a href="{{ route('formulas.index') }}"
                                    class="sidebar-sub-link {{ request()->routeIs('formulas.*') ? 'active' : '' }}">
-                                    <span class="flex-1 truncate">Formula RM</span>
+                                    <span class="flex-1 truncate">Formula RM sdasd</span>
                                 </a>
                                 @can('trial_rm.view')
                                 <a href="{{ route('trial-rms.index') }}"
                                    class="sidebar-sub-link {{ request()->routeIs('trial-rms.*') ? 'active' : '' }}">
-                                    <span class="flex-1 truncate">Trial RM</span>
+                                    <span class="flex-1 truncate">Trial Formulation</span>
                                 </a>
                                 @endcan
                                 @can('trial_pm.view')

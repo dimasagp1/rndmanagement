@@ -17,7 +17,7 @@
                 <code class="text-sm bg-surface text-primary px-2 py-0.5 rounded font-mono">{{ $trialRm->code }}</code>
                 <x-status-badge :status="$trialRm->approval_status" />
             </div>
-            <h1 class="page-title">Edit Catatan Trial RM</h1>
+            <h1 class="page-title">Edit Catatan Trial Formulation</h1>
             <p class="page-subtitle">Uji coba sampel untuk formula: {{ $trialRm->formula?->code }}</p>
         </div>
         <a href="{{ route('trial-rms.show', $trialRm) }}" class="btn-ghost">← Batal</a>

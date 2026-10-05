@@ -5,7 +5,7 @@
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
-            <span class="text-ink font-medium">Catatan Trial RM</span>
+            <span class="text-ink font-medium">Catatan Trial Formulation</span>
         </div>
     </x-slot>
 
@@ -20,7 +20,7 @@
 
     <div class="page-header">
         <div>
-            <h1 class="page-title">Catatan Trial RM</h1>
+            <h1 class="page-title">Trial Formulation</h1>
             <p class="page-subtitle">Uji coba bahan baku produk herbal PT Herbatech</p>
         </div>
         @can('create', App\Models\TrialRm::class)
@@ -28,7 +28,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Trial RM Baru
+            Trial Formulation Baru
         </a>
         @endcan
     </div>

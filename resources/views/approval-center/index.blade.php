@@ -48,7 +48,7 @@
                         @click="activeTab = 'trials'; activeRejectItem = null"
                         :class="activeTab === 'trials' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-ink'"
                         class="px-4 py-2.5 border-b-2 text-sm transition font-medium">
-                    Catatan Trial RM
+                    Catatan Trial RM 
                     <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
                           :class="activeTab === 'trials' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'">
                         {{ $pendingTrialRms->count() }}
