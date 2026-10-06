@@ -70,10 +70,18 @@
                     </div>
                     <div>
                         <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-                        <input type="text" id="product_name" name="product_name" value="{{ old('product_name') }}"
-                               class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
-                               placeholder="Input manual (belum ada master produk)">
-                        <p class="text-xs text-gray-400 mt-1">Sementara diisi manual. Nantinya akan memilih dari master produk.</p>
+                        <select id="product_name" name="product_name"
+                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
+                                onchange="syncProductId(this)">
+                            <option value="">— Pilih Produk (opsional) —</option>
+                            @foreach($products as $product)
+                            <option value="{{ $product->name }}" data-id="{{ $product->id }}" {{ old('product_name') == $product->name ? 'selected' : '' }}>{{ $product->name }}</option>
+                            @endforeach
+                            @if(old('product_name') && ! $products->pluck('name')->contains(old('product_name')))
+                            <option value="{{ old('product_name') }}" selected>{{ old('product_name') }} (Kategori lama)</option>
+                            @endif
+                        </select>
+                        <input type="hidden" name="product_id" id="product_id" value="{{ old('product_id') }}">
                         @error('product_name') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -111,6 +119,11 @@
     </div>
 
     <script>
+        function syncProductId(select) {
+            const selected = select.options[select.selectedIndex];
+            const hiddenId = document.getElementById('product_id');
+            if (hiddenId) hiddenId.value = selected?.dataset?.id || '';
+        }
         document.addEventListener('DOMContentLoaded', function() {
             let docIndex = 0;
             const container = document.getElementById('documents-container');

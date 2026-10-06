@@ -20,11 +20,28 @@
 
             <div class="card card-body space-y-5">
                 <div>
+                    <label for="product_id" class="form-label">
+                        Produk <span class="text-red-500">*</span>
+                    </label>
+                    <select id="product_id" name="product_id" required
+                            class="form-input {{ $errors->has('product_id') ? 'border-red-400' : '' }}"
+                            onchange="syncProductName(this)">
+                        <option value="">— Pilih Produk —</option>
+                        @foreach($products as $product)
+                        <option value="{{ $product->id }}" data-name="{{ $product->name }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('product_id')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="product_name" class="form-label">
                         Nama Produk <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="product_name" name="product_name" required
-                           placeholder="Contoh: HerbaBoost Immunity Sachet"
+                           placeholder="Otomatis terisi dari produk yang dipilih"
                            value="{{ old('product_name') }}"
                            class="form-input {{ $errors->has('product_name') ? 'border-red-400' : '' }}">
                     @error('product_name')
@@ -59,4 +76,14 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function syncProductName(select) {
+            const selected = select.options[select.selectedIndex];
+            const nameInput = document.getElementById('product_name');
+            if (nameInput && selected?.dataset?.name) {
+                nameInput.value = selected.dataset.name;
+            }
+        }
+    </script>
 </x-app-layout>

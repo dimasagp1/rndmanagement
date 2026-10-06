@@ -66,6 +66,7 @@ class TrialRmService
 
             $trial = TrialRm::create([
                 'code'             => $data['code'],
+                'product_id'       => $data['product_id'] ?? $formula->product_id,
                 'formula_id'       => $formula->id,
                 'sample_identity'  => $data['sample_identity'],
                 'trial_objective'  => $data['trial_objective'] ?? null,

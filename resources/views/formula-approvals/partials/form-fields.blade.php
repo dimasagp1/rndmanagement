@@ -56,17 +56,20 @@
 @else
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="md:col-span-2">
-        <label for="product_name" class="form-label">
+        <label for="product_id" class="form-label">
             Produk <span class="text-red-500">*</span>
         </label>
-        <input type="text" id="product_name" name="product_name" required
-               value="{{ old('product_name', $form?->product_name) }}"
-               placeholder="Ketik nama produk manual, contoh: Serum Vitamin C 30ml"
-               class="form-input {{ $errors->has('product_name') ? 'border-red-400' : '' }}">
-        @error('product_name')
+        <select id="product_id" name="product_id" required
+                class="form-input {{ $errors->has('product_id') ? 'border-red-400' : '' }}">
+            <option value="">— Pilih Produk —</option>
+            @foreach($products as $product)
+            <option value="{{ $product->id }}" {{ old('product_id', $form?->product_id) == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+            @endforeach
+        </select>
+        @error('product_id')
         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
         @enderror
-        <p class="mt-1 text-xs text-gray-400">Input manual — tidak lagi memilih dari master Produk.</p>
+        <p class="mt-1 text-xs text-gray-400">Pilih dari master Produk. Nama produk akan otomatis tersinkron.</p>
     </div>
 
     <div>

@@ -13,7 +13,10 @@
                 <div>
                     <h1 class="text-sm font-bold text-primary uppercase tracking-wider">RND Herbatech</h1>
                     <p class="text-sm text-gray-500">
-                        @if($isStaff) Item saya &amp; pipeline NPD
+                        @if($currentProduct)
+                            Filter: <span class="font-semibold text-ink">{{ $currentProduct->name }}</span>
+                            <span class="text-gray-400">({{ $currentProduct->category?->name ?? 'Tanpa kategori' }})</span>
+                        @elseif($isStaff) Item saya &amp; pipeline NPD
                         @elseif($isManager) Approval queue &amp; team overview
                         @elseif($isGM) Approval queue &amp; team overview
                         @else System overview
@@ -22,14 +25,15 @@
                 </div>
             </div>
             <div class="flex gap-2">
+                @if($currentProduct)
+                <a href="{{ route('timeline.index') }}" class="btn-ghost flex-shrink-0">
+                    Semua Produk
+                </a>
+                @endif
                 @if($isStaff)
                 <a href="{{ route('formulas.create') }}" class="btn-primary flex-shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Tambah Formula
-                </a>
-                <a href="{{ route('prfs.create') }}" class="btn-primary flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Tambah PRF
                 </a>
                 @endif
                 <a href="{{ route('timeline.index') }}" class="btn-ghost flex-shrink-0">
@@ -38,39 +42,77 @@
             </div>
         </header>
 
-        {{-- ─── Stat Cards ────────────────────────────────── --}}
-        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-            <a href="{{ route('prfs.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
-                <p class="text-[11px] text-gray-400 font-medium mb-1">PRF</p>
-                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['prf'] }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">Product Request</p>
-            </a>
-            <a href="{{ route('npd-proposals.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
-                <p class="text-[11px] text-gray-400 font-medium mb-1">NPD Proposal</p>
-                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['npd_proposal'] }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">Proposals</p>
-            </a>
-            <a href="{{ route('formulas.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
-                <p class="text-[11px] text-gray-400 font-medium mb-1">Formula Approved</p>
-                <p class="text-2xl font-heading font-bold text-emerald-600">{{ $moduleStats['formula_approved'] }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">disetujui</p>
-            </a>
-            <a href="{{ route('trial-rms.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
-                <p class="text-[11px] text-gray-400 font-medium mb-1">Trial RM</p>
-                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['trial_rm'] }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">uji bahan baku</p>
-            </a>
-            <a href="{{ route('trial-pms.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
-                <p class="text-[11px] text-gray-400 font-medium mb-1">Trial PM</p>
-                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['trial_pm'] }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">uji kemasan</p>
-            </a>
-            <a href="{{ route('sample-evaluations.index') }}" class="card card-body group cursor-pointer hover:-translate-y-0.5 transition-all py-4">
-                <p class="text-[11px] text-gray-400 font-medium mb-1">Sample Eval</p>
-                <p class="text-2xl font-heading font-bold text-ink">{{ $moduleStats['sample_evaluation'] }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">evaluasi sampel</p>
-            </a>
+        {{-- ─── Product Cards Grid ─────────────────────────── --}}
+        @if(!$currentProduct)
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xs font-bold text-primary uppercase tracking-wider">Produk</h2>
+                <span class="text-xs text-gray-400">{{ $productCards->count() }} produk</span>
+            </div>
+
+            @if($productCards->isEmpty())
+            <div class="card card-body text-center py-8 text-gray-400 text-sm">
+                Belum ada produk. Tambahkan produk di menu <a href="{{ route('products.index') }}" class="text-primary hover:underline">Kelola Nama Produk</a>.
+            </div>
+            @else
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                @foreach($productCards as $card)
+                <a href="{{ route('timeline.index', ['product' => $card['id']]) }}"
+                   class="card card-body group cursor-pointer hover:-translate-y-0.5 hover:shadow-md transition-all">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-ink truncate">{{ $card['name'] }}</p>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 mt-0.5">
+                                {{ $card['category'] }}
+                            </span>
+                        </div>
+                        <div class="text-right shrink-0 ml-2">
+                            <p class="text-lg font-heading font-bold {{ $card['pipelinePercent'] >= 80 ? 'text-emerald-600' : ($card['pipelinePercent'] >= 40 ? 'text-amber-600' : 'text-gray-500') }}">
+                                {{ $card['pipelinePercent'] }}%
+                            </p>
+                            <p class="text-[10px] text-gray-400">progres</p>
+                        </div>
+                    </div>
+
+                    {{-- Progress bar --}}
+                    <div class="w-full bg-gray-100 rounded-full h-1.5 mb-2">
+                        <div class="h-1.5 rounded-full transition-all duration-500 {{ $card['pipelinePercent'] >= 80 ? 'bg-emerald-400' : ($card['pipelinePercent'] >= 40 ? 'bg-amber-400' : 'bg-gray-300') }}"
+                             style="width: {{ $card['pipelinePercent'] }}%"></div>
+                    </div>
+
+                    {{-- Stats row --}}
+                    <div class="flex items-center gap-3 text-[11px] text-gray-500 mb-2">
+                        <span><span class="font-bold text-emerald-600">{{ $card['approved'] }}</span> approved</span>
+                        <span><span class="font-bold text-amber-600">{{ $card['pending'] }}</span> pending</span>
+                        <span><span class="font-bold text-gray-600">{{ $card['total'] }}</span> total</span>
+                    </div>
+
+                    {{-- Module chips --}}
+                    @if(count($card['chips']) > 0)
+                    <div class="flex flex-wrap gap-1">
+                        @foreach($card['chips'] as $chip)
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-{{ $chip['color'] }}-50 text-{{ $chip['color'] }}-700">
+                            {{ $chip['label'] }}: {{ $chip['count'] }}
+                        </span>
+                        @endforeach
+                    </div>
+                    @else
+                    <p class="text-[11px] text-gray-400">Belum ada data</p>
+                    @endif
+                </a>
+                @endforeach
+            </div>
+            @endif
+
+            {{-- Unlinked items notice --}}
+            @if($unlinkedCount > 0)
+            <div class="mt-4 card card-body py-3 flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span><strong>{{ $unlinkedCount }}</strong> item belum terhubung ke produk. Muncul di bagian "Semua" tapi tidak masuk kartu produk.</span>
+            </div>
+            @endif
         </section>
+        @endif
 
         {{-- ─── Summary Row ────────────────────────────────── --}}
         <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -114,6 +156,9 @@
                     <div class="card shadow-sm overflow-hidden">
                         <div class="p-4 border-b border-gray-200">
                             <form method="GET" action="{{ route('timeline.index') }}" class="flex gap-3 flex-wrap">
+                                @if($productId)
+                                <input type="hidden" name="product" value="{{ $productId }}">
+                                @endif
                                 <input type="text" name="search" value="{{ request('search') }}"
                                        placeholder="Cari nama, kode..."
                                        class="flex-1 min-w-40 rounded-lg border-gray-300 bg-gray-50 px-3 py-2 text-xs focus:border-primary focus:ring-primary">
@@ -130,7 +175,13 @@
                                     <option value="Approved" {{ request('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
                                     <option value="Rejected" {{ request('status') === 'Rejected' ? 'selected' : '' }}>Rejected</option>
                                 </select>
-                                @if(request()->hasAny(['search', 'module', 'status']))
+                                <select name="product" onchange="this.form.submit()" class="rounded-lg border-gray-300 bg-gray-50 px-3 py-2 text-xs w-40 focus:border-primary focus:ring-primary">
+                                    <option value="">Semua produk</option>
+                                    @foreach($products as $prod)
+                                    <option value="{{ $prod->id }}" {{ $productId == $prod->id ? 'selected' : '' }}>{{ $prod->name }}</option>
+                                    @endforeach
+                                </select>
+                                @if(request()->hasAny(['search', 'module', 'status', 'product']))
                                 <a href="{{ route('timeline.index') }}" class="text-xs text-gray-400 hover:text-gray-600 px-2 py-2">Clear</a>
                                 @endif
                             </form>
@@ -141,6 +192,7 @@
                                     <tr>
                                         <th class="px-4 py-3">Modul</th>
                                         <th class="px-4 py-3">Item</th>
+                                        <th class="px-4 py-3">Produk</th>
                                         <th class="px-4 py-3">Status</th>
                                         <th class="px-4 py-3">Owner</th>
                                         <th class="px-4 py-3 text-right">Updated</th>
@@ -164,6 +216,14 @@
                                             </a>
                                         </td>
                                         <td class="px-4 py-3">
+                                            @if($item['product_id'])
+                                            <a href="{{ route('timeline.index', ['product' => $item['product_id']]) }}"
+                                               class="text-xs text-primary hover:underline">{{ $item['product_name'] ?? '—' }}</a>
+                                            @else
+                                            <span class="text-[11px] text-gray-400">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
                                             @if($item['status'])
                                                 <x-status-badge :status="$item['status']" size="sm" />
                                             @else
@@ -183,7 +243,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
+                                        <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">
                                             Belum ada data. Mulai buat item pertama.
                                         </td>
                                     </tr>

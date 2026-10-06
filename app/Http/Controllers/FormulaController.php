@@ -89,7 +89,8 @@ class FormulaController extends Controller
 
         $validated = $request->validate([
             'code'              => 'required|string|max:255|unique:formulas,code',
-            'name'              => ['required', 'string', 'max:255', Rule::exists('products', 'name')],
+            'product_id'        => 'required|exists:products,id',
+            'name'              => 'nullable|string|max:255',
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
             'development_stage' => 'required_unless:formula_type,existing|nullable|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
@@ -113,6 +114,10 @@ class FormulaController extends Controller
             'materials.*.sachet_30' => 'nullable|numeric|min:0',
             'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
         ]);
+
+        // Sync name from product
+        $product = \App\Models\Product::find($validated['product_id']);
+        $validated['name'] = $product->name;
 
         if (($validated['formula_type'] ?? null) === 'existing') {
             $validated['development_stage'] = null;
@@ -168,11 +173,8 @@ class FormulaController extends Controller
 
         $validated = $request->validate([
             'code'              => 'required|string|max:255|unique:formulas,code,' . $formula->id,
-            'name'              => ['required', 'string', 'max:255', function ($attribute, $value, $fail) use ($formula) {
-                if ($value !== $formula->getOriginal('name') && !Product::where('name', $value)->exists()) {
-                    $fail('Nama produk harus dipilih dari daftar Nama Produk yang tersedia.');
-                }
-            }],
+            'product_id'        => 'required|exists:products,id',
+            'name'              => 'nullable|string|max:255',
             'formula_type'      => 'nullable|in:existing,new_product,substitution',
             'formula_date'      => 'nullable|date',
             'development_stage' => 'required_unless:formula_type,existing|nullable|in:Product Form,Laboratory Trial,Sensory Test,Plant Trial,Market Test',
@@ -196,6 +198,10 @@ class FormulaController extends Controller
             'materials.*.sachet_30' => 'nullable|numeric|min:0',
             'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
         ]);
+
+        // Sync name from product
+        $product = \App\Models\Product::find($validated['product_id']);
+        $validated['name'] = $product->name;
 
         if (($validated['formula_type'] ?? null) === 'existing') {
             $validated['development_stage'] = null;

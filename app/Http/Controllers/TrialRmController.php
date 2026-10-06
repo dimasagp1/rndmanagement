@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TrialRm;
 use App\Models\Formula;
+use App\Models\Product;
 use App\Services\TrialRmService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -81,6 +82,7 @@ class TrialRmController extends Controller
 
         $validated = $request->validate([
             'code'            => 'required|string|max:255|unique:trial_rms,code',
+            'product_id'      => 'nullable|exists:products,id',
             'formula_id'      => 'required|exists:formulas,id',
             'sample_identity' => 'required|string|max:255',
             'trial_objective' => 'nullable|string|max:10000',
@@ -95,6 +97,12 @@ class TrialRmController extends Controller
             'verifications.*.status'         => 'required|in:Pass,Fail,Warning',
             'verifications.*.notes'          => 'nullable|string|max:1000',
         ]);
+
+        // If product_id not set, inherit from formula
+        if (empty($validated['product_id'])) {
+            $formula = Formula::find($validated['formula_id']);
+            $validated['product_id'] = $formula?->product_id;
+        }
 
         try {
             $trial = $this->service->create($validated, auth()->id());

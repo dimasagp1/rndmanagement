@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Prf;
 use App\Models\PrfDocument;
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Services\PrfService;
 use Illuminate\Support\Facades\Gate;
@@ -45,8 +46,9 @@ class PrfController extends Controller
 
         $autoCode = $this->service->generateCode();
         $categories = $this->categories();
+        $products = Product::orderBy('name')->get(['id', 'name']);
 
-        return view('prfs.create', compact('autoCode', 'categories'));
+        return view('prfs.create', compact('autoCode', 'categories', 'products'));
     }
 
     public function store(Request $request)
@@ -55,6 +57,7 @@ class PrfController extends Controller
 
         $validated = $request->validate([
             'code'             => 'required|string|max:255|unique:prfs,code',
+            'product_id'       => 'nullable|exists:products,id',
             'product_concept'  => 'required|string|max:10000',
             'target_market'    => 'nullable|string|max:255',
             'product_category' => 'nullable|string|max:255',
@@ -63,6 +66,12 @@ class PrfController extends Controller
             'documents'        => ['nullable', 'array'],
             'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $prf = $this->service->create($validated, auth()->id());
 
@@ -86,8 +95,9 @@ class PrfController extends Controller
 
         $prf->load('documents');
         $categories = $this->categories();
+        $products = Product::orderBy('name')->get(['id', 'name']);
 
-        return view('prfs.edit', compact('prf', 'categories'));
+        return view('prfs.edit', compact('prf', 'categories', 'products'));
     }
 
     public function update(Request $request, Prf $prf)
@@ -96,6 +106,7 @@ class PrfController extends Controller
 
         $validated = $request->validate([
             'code'             => 'required|string|max:255|unique:prfs,code,' . $prf->id,
+            'product_id'       => 'nullable|exists:products,id',
             'product_concept'  => 'required|string|max:10000',
             'target_market'    => 'nullable|string|max:255',
             'product_category' => 'nullable|string|max:255',
@@ -104,6 +115,12 @@ class PrfController extends Controller
             'documents'        => ['nullable', 'array'],
             'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $prf = $this->service->update($prf, $validated);
         $this->storeDocuments($request, $prf);

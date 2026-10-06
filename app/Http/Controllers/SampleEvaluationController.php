@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NpdProposal;
+use App\Models\Product;
 use App\Models\SampleEvaluation;
 use App\Models\SampleEvaluationAttachment;
 use App\Models\SampleEvaluationParameter;
@@ -74,9 +75,10 @@ class SampleEvaluationController extends Controller
 
         $users = User::orderBy('name')->get();
         $npdProposals = NpdProposal::orderBy('code', 'desc')->get();
+        $products = Product::orderBy('name')->get(['id', 'name']);
         $autoSampleId = $this->generateSampleId();
 
-        return view('sample-evaluations.create', compact('users', 'npdProposals', 'autoSampleId'));
+        return view('sample-evaluations.create', compact('users', 'npdProposals', 'products', 'autoSampleId'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -89,9 +91,16 @@ class SampleEvaluationController extends Controller
         $validated = $request->validate([
             'sample_id'        => 'required|string|max:255|unique:sample_evaluations,sample_id',
             'npd_proposal_id'  => 'nullable|exists:npd_proposals,id',
+            'product_id'       => 'nullable|exists:products,id',
             'product_name'     => 'nullable|string|max:255',
             'project_owner_id' => 'required|exists:users,id',
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $productName = $validated['product_name'] ?? null;
 
@@ -108,6 +117,7 @@ class SampleEvaluationController extends Controller
 
         $evaluation = SampleEvaluation::create([
             'sample_id'        => $validated['sample_id'],
+            'product_id'       => $validated['product_id'] ?? null,
             'product_name'     => $productName,
             'npd_proposal_id'  => $validated['npd_proposal_id'] ?? null,
             'project_owner_id' => $validated['project_owner_id'],

@@ -39,6 +39,7 @@ class FormulaService
 
             $formula = Formula::create([
                 'code'               => $data['code'],
+                'product_id'         => $data['product_id'] ?? null,
                 'name'               => $data['name'],
                 'formula_type'       => $data['formula_type'] ?? null,
                 'formula_date'       => $data['formula_date'] ?? now()->format('Y-m-d'),
@@ -72,6 +73,7 @@ class FormulaService
             $this->validateComposition($data['materials'] ?? []);
 
             $updateData = [
+                'product_id'         => $data['product_id'] ?? $formula->product_id,
                 'name'               => $data['name'],
                 'formula_type'       => $data['formula_type'] ?? null,
                 'formula_date'       => $data['formula_date'] ?? null,

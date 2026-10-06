@@ -47,11 +47,26 @@
             </div>
 
             <div>
+                <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    Produk (Master) <span class="text-xs text-gray-400 font-normal">(Opsional)</span>
+                </label>
+                <select id="product_id" name="product_id"
+                        class="form-input @error('product_id') border-red-400 @enderror"
+                        onchange="syncProductName(this)">
+                    <option value="">— Pilih Produk Master —</option>
+                    @foreach($products as $product)
+                    <option value="{{ $product->id }}" data-name="{{ $product->name }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                    @endforeach
+                </select>
+                @error('product_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">
                     Product Name (Manual / Keterangan) <span class="text-xs text-gray-400 font-normal">(Opsional jika tidak memilih NPD Proposal)</span>
                 </label>
                 <input type="text" id="product_name" name="product_name" value="{{ old('product_name') }}"
-                       placeholder="Nama produk / sampel evaluasi..."
+                       placeholder="Otomatis terisi dari produk yang dipilih..."
                        class="form-input @error('product_name') border-red-400 @enderror">
                 @error('product_name') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
@@ -75,4 +90,14 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function syncProductName(select) {
+            const selected = select.options[select.selectedIndex];
+            const nameInput = document.getElementById('product_name');
+            if (nameInput && selected?.dataset?.name) {
+                nameInput.value = selected.dataset.name;
+            }
+        }
+    </script>
 </x-app-layout>

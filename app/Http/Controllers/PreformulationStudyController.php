@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\PreformulationStudy;
 use App\Models\PreformulationStudyDocument;
 use App\Models\NpdProposal;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\PreformulationStudyService;
 use Illuminate\Support\Facades\Gate;
@@ -55,9 +56,10 @@ class PreformulationStudyController extends Controller
 
         $autoCode = $this->service->generateCode();
         $npdProposals = NpdProposal::orderBy('code')->get(['id', 'code', 'product_name', 'product_concept']);
+        $products = Product::orderBy('name')->get(['id', 'name']);
         $teamMembers = User::role(['Staff R&D', 'Staff Packdev'])->orderBy('name')->get(['id', 'name']);
 
-        return view('preformulation-studies.create', compact('autoCode', 'npdProposals', 'teamMembers'));
+        return view('preformulation-studies.create', compact('autoCode', 'npdProposals', 'products', 'teamMembers'));
     }
 
     public function store(Request $request)
@@ -67,6 +69,7 @@ class PreformulationStudyController extends Controller
         $validated = $request->validate([
             'code'               => 'required|string|max:255|unique:preformulation_studies,code',
             'npd_proposal_id'    => 'nullable|exists:npd_proposals,id',
+            'product_id'         => 'nullable|exists:products,id',
             'product_name'       => 'required|string|max:255',
             'product_concept'    => 'nullable|string|max:10000',
             'project_owner'      => 'nullable|string|max:255',
@@ -77,6 +80,12 @@ class PreformulationStudyController extends Controller
             'documents'          => ['nullable', 'array'],
             'documents.*.file'   => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $study = $this->service->create($validated, auth()->id());
 
@@ -113,11 +122,13 @@ class PreformulationStudyController extends Controller
 
         $preformulationStudy->load('documents');
         $npdProposals = NpdProposal::orderBy('code')->get(['id', 'code', 'product_name', 'product_concept']);
+        $products = Product::orderBy('name')->get(['id', 'name']);
         $teamMembers = User::role(['Staff R&D', 'Staff Packdev'])->orderBy('name')->get(['id', 'name']);
 
         return view('preformulation-studies.edit', [
             'study'        => $preformulationStudy,
             'npdProposals' => $npdProposals,
+            'products'     => $products,
             'teamMembers'  => $teamMembers,
         ]);
     }

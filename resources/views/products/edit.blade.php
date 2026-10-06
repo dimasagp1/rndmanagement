@@ -33,6 +33,19 @@
                               placeholder="Keterangan singkat produk (opsional)">{{ old('description', $product->description) }}</textarea>
                     @error('description') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
+
+                <div>
+                    <label for="product_category_id" class="block text-sm font-medium text-gray-700 mb-1">Kategori Produk</label>
+                    <select id="product_category_id" name="product_category_id"
+                            class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
+                        <option value="">— Tanpa Kategori —</option>
+                        @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ old('product_category_id', $product->product_category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('product_category_id') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    <p class="text-xs text-gray-400 mt-1">Kategori digunakan untuk mengelompokkan produk di dashboard.</p>
+                </div>
             </div>
 
             <div class="flex justify-end gap-3">

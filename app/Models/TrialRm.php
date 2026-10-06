@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Models\Concerns\BelongsToProduct;
 
 class TrialRm extends Model
 {
-    use LogsActivity;
+    use LogsActivity, BelongsToProduct;
 
     protected $fillable = [
         'code',
+        'product_id',
         'formula_id',
         'sample_identity',
         'trial_objective',
@@ -42,6 +44,11 @@ class TrialRm extends Model
     public function formula()
     {
         return $this->belongsTo(Formula::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function creator()

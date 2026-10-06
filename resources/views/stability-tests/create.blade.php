@@ -20,6 +20,22 @@
 
             <div class="card card-body space-y-5">
                 <div>
+                    <label for="product_id" class="form-label">
+                        Produk
+                    </label>
+                    <select id="product_id" name="product_id"
+                            class="form-input {{ $errors->has('product_id') ? 'border-red-400' : '' }}">
+                        <option value="">— Tanpa Produk —</option>
+                        @foreach($products as $product)
+                        <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('product_id')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="title" class="form-label">
                         Judul Tes <span class="text-red-500">*</span>
                     </label>

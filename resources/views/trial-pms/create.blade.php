@@ -52,7 +52,19 @@
                 <h2 class="text-sm font-heading font-bold text-ink uppercase tracking-wider">A. Data Bahan Kemas (Packaging Development)</h2>
             </div>
             <div class="card-body grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
+                <div>
+                    <label class="form-label" for="product_id">Produk <span class="text-red-500">*</span></label>
+                    <select id="product_id" name="product_id" required
+                            class="form-input {{ $errors->has('product_id') ? 'border-red-400' : '' }}">
+                        <option value="">— Pilih Produk —</option>
+                        @foreach($products as $product)
+                        <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('product_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
                     <label class="form-label" for="proposal_number">No. Usulan (diisi oleh Sub-Bagian R&D)</label>
                     <input type="text" id="proposal_number" name="proposal_number"
                            value="{{ old('proposal_number') }}"

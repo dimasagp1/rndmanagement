@@ -24,6 +24,7 @@ class PreformulationStudyService
         return PreformulationStudy::create([
             'code'            => $this->generateCode(),
             'npd_proposal_id' => $data['npd_proposal_id'] ?? null,
+            'product_id'      => $data['product_id'] ?? null,
             'product_name'    => $data['product_name'],
             'product_concept' => $data['product_concept'] ?? null,
             'project_owner'   => $data['project_owner'] ?? null,
@@ -39,6 +40,7 @@ class PreformulationStudyService
     public function update(PreformulationStudy $study, array $data): void
     {
         $study->update([
+            'product_id'      => $data['product_id'] ?? $study->product_id,
             'product_name'    => $data['product_name'] ?? $study->product_name,
             'product_concept' => $data['product_concept'] ?? $study->product_concept,
             'project_owner'   => $data['project_owner'] ?? $study->project_owner,

@@ -31,6 +31,7 @@ class NpdProposalService
         return NpdProposal::create([
             'code'               => $data['code'],
             'prf_id'             => $data['prf_id'],
+            'product_id'         => $data['product_id'] ?? null,
             'product_name'       => $data['product_name'],
             'product_concept'    => $data['product_concept'],
             'target_cogs'        => $data['target_cogs'],
@@ -47,6 +48,7 @@ class NpdProposalService
     public function update(NpdProposal $proposal, array $data): NpdProposal
     {
         $proposal->update([
+            'product_id'         => $data['product_id'] ?? $proposal->product_id,
             'product_name'       => $data['product_name'],
             'product_concept'    => $data['product_concept'],
             'target_cogs'        => $data['target_cogs'],

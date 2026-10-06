@@ -9,7 +9,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::with('creator')
+        $products = Product::with(['creator', 'category'])
             ->when($request->get('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -25,14 +25,17 @@ class ProductController extends Controller
 
     public function create()
     {
-        return view('products.create');
+        $categories = \App\Models\ProductCategory::orderBy('name')->get();
+
+        return view('products.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255|unique:products,name',
-            'description' => 'nullable|string|max:1000',
+            'name'                => 'required|string|max:255|unique:products,name',
+            'description'         => 'nullable|string|max:1000',
+            'product_category_id' => 'nullable|exists:product_categories,id',
         ]);
 
         Product::create($validated + ['created_by' => auth()->id()]);
@@ -44,14 +47,17 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return view('products.edit', compact('product'));
+        $categories = \App\Models\ProductCategory::orderBy('name')->get();
+
+        return view('products.edit', compact('product', 'categories'));
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255|unique:products,name,' . $product->id,
-            'description' => 'nullable|string|max:1000',
+            'name'                => 'required|string|max:255|unique:products,name,' . $product->id,
+            'description'         => 'nullable|string|max:1000',
+            'product_category_id' => 'nullable|exists:product_categories,id',
         ]);
 
         $product->update($validated);

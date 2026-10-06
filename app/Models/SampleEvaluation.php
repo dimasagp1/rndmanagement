@@ -5,15 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Models\Concerns\BelongsToProduct;
 
 class SampleEvaluation extends Model
 {
-    use LogsActivity;
+    use LogsActivity, BelongsToProduct;
 
     public const PARAMETERS = ['Rasa', 'Warna', 'Aroma', 'Tekstur', 'After Taste'];
 
     protected $fillable = [
         'sample_id',
+        'product_id',
         'product_name',
         'npd_proposal_id',
         'project_owner_id',
@@ -31,6 +33,11 @@ class SampleEvaluation extends Model
     public function npdProposal()
     {
         return $this->belongsTo(NpdProposal::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function projectOwner()

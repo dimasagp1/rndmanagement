@@ -47,13 +47,25 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
+                        <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Produk (Master)</label>
+                        <select id="product_id" name="product_id"
+                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
+                                onchange="syncProductFromMaster(this)">
+                            <option value="">— Pilih Produk Master —</option>
+                            @foreach($products as $product)
+                            <option value="{{ $product->id }}" data-name="{{ $product->name }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Pilih dari master Produk agar terhubung ke dashboard.</p>
+                        @error('product_id') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
                         <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
                         <input type="text" id="product_name" name="product_name" x-model="productName" value="{{ old('product_name') }}"
                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
                         @error('product_name') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <div>
-                        <label for="project_owner" class="block text-sm font-medium text-gray-700 mb-1">Project Owner</label>
+                </div>
                         <select id="project_owner" name="project_owner"
                                 class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
                             <option value="">— Pilih Project Owner —</option>

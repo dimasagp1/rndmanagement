@@ -8,15 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use App\Models\NpdProposal;
+use App\Models\Concerns\BelongsToProduct;
 
 class Prf extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToProduct;
 
     protected $table = 'prfs';
 
     protected $fillable = [
         'code',
+        'product_id',
         'product_concept',
         'target_market',
         'product_category',
@@ -35,6 +37,11 @@ class Prf extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function documents(): HasMany

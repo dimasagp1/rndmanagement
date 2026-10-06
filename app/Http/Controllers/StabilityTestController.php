@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StabilityTest;
 use App\Models\StabilityTestAttachment;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +42,9 @@ class StabilityTestController extends Controller
     {
         abort_unless(auth()->user()->can('stability_test.edit'), 403);
 
-        return view('stability-tests.create');
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('stability-tests.create', compact('products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -52,14 +55,16 @@ class StabilityTestController extends Controller
         abort_unless(auth()->user()->can('stability_test.edit'), 403);
 
         $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'files'   => 'nullable|array',
-            'files.*' => 'file|max:20480|mimes:pdf,doc,docx,jpg,jpeg,png,webp,xls,xlsx',
+            'product_id' => 'nullable|exists:products,id',
+            'title'      => 'required|string|max:255',
+            'files'      => 'nullable|array',
+            'files.*'    => 'file|max:20480|mimes:pdf,doc,docx,jpg,jpeg,png,webp,xls,xlsx',
         ]);
 
         $test = StabilityTest::create([
-            'title'      => $validated['title'],
-            'created_by' => auth()->id(),
+            'product_id'  => $validated['product_id'] ?? null,
+            'title'       => $validated['title'],
+            'created_by'  => auth()->id(),
         ]);
 
         foreach ($request->file('files', []) as $file) {
@@ -111,7 +116,9 @@ class StabilityTestController extends Controller
     {
         Gate::authorize('edit', $stabilityTest);
 
-        return view('stability-tests.edit', compact('stabilityTest'));
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('stability-tests.edit', compact('stabilityTest', 'products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -122,7 +129,8 @@ class StabilityTestController extends Controller
         Gate::authorize('update', $stabilityTest);
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'product_id' => 'nullable|exists:products,id',
+            'title'      => 'required|string|max:255',
         ]);
 
         $stabilityTest->update($validated);

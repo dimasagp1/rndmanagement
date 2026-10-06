@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Models\Concerns\BelongsToProduct;
 
 class TrialPm extends Model
 {
-    use LogsActivity;
+    use LogsActivity, BelongsToProduct;
 
     protected $fillable = [
         'code',
+        'product_id',
         'proposal_number',
         'packaging_material',
         'supplier',
@@ -56,6 +58,11 @@ class TrialPm extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function operationalManager()

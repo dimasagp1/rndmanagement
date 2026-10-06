@@ -53,14 +53,15 @@
                                        class="form-input @error('code') border-red-400 @enderror" required>
                             </div>
                             <div>
-                                <label class="form-label" for="name">Product Name <span class="text-red-500">*</span></label>
-                                <select id="name" name="name" required
-                                        class="form-input @error('name') border-red-400 @enderror">
+                                <label class="form-label" for="product_id">Product Name <span class="text-red-500">*</span></label>
+                                <select id="product_id" name="product_id" required
+                                        class="form-input @error('product_id') border-red-400 @enderror">
                                     <option value="">— Pilih Produk —</option>
                                     @foreach($products as $product)
-                                    <option value="{{ $product->name }}" {{ old('name') === $product->name ? 'selected' : '' }}>{{ $product->name }}</option>
+                                    <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
                                     @endforeach
                                 </select>
+                                @error('product_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <label class="form-label" for="formula_date">Date</label>

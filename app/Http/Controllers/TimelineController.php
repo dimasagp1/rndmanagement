@@ -7,6 +7,7 @@ use App\Models\FormulaApprovalForm;
 use App\Models\NpdProposal;
 use App\Models\PreformulationStudy;
 use App\Models\Prf;
+use App\Models\Product;
 use App\Models\Qbd;
 use App\Models\SampleEvaluation;
 use App\Models\StabilityTest;
@@ -16,6 +17,7 @@ use App\Models\TrialPm;
 use App\Models\TrialRm;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 
 class TimelineController extends Controller
@@ -35,6 +37,22 @@ class TimelineController extends Controller
         'nie-approval'            => ['label' => 'NIE Approved',     'group' => 'Regulatory','color' => 'rose',    'route' => 'nie-approvals.show'],
     ];
 
+    // Map module_key => [model_class, table, status_field, name_field, code_field]
+    private const MODULE_MAP = [
+        'prf'                  => [Prf::class,                  'prfs',                    null,               'product_name',     'code'],
+        'npd-proposal'         => [NpdProposal::class,         'npd_proposals',           'project_status',   'product_name',     'code'],
+        'qbd'                  => [Qbd::class,                  'qbds',                    null,               'product_name',     null],
+        'formula'              => [Formula::class,              'formulas',                'approval_status',  'name',             'code'],
+        'trial-rm'             => [TrialRm::class,             'trial_rms',               'approval_status',  'sample_identity',  'code'],
+        'trial-pm'             => [TrialPm::class,             'trial_pms',               'approval_status',  'packaging_material','code'],
+        'preformulation-study' => [PreformulationStudy::class, 'preformulation_studies',  'approval_status',  'product_name',     'code'],
+        'sample-evaluation'    => [SampleEvaluation::class,    'sample_evaluations',      'status',           'product_name',     'sample_id'],
+        'formula-approval'     => [FormulaApprovalForm::class,  'formula_approval_forms',  'approval_status',  'product_name',     null],
+        'stability-test'       => [StabilityTest::class,       'stability_tests',         null,               'title',            null],
+        'technology-transfer'  => [TechnologyTransfer::class,  'technology_transfers',    null,               'title',            null],
+        'nie-approval'         => [NieApproval::class,         'nie_approvals',           null,               'product_name',     null],
+    ];
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -43,10 +61,16 @@ class TimelineController extends Controller
         $isGM = $user->hasRole('General Manager');
         $staffScope = $isStaff ? $user->id : null;
 
-        // ── 1. Collect items from all 13 modules ──────────────
-        $items = $this->collectAllItems(null);
+        $productId = $request->get('product') ? (int) $request->get('product') : null;
 
-        // ── 2. Filtering ──────────────────────────────────────
+        // ── 1. Product cards grid data ─────────────────────────
+        $products = Product::with('category')->get();
+        $productCards = $this->buildProductCards($products);
+
+        // ── 2. Collect items (filtered by product if set) ──────
+        $items = $this->collectAllItems(null, $productId);
+
+        // ── 3. Filtering ──────────────────────────────────────
         $moduleFilter = $request->get('module');
         $statusFilter = $request->get('status');
         $search = $request->get('search');
@@ -70,150 +94,195 @@ class TimelineController extends Controller
         $items = $items->values();
         $totalItems = $items->count();
 
-        // ── 3. Summary stats ──────────────────────────────────
+        // ── 4. Summary stats ──────────────────────────────────
         $approved = $items->whereIn('status', ['Approved', 'Completed', 'Completed by GM', 'Lulus'])->count();
         $pending = $items->filter(fn ($i) => str_starts_with(strtolower($i['status'] ?? ''), 'pending'))->count();
         $rejected = $items->where('status', 'Rejected')->count();
         $draft = $items->where('status', 'Draft')->count();
         $pipelinePercent = $totalItems > 0 ? round($approved / $totalItems * 100) : 0;
 
-        // ── 4. Module stat cards ──────────────────────────────
+        // ── 5. Module stat cards (global) ─────────────────────
         $moduleStats = $this->getModuleStats(null);
 
-        // ── 5. Pending action items (role-based) ──────────────
-        $pendingItems = $this->getPendingItems($user, $isStaff, $isManager, $isGM, $staffScope);
+        // ── 6. Pending action items (role-based + product) ────
+        $pendingItems = $this->getPendingItems($user, $isStaff, $isManager, $isGM, $staffScope, $productId);
 
-        // ── 6. Activity feed ──────────────────────────────────
+        // ── 7. Activity feed ──────────────────────────────────
         $activities = $this->getActivityFeed($user, $isStaff);
 
-        // ── 7. Workload (manager/GM only) ─────────────────────
+        // ── 8. Workload (manager/GM only) ─────────────────────
         $workload = collect();
         if (!$isStaff) {
             $workload = $this->getWorkload();
         }
 
-        // ── 8. Owner options for filter ───────────────────────
+        // ── 9. Owner options for filter ───────────────────────
         $ownerOptions = User::whereHas('formulas')->orderBy('name')->get(['id', 'name']);
+
+        // ── 10. Current product (for header display) ──────────
+        $currentProduct = $productId ? Product::with('category')->find($productId) : null;
+
+        // ── 11. Unlinked items count ──────────────────────────
+        $unlinkedCount = $this->getUnlinkedCount();
 
         return view('timeline.index', compact(
             'items', 'totalItems', 'approved', 'pending', 'rejected', 'draft',
             'pipelinePercent', 'moduleStats', 'pendingItems', 'activities',
-            'workload', 'ownerOptions', 'isStaff', 'isManager', 'isGM'
+            'workload', 'ownerOptions', 'isStaff', 'isManager', 'isGM',
+            'productCards', 'products', 'productId', 'currentProduct', 'unlinkedCount'
         ));
     }
 
-    // ── Collect items from all 13 modules ──────────────────────
-    private function collectAllItems(?int $userId): \Illuminate\Support\Collection
+    // ── Build product cards for grid ────────────────────────────
+    private function buildProductCards($products): \Illuminate\Support\Collection
+    {
+        // Aggregate per module group by product_id using efficient queries
+        $aggregates = $this->getProductAggregates();
+
+        return $products->map(function ($product) use ($aggregates) {
+            $pid = $product->id;
+            $agg = $aggregates[$pid] ?? ['total' => 0, 'approved' => 0, 'pending' => 0, 'rejected' => 0, 'draft' => 0];
+
+            $pipelinePercent = $agg['total'] > 0 ? round($agg['approved'] / $agg['total'] * 100) : 0;
+
+            // Module chips (compact counts)
+            $chips = [];
+            foreach (self::MODULE_META as $key => $meta) {
+                $count = $aggregates[$pid]['modules'][$key] ?? 0;
+                if ($count > 0) {
+                    $chips[] = ['key' => $key, 'label' => $meta['label'], 'count' => $count, 'color' => $meta['color']];
+                }
+            }
+
+            return [
+                'id'              => $product->id,
+                'name'            => $product->name,
+                'category'        => $product->category?->name ?? 'Tanpa kategori',
+                'total'           => $agg['total'],
+                'approved'        => $agg['approved'],
+                'pending'         => $agg['pending'],
+                'pipelinePercent' => $pipelinePercent,
+                'chips'           => $chips,
+            ];
+        });
+    }
+
+    // ── Aggregate counts per product (one query per module) ─────
+    private function getProductAggregates(): array
+    {
+        $aggregates = [];
+
+        foreach (self::MODULE_MAP as $key => [$class, $table, $statusField]) {
+            $query = (new $class)->newQuery()->selectRaw('product_id, COUNT(*) as total');
+
+            if ($statusField) {
+                [$approvedStatuses, $pendingStatuses, $rejectedStatuses] = match ($key) {
+                    'npd-proposal' => [
+                        ['Completed'],
+                        ['On Track', 'In Progress', 'On Hold', 'Delayed'],
+                        [],
+                    ],
+                    'formula', 'trial-rm', 'preformulation-study' => [
+                        ['Approved', 'Completed'],
+                        ['Pending Tahap 1', 'Pending Tahap 2'],
+                        ['Rejected'],
+                    ],
+                    'trial-pm' => [
+                        ['Approved'],
+                        ['Pending Review', 'Pending Approval'],
+                        ['Rejected'],
+                    ],
+                    'sample-evaluation' => [
+                        ['Approved'],
+                        ['In Progress'],
+                        ['Reform'],
+                    ],
+                    'formula-approval' => [
+                        ['Approved'],
+                        ['Pending', 'Approval by OM'],
+                        ['Rejected'],
+                    ],
+                    default => [[], [], []],
+                };
+
+                if ($approvedStatuses) {
+                    $query->selectRaw("SUM(CASE WHEN {$statusField} IN ('" . implode("','", $approvedStatuses) . "') THEN 1 ELSE 0 END) as is_approved");
+                }
+                if ($pendingStatuses) {
+                    $query->selectRaw("SUM(CASE WHEN {$statusField} IN ('" . implode("','", $pendingStatuses) . "') THEN 1 ELSE 0 END) as is_pending");
+                }
+                if ($rejectedStatuses) {
+                    $query->selectRaw("SUM(CASE WHEN {$statusField} IN ('" . implode("','", $rejectedStatuses) . "') THEN 1 ELSE 0 END) as is_rejected");
+                }
+            }
+
+            $query->groupBy('product_id');
+
+            foreach ($query->get() as $row) {
+                $pid = $row->product_id;
+                if ($pid === null) continue;
+
+                $aggregates[$pid] ??= ['total' => 0, 'approved' => 0, 'pending' => 0, 'rejected' => 0, 'draft' => 0, 'modules' => []];
+                $aggregates[$pid]['total'] += $row->total;
+                $aggregates[$pid]['approved'] += (int) ($row->is_approved ?? 0);
+                $aggregates[$pid]['pending'] += (int) ($row->is_pending ?? 0);
+                $aggregates[$pid]['rejected'] += (int) ($row->is_rejected ?? 0);
+                $aggregates[$pid]['modules'][$key] = $row->total;
+            }
+        }
+
+        return $aggregates;
+    }
+
+    // ── Count items without product_id ──────────────────────────
+    private function getUnlinkedCount(): int
+    {
+        $count = 0;
+        foreach (self::MODULE_MAP as [$class, $table]) {
+            $count += (new $class)->newQuery()->whereNull('product_id')->count();
+        }
+        return $count;
+    }
+
+    // ── Collect items from all modules ──────────────────────────
+    private function collectAllItems(?int $userId, ?int $productId = null): \Illuminate\Support\Collection
     {
         $items = collect();
         $userField = 'created_by';
 
-        // Helper: map a model to uniform array
         $mapItem = function ($model, $moduleKey, $nameField, $statusField = null, $codeField = 'code', $routeParam = null) use ($userField) {
             $meta = self::MODULE_META[$moduleKey];
             return [
-                'module_key' => $moduleKey,
-                'module'     => $meta['label'],
-                'group'      => $meta['group'],
-                'color'      => $meta['color'],
-                'name'       => $model->{$nameField} ?? $model->title ?? '—',
-                'code'       => $model->{$codeField} ?? null,
-                'status'     => $statusField ? ($model->{$statusField} ?? null) : null,
-                'owner'      => $model->creator?->name ?? '—',
-                'owner_id'   => $model->{$userField},
-                'updated_at' => $model->updated_at,
-                'route'      => route($meta['route'], $routeParam ?? $model),
+                'module_key'  => $moduleKey,
+                'module'      => $meta['label'],
+                'group'       => $meta['group'],
+                'color'       => $meta['color'],
+                'name'        => $model->{$nameField} ?? $model->title ?? '—',
+                'code'        => $model->{$codeField} ?? null,
+                'status'      => $statusField ? ($model->{$statusField} ?? null) : null,
+                'owner'       => $model->creator?->name ?? '—',
+                'owner_id'    => $model->{$userField},
+                'product_id'  => $model->product_id ?? null,
+                'product_name'=> $model->product?->name ?? null,
+                'updated_at'  => $model->updated_at,
+                'route'       => route($meta['route'], $routeParam ?? $model),
             ];
         };
 
-        // 1. PRF
-        $q = Prf::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'prf', 'product_name', null, 'code'));
-        }
+        foreach (self::MODULE_MAP as $key => [$class, $table, $statusField, $nameField, $codeField]) {
+            $q = $class::query()->with('creator')->with('product')->latest();
+            if ($userId) $q->where($userField, $userId);
+            if ($productId) $q->where('product_id', $productId);
 
-        // 2. NPD Proposal
-        $q = NpdProposal::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'npd-proposal', 'product_name', 'project_status', 'code'));
-        }
-
-        // 3. QbD
-        $q = Qbd::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'qbd', 'product_name', null, null));
-        }
-
-        // 4. Formula
-        $q = Formula::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'formula', 'name', 'approval_status', 'code'));
-        }
-
-        // 5. Trial RM
-        $q = TrialRm::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'trial-rm', 'sample_identity', 'approval_status', 'code'));
-        }
-
-        // 6. Trial PM
-        $q = TrialPm::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'trial-pm', 'packaging_material', 'approval_status', 'code'));
-        }
-
-        // 7. Preformulation Study
-        $q = PreformulationStudy::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'preformulation-study', 'product_name', 'approval_status', 'code'));
-        }
-
-        // 8. Sample Evaluation
-        $q = SampleEvaluation::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'sample-evaluation', 'product_name', 'status', 'sample_id'));
-        }
-
-        // 9. Formula Approval (both sources)
-        $q = FormulaApprovalForm::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'formula-approval', 'product_name', 'approval_status', null));
-        }
-
-        // 10. Stability Test
-        $q = StabilityTest::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'stability-test', 'title', null, null));
-        }
-
-        // 12. Technology Transfer
-        $q = TechnologyTransfer::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'technology-transfer', 'title', null, null));
-        }
-
-        // 13. NIE Approval
-        $q = NieApproval::with('creator')->latest();
-        if ($userId) $q->where($userField, $userId);
-        foreach ($q->get() as $m) {
-            $items->push($mapItem($m, 'nie-approval', 'product_name', null, null));
+            foreach ($q->get() as $m) {
+                $items->push($mapItem($m, $key, $nameField, $statusField, $codeField));
+            }
         }
 
         return $items->sortByDesc('updated_at')->values();
     }
 
-    // ── Module stat cards ──────────────────────────────────────
+    // ── Module stat cards (global) ──────────────────────────────
     private function getModuleStats(?int $userId): array
     {
         $scope = fn ($q) => $userId ? $q->where('created_by', $userId) : $q;
@@ -228,15 +297,18 @@ class TimelineController extends Controller
         ];
     }
 
-    // ── Pending action items (role-based) ──────────────────────
-    private function getPendingItems($user, bool $isStaff, bool $isManager, bool $isGM, ?int $userId): \Illuminate\Support\Collection
+    // ── Pending action items (role-based + product filter) ──────
+    private function getPendingItems($user, bool $isStaff, bool $isManager, bool $isGM, ?int $userId, ?int $productId = null): \Illuminate\Support\Collection
     {
         $pending = collect();
 
+        $scopeProduct = function ($q) use ($productId) {
+            return $productId ? $q->where('product_id', $productId) : $q;
+        };
+
         if ($isStaff) {
-            // Staff: items they created that need submit/reformulate
-            $draftFormulas = Formula::where('created_by', $userId)
-                ->whereIn('approval_status', ['Draft', 'Rejected'])->latest()->get();
+            $draftFormulas = $scopeProduct(Formula::where('created_by', $userId)
+                ->whereIn('approval_status', ['Draft', 'Rejected']))->latest()->get();
             foreach ($draftFormulas as $f) {
                 $pending->push([
                     'module' => 'Formula', 'name' => $f->name, 'code' => $f->code,
@@ -245,8 +317,8 @@ class TimelineController extends Controller
                 ]);
             }
 
-            $draftTrials = TrialRm::where('created_by', $userId)
-                ->whereIn('approval_status', ['Draft', 'Rejected'])->latest()->get();
+            $draftTrials = $scopeProduct(TrialRm::where('created_by', $userId)
+                ->whereIn('approval_status', ['Draft', 'Rejected']))->latest()->get();
             foreach ($draftTrials as $t) {
                 $pending->push([
                     'module' => 'Trial RM', 'name' => $t->sample_identity, 'code' => $t->code,
@@ -255,8 +327,8 @@ class TimelineController extends Controller
                 ]);
             }
 
-            $draftPreforms = PreformulationStudy::where('created_by', $userId)
-                ->whereIn('approval_status', ['Draft', 'Rejected'])->latest()->get();
+            $draftPreforms = $scopeProduct(PreformulationStudy::where('created_by', $userId)
+                ->whereIn('approval_status', ['Draft', 'Rejected']))->latest()->get();
             foreach ($draftPreforms as $p) {
                 $pending->push([
                     'module' => 'Preformulasi', 'name' => $p->product_name, 'code' => $p->code,
@@ -265,8 +337,7 @@ class TimelineController extends Controller
                 ]);
             }
 
-            // Staff: Trial PM needing department approval
-            $pendingPm = TrialPm::where('approval_status', 'Pending Review')->latest()->get();
+            $pendingPm = $scopeProduct(TrialPm::where('approval_status', 'Pending Review'))->latest()->get();
             foreach ($pendingPm as $tp) {
                 $pending->push([
                     'module' => 'Trial PM', 'name' => $tp->packaging_material, 'code' => $tp->code,
@@ -277,8 +348,7 @@ class TimelineController extends Controller
         }
 
         if ($isManager || $isGM) {
-            // Manager: Pending Tahap 1
-            $pendingT1Formula = Formula::where('approval_status', 'Pending Tahap 1')->latest()->get();
+            $pendingT1Formula = $scopeProduct(Formula::where('approval_status', 'Pending Tahap 1'))->latest()->get();
             foreach ($pendingT1Formula as $f) {
                 $pending->push([
                     'module' => 'Formula', 'name' => $f->name, 'code' => $f->code,
@@ -287,7 +357,7 @@ class TimelineController extends Controller
                 ]);
             }
 
-            $pendingT1Trial = TrialRm::where('approval_status', 'Pending Tahap 1')->latest()->get();
+            $pendingT1Trial = $scopeProduct(TrialRm::where('approval_status', 'Pending Tahap 1'))->latest()->get();
             foreach ($pendingT1Trial as $t) {
                 $pending->push([
                     'module' => 'Trial RM', 'name' => $t->sample_identity, 'code' => $t->code,
@@ -296,7 +366,7 @@ class TimelineController extends Controller
                 ]);
             }
 
-            $pendingT1Preform = PreformulationStudy::where('approval_status', 'Pending Tahap 1')->latest()->get();
+            $pendingT1Preform = $scopeProduct(PreformulationStudy::where('approval_status', 'Pending Tahap 1'))->latest()->get();
             foreach ($pendingT1Preform as $p) {
                 $pending->push([
                     'module' => 'Preformulasi', 'name' => $p->product_name, 'code' => $p->code,
@@ -307,8 +377,7 @@ class TimelineController extends Controller
         }
 
         if ($isGM) {
-            // GM: Pending Tahap 2
-            $pendingT2Formula = Formula::where('approval_status', 'Pending Tahap 2')->latest()->get();
+            $pendingT2Formula = $scopeProduct(Formula::where('approval_status', 'Pending Tahap 2'))->latest()->get();
             foreach ($pendingT2Formula as $f) {
                 $pending->push([
                     'module' => 'Formula', 'name' => $f->name, 'code' => $f->code,
@@ -317,7 +386,7 @@ class TimelineController extends Controller
                 ]);
             }
 
-            $pendingT2Trial = TrialRm::where('approval_status', 'Pending Tahap 2')->latest()->get();
+            $pendingT2Trial = $scopeProduct(TrialRm::where('approval_status', 'Pending Tahap 2'))->latest()->get();
             foreach ($pendingT2Trial as $t) {
                 $pending->push([
                     'module' => 'Trial RM', 'name' => $t->sample_identity, 'code' => $t->code,
@@ -326,7 +395,7 @@ class TimelineController extends Controller
                 ]);
             }
 
-            $pendingT2Preform = PreformulationStudy::where('approval_status', 'Pending Tahap 2')->latest()->get();
+            $pendingT2Preform = $scopeProduct(PreformulationStudy::where('approval_status', 'Pending Tahap 2'))->latest()->get();
             foreach ($pendingT2Preform as $p) {
                 $pending->push([
                     'module' => 'Preformulasi', 'name' => $p->product_name, 'code' => $p->code,
@@ -335,8 +404,7 @@ class TimelineController extends Controller
                 ]);
             }
 
-            // GM: Pending approval forms
-            $pendingApproval = FormulaApprovalForm::where('approval_status', 'Pending')->latest()->get();
+            $pendingApproval = $scopeProduct(FormulaApprovalForm::where('approval_status', 'Pending'))->latest()->get();
             foreach ($pendingApproval as $a) {
                 $pending->push([
                     'module' => 'Formula Approval', 'name' => $a->product_name, 'code' => $a->code,
@@ -349,7 +417,7 @@ class TimelineController extends Controller
         return $pending->sortByDesc('status')->values();
     }
 
-    // ── Activity feed ──────────────────────────────────────────
+    // ── Activity feed ───────────────────────────────────────────
     private function getActivityFeed($user, bool $isStaff): \Illuminate\Support\Collection
     {
         try {
@@ -363,7 +431,7 @@ class TimelineController extends Controller
         }
     }
 
-    // ── Workload by owner ──────────────────────────────────────
+    // ── Workload by owner ───────────────────────────────────────
     private function getWorkload(): \Illuminate\Support\Collection
     {
         $models = [

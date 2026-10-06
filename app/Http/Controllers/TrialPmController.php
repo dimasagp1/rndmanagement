@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TrialPm;
+use App\Models\Product;
 use App\Services\TrialPmService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -54,7 +55,9 @@ class TrialPmController extends Controller
     {
         Gate::authorize('create', TrialPm::class);
 
-        return view('trial-pms.create');
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('trial-pms.create', compact('products'));
     }
 
     // ──────────────────────────────────────────────────────────────

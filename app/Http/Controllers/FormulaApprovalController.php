@@ -90,7 +90,7 @@ class FormulaApprovalController extends Controller
 
         return view('formula-approvals.create', [
             'categories' => ProductCategory::orderBy('name')->get(),
-            'products'   => collect(), // kept for backward compat, not used (manual input)
+            'products'   => Product::orderBy('name')->get(['id', 'name']),
             'formulas'   => Formula::where('approval_status', 'Approved')->orderByDesc('created_at')->limit(100)->get(),
             'type'       => $type,
         ]);
@@ -155,6 +155,14 @@ class FormulaApprovalController extends Controller
             'created_by'            => auth()->id(),
         ]);
 
+        // Sync product_name from product_id for Formula type
+        if ($type !== 'Design' && !empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            if ($product) {
+                $form->update(['product_name' => $product->name]);
+            }
+        }
+
         // Initial revision record
         $form->revisions()->create([
             'revision'           => 0,
@@ -211,7 +219,7 @@ class FormulaApprovalController extends Controller
         return view('formula-approvals.edit', [
             'formApproval' => $formApproval,
             'categories'   => ProductCategory::orderBy('name')->get(),
-            'products'     => collect(),
+            'products'     => Product::orderBy('name')->get(['id', 'name']),
             'type'         => $formApproval->type,
         ]);
     }
@@ -254,6 +262,14 @@ class FormulaApprovalController extends Controller
 
         $updateData = collect($validated)->except(['files', 'files.*'])->toArray();
         $formApproval->update($updateData);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id']) && !$isDesign) {
+            $product = Product::find($validated['product_id']);
+            if ($product) {
+                $formApproval->update(['product_name' => $product->name]);
+            }
+        }
 
         if (!$isDesign && $request->hasFile('files')) {
             foreach ($request->file('files', []) as $file) {

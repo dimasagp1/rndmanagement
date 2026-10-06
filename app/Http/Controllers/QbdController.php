@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Qbd;
 use App\Models\QbdAttachment;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +42,9 @@ class QbdController extends Controller
     {
         abort_unless(auth()->user()->can('qbd.edit'), 403);
 
-        return view('qbds.create');
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('qbds.create', compact('products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -52,12 +55,20 @@ class QbdController extends Controller
         abort_unless(auth()->user()->can('qbd.edit'), 403);
 
         $validated = $request->validate([
+            'product_id'   => 'nullable|exists:products,id',
             'product_name' => 'required|string|max:255',
             'files'        => 'nullable|array',
             'files.*'      => 'file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp',
         ]);
 
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
+
         $qbd = Qbd::create([
+            'product_id'   => $validated['product_id'] ?? null,
             'product_name' => $validated['product_name'],
             'created_by'   => auth()->id(),
         ]);
@@ -82,7 +93,9 @@ class QbdController extends Controller
     {
         Gate::authorize('edit', $qbd);
 
-        return view('qbds.edit', compact('qbd'));
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('qbds.edit', compact('qbd', 'products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -93,8 +106,15 @@ class QbdController extends Controller
         Gate::authorize('update', $qbd);
 
         $validated = $request->validate([
+            'product_id'   => 'nullable|exists:products,id',
             'product_name' => 'required|string|max:255',
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $qbd->update($validated);
 

@@ -57,6 +57,7 @@ class TrialPmService
 
             $trial = TrialPm::create([
                 'code'                     => $this->generateCode($data['proposal_number'] ?? null),
+                'product_id'               => $data['product_id'] ?? null,
                 'proposal_number'          => $data['proposal_number'] ?? null,
                 'packaging_material'       => $data['packaging_material'],
                 'supplier'                 => $data['supplier'] ?? '',

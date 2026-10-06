@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\NpdProposal;
 use App\Models\NpdProposalDocument;
 use App\Models\Prf;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\NpdProposalService;
 use Illuminate\Support\Facades\Gate;
@@ -68,9 +69,10 @@ class NpdProposalController extends Controller
         $autoCode = $this->service->generateCode();
         $prfs = Prf::orderBy('code')
             ->get(['id', 'code', 'product_name', 'product_concept']);
+        $products = Product::orderBy('name')->get(['id', 'name']);
         $teamMembers = $this->teamMembers();
 
-        return view('npd-proposals.create', compact('autoCode', 'prfs', 'teamMembers'));
+        return view('npd-proposals.create', compact('autoCode', 'prfs', 'products', 'teamMembers'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -83,6 +85,7 @@ class NpdProposalController extends Controller
         $validated = $request->validate([
             'code'               => 'required|string|max:255|unique:npd_proposals,code',
             'prf_id'             => 'required|exists:prfs,id',
+            'product_id'         => 'nullable|exists:products,id',
             'product_name'       => 'required|string|max:255',
             'product_concept'    => 'required|string|max:10000',
             'target_cogs'        => 'required|numeric|min:0',
@@ -94,6 +97,12 @@ class NpdProposalController extends Controller
             'documents'          => ['nullable', 'array'],
             'documents.*.file'   => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $prf = Prf::findOrFail($validated['prf_id']);
 
@@ -125,11 +134,13 @@ class NpdProposalController extends Controller
 
         $npdProposal->load('documents');
         $teamMembers = $this->teamMembers();
+        $products = Product::orderBy('name')->get(['id', 'name']);
 
         return view('npd-proposals.edit', [
             'proposal'    => $npdProposal,
             'npdProposal' => $npdProposal,
             'teamMembers' => $teamMembers,
+            'products'    => $products,
         ]);
     }
 
@@ -141,6 +152,7 @@ class NpdProposalController extends Controller
         Gate::authorize('edit', $npdProposal);
 
         $validated = $request->validate([
+            'product_id'         => 'nullable|exists:products,id',
             'product_name'       => 'required|string|max:255',
             'product_concept'    => 'required|string|max:10000',
             'target_cogs'        => 'required|numeric|min:0',
@@ -152,6 +164,12 @@ class NpdProposalController extends Controller
             'documents'          => ['nullable', 'array'],
             'documents.*.file'   => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
+
+        // Sync product_name from product_id
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            $validated['product_name'] = $product->name;
+        }
 
         $this->service->update($npdProposal, $validated);
         $this->storeDocuments($request, $npdProposal);

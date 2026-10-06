@@ -27,6 +27,7 @@ class PrfService
     {
         return Prf::create([
             'code'             => $data['code'],
+            'product_id'       => $data['product_id'] ?? null,
             'product_concept'  => $data['product_concept'],
             'target_market'    => $data['target_market'] ?? null,
             'product_category' => $data['product_category'] ?? null,
@@ -40,6 +41,7 @@ class PrfService
     {
         $prf->update([
             'code'             => $data['code'] ?? $prf->code,
+            'product_id'       => $data['product_id'] ?? $prf->product_id,
             'product_concept'  => $data['product_concept'],
             'target_market'    => $data['target_market'] ?? null,
             'product_category' => $data['product_category'] ?? null,

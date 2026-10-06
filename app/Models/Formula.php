@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Models\Concerns\BelongsToProduct;
 
 class Formula extends Model
 {
-    use LogsActivity;
+    use LogsActivity, BelongsToProduct;
 
     protected $fillable = [
         'code',
         'name',
+        'product_id',
         'formula_type',
         'formula_date',
         'version',
@@ -51,6 +53,11 @@ class Formula extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function operationalManager()

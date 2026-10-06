@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TechnologyTransfer;
 use App\Models\TechnologyTransferAttachment;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +42,9 @@ class TechnologyTransferController extends Controller
     {
         abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
 
-        return view('technology-transfers.create');
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('technology-transfers.create', compact('products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -52,14 +55,16 @@ class TechnologyTransferController extends Controller
         abort_unless(auth()->user()->can('technology_transfer.edit'), 403);
 
         $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'files'   => 'nullable|array',
-            'files.*' => 'file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp',
+            'product_id' => 'nullable|exists:products,id',
+            'title'      => 'required|string|max:255',
+            'files'      => 'nullable|array',
+            'files.*'    => 'file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp',
         ]);
 
         $transfer = TechnologyTransfer::create([
-            'title'      => $validated['title'],
-            'created_by' => auth()->id(),
+            'product_id'  => $validated['product_id'] ?? null,
+            'title'       => $validated['title'],
+            'created_by'  => auth()->id(),
         ]);
 
         foreach ($request->file('files', []) as $file) {
@@ -82,7 +87,9 @@ class TechnologyTransferController extends Controller
     {
         Gate::authorize('edit', $technologyTransfer);
 
-        return view('technology-transfers.edit', compact('technologyTransfer'));
+        $products = Product::orderBy('name')->get(['id', 'name']);
+
+        return view('technology-transfers.edit', compact('technologyTransfer', 'products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -93,7 +100,8 @@ class TechnologyTransferController extends Controller
         Gate::authorize('update', $technologyTransfer);
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'product_id' => 'nullable|exists:products,id',
+            'title'      => 'required|string|max:255',
         ]);
 
         $technologyTransfer->update($validated);

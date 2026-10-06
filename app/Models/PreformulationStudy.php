@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\Models\Concerns\BelongsToProduct;
+
 class PreformulationStudy extends Model
 {
+    use BelongsToProduct;
+
     protected $fillable = [
         'code',
+        'product_id',
         'npd_proposal_id',
         'product_name',
         'product_concept',
@@ -38,6 +43,11 @@ class PreformulationStudy extends Model
     public function npdProposal(): BelongsTo
     {
         return $this->belongsTo(NpdProposal::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     public function creator(): BelongsTo

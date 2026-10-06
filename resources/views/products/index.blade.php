@@ -64,6 +64,7 @@
                     <tr>
                         <th class="w-20">No</th>
                         <th>Nama Produk</th>
+                        <th>Kategori</th>
                         <th>Deskripsi</th>
                         <th class="w-36 text-center">Aksi</th>
                     </tr>
@@ -73,6 +74,15 @@
                     <tr>
                         <td class="text-xs font-mono text-gray-400">{{ $index + 1 + ($products->currentPage() - 1) * $products->perPage() }}</td>
                         <td class="font-semibold text-ink">{{ $product->name }}</td>
+                        <td>
+                            @if($product->category)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                {{ $product->category->name }}
+                            </span>
+                            @else
+                            <span class="text-xs text-gray-400">—</span>
+                            @endif
+                        </td>
                         <td class="text-xs text-gray-500 max-w-md truncate" title="{{ $product->description }}">{{ $product->description ?? '—' }}</td>
                         <td>
                             <div class="flex items-center justify-center gap-1">
@@ -87,7 +97,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center py-10 text-gray-400 text-sm">Belum ada produk. Klik "Tambah Produk" untuk membuat.</td>
+                        <td colspan="5" class="text-center py-10 text-gray-400 text-sm">Belum ada produk. Klik "Tambah Produk" untuk membuat.</td>
                     </tr>
                     @endforelse
                 </tbody>
