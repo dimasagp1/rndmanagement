@@ -69,6 +69,17 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        // Produk yang sudah terhubung ke data modul tidak boleh dihapus agar relasinya tidak hilang
+        $relations = ['formulas', 'trialRms', 'trialPms', 'prfs', 'npdProposals', 'preformulationStudies',
+            'sampleEvaluations', 'qbds', 'nieApprovals', 'stabilityTests', 'technologyTransfers', 'approvalForms'];
+        $usageCount = collect($relations)->sum(fn ($relation) => $product->{$relation}()->count());
+
+        if ($usageCount > 0) {
+            return redirect()
+                ->route('products.index')
+                ->with('error', "Produk {$product->name} tidak dapat dihapus karena masih terhubung ke {$usageCount} data di modul lain.");
+        }
+
         $name = $product->name;
         $product->delete();
 

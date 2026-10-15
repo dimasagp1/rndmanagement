@@ -63,9 +63,9 @@ class ApprovalCenterController extends Controller
                 ->latest()
                 ->get();
 
+            // Kedua sumber (Formula Approval & Approval Formula & Design), sama dengan badge notifikasi
             $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
-                ->where('source', 'formula-approval')
-                ->with('product.creator', 'omApprover', 'gmApprover')
+                ->with('creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
         }
@@ -90,10 +90,8 @@ class ApprovalCenterController extends Controller
                 ->with('creator')
                 ->latest()
                 ->get();
-
-            $pendingFormulaApprovals = collect();
-            $pendingApprovalFormulaDesigns = collect();
-        } 
+            // $pendingFormulaApprovals tetap kosong: Formula Approval hanya disetujui GM
+        }
         // Antrean General Manager (Tahap 2) — Formula Approval GM only
         elseif ($user->hasRole('General Manager')) {
             $pendingFormulas = Formula::where('approval_status', 'Pending Tahap 2')
@@ -112,8 +110,7 @@ class ApprovalCenterController extends Controller
                 ->get();
 
             $pendingFormulaApprovals = FormulaApprovalForm::whereIn('approval_status', ['Pending', 'Approval by OM'])
-                ->where('source', 'formula-approval')
-                ->with('product.creator', 'omApprover', 'gmApprover')
+                ->with('creator', 'omApprover', 'gmApprover')
                 ->latest()
                 ->get();
         }
@@ -150,6 +147,10 @@ class ApprovalCenterController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function rejectFormula(Request $request, Formula $formula)
     {
+        if (! $this->canRejectAtStage($formula->approval_status)) {
+            abort(403, 'Anda hanya dapat menolak dokumen pada tahap persetujuan Anda sendiri.');
+        }
+
         $request->validate([
             'rejection_notes' => 'required|string|max:1000',
         ]);
@@ -194,6 +195,10 @@ class ApprovalCenterController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function rejectTrialRm(Request $request, TrialRm $trialRm)
     {
+        if (! $this->canRejectAtStage($trialRm->approval_status)) {
+            abort(403, 'Anda hanya dapat menolak dokumen pada tahap persetujuan Anda sendiri.');
+        }
+
         $request->validate([
             'rejection_notes' => 'required|string|max:1000',
         ]);
@@ -284,17 +289,8 @@ class ApprovalCenterController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function rejectPreformulationStudy(Request $request, PreformulationStudy $preformulationStudy)
     {
-        $user = auth()->user();
-
-        $canReject = match (true) {
-            $user->hasRole('Operational Manager') => $preformulationStudy->approval_status === 'Pending Tahap 1',
-            $user->hasRole('General Manager')     => $preformulationStudy->approval_status === 'Pending Tahap 2',
-            $user->hasRole('Superadmin')          => in_array($preformulationStudy->approval_status, ['Pending Tahap 1', 'Pending Tahap 2']),
-            default                               => false,
-        };
-
-        if (! $canReject) {
-            abort(403);
+        if (! $this->canRejectAtStage($preformulationStudy->approval_status)) {
+            abort(403, 'Anda hanya dapat menolak dokumen pada tahap persetujuan Anda sendiri.');
         }
 
         $request->validate([
@@ -310,5 +306,20 @@ class ApprovalCenterController extends Controller
         return redirect()
             ->route('approval-center.index')
             ->with('success', "Preformulation Study {$preformulationStudy->code} berhasil ditolak.");
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Helper: OM hanya menolak Tahap 1, GM hanya Tahap 2
+    // ──────────────────────────────────────────────────────────────
+    private function canRejectAtStage(?string $approvalStatus): bool
+    {
+        $user = auth()->user();
+
+        return match (true) {
+            $user->hasRole('Superadmin')          => in_array($approvalStatus, ['Pending Tahap 1', 'Pending Tahap 2']),
+            $user->hasRole('Operational Manager') => $approvalStatus === 'Pending Tahap 1',
+            $user->hasRole('General Manager')     => $approvalStatus === 'Pending Tahap 2',
+            default                               => false,
+        };
     }
 }

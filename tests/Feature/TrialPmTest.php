@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
 use App\Models\User;
 use App\Models\TrialPm;
 use App\Models\TrialPmApproval;
@@ -32,7 +33,10 @@ class TrialPmTest extends TestCase
 
     public function test_staff_rnd_can_create_trial_pm_and_initializes_4_department_approvals()
     {
+        $product = Product::create(['name' => 'Jahe Merah']);
+
         $response = $this->actingAs($this->staff)->post(route('trial-pms.store'), [
+            'product_id'         => $product->id,
             'proposal_number'    => 'USUL-12345',
             'packaging_material' => 'Botol PET 250ml',
             'supplier'           => 'PT Kemas Makmur',
@@ -48,6 +52,7 @@ class TrialPmTest extends TestCase
         $this->assertEquals('Botol PET 250ml', $trial->packaging_material);
         $this->assertEquals('Draft', $trial->approval_status);
         $this->assertEquals('USUL-12345-01', $trial->code);
+        $this->assertEquals($product->id, $trial->product_id);
 
         // Verify 4 department approvals initialized
         $approvals = TrialPmApproval::where('trial_pm_id', $trial->id)->get();

@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\NpdProposalService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class NpdProposalController extends Controller
@@ -104,8 +105,6 @@ class NpdProposalController extends Controller
             $validated['product_name'] = $product->name;
         }
 
-        $prf = Prf::findOrFail($validated['prf_id']);
-
         $proposal = $this->service->create($validated, auth()->id());
 
         $this->storeDocuments($request, $proposal);
@@ -186,6 +185,7 @@ class NpdProposalController extends Controller
     {
         Gate::authorize('delete', $npdProposal);
         $code = $npdProposal->code;
+        Storage::disk('public')->delete($npdProposal->documents()->pluck('file_path')->all());
         $npdProposal->delete();
 
         return redirect()
@@ -235,6 +235,7 @@ class NpdProposalController extends Controller
 
         Gate::authorize('edit', $proposal);
 
+        Storage::disk('public')->delete($document->file_path);
         $document->delete();
 
         return redirect()
@@ -248,6 +249,7 @@ class NpdProposalController extends Controller
     private function teamMembers()
     {
         return User::role(['Staff R&D', 'Staff Packdev'])
+            ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name']);
     }

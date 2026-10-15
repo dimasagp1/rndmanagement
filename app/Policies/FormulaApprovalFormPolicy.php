@@ -62,6 +62,15 @@ class FormulaApprovalFormPolicy
             && $user->can('formula.delete');
     }
 
+    /**
+     * Buat revisi baru — hanya pembuat dokumen (Superadmin lewat Gate::before)
+     */
+    public function duplicate(User $user, FormulaApprovalForm $form): bool
+    {
+        return $form->created_by === $user->id
+            && $user->can('formula.edit');
+    }
+
     public function submit(User $user, FormulaApprovalForm $form): bool
     {
         if ($user->hasRole('Superadmin')) {

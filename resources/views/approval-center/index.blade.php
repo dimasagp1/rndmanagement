@@ -359,6 +359,7 @@
             <x-empty-state icon="approval" title="Antrean Kosong" description="Tidak ada Form Approval menunggu keputusan Anda saat ini." />
             @else
                 @foreach($pendingFormulaApprovals as $approval)
+                @php($faRoute = $approval->source === 'approval-formula-design' ? 'approval-formula-designs' : 'formula-approvals')
                 <div class="card p-4 hover:border-gray-300 transition duration-150 relative">
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div class="space-y-1">
@@ -369,17 +370,20 @@
                                 @else
                                 <span class="badge bg-gray-100 text-gray-600">{{ $approval->approval_status }}</span>
                                 @endif
+                                @if($approval->source === 'approval-formula-design')
+                                <span class="badge bg-gray-100 text-gray-600">Approval Formula &amp; Design · {{ $approval->type }}</span>
+                                @endif
                             </div>
                             <h3 class="text-base font-bold text-ink hover:text-primary">
-                                <a href="{{ route('formula-approvals.show', $approval) }}">{{ $approval->product_name }}</a>
+                                <a href="{{ route($faRoute . '.show', $approval) }}">{{ $approval->product_name }}</a>
                             </h3>
                             <p class="text-xs text-gray-400">
-                                Diajukan oleh {{ $approval->product?->creator?->name ?? '—' }} · {{ $approval->created_at?->diffForHumans() }}
+                                Diajukan oleh {{ $approval->creator?->name ?? '—' }} · {{ ($approval->submitted_at ?? $approval->created_at)?->diffForHumans() }}
                             </p>
                         </div>
                         <div class="flex items-center gap-2 flex-shrink-0">
-                            <a href="{{ route('formula-approvals.show', $approval) }}" class="btn-ghost btn-sm">Lihat Detail</a>
-                            <form method="POST" action="{{ route('formula-approvals.approve-gm', $approval) }}">
+                            <a href="{{ route($faRoute . '.show', $approval) }}" class="btn-ghost btn-sm">Lihat Detail</a>
+                            <form method="POST" action="{{ route($faRoute . '.approve-gm', $approval) }}">
                                 @csrf
                                 <button type="submit" class="btn-primary btn-sm">Setujui (GM)</button>
                             </form>
@@ -393,7 +397,7 @@
                     <div x-show="activeRejectItem === 'fa_{{ $approval->id }}'" x-collapse
                          class="mt-4 p-3 bg-red-50/50 border border-red-200 rounded-xl space-y-3">
                         <h4 class="text-xs font-bold text-red-800 uppercase">Alasan Penolakan</h4>
-                        <form method="POST" action="{{ route('formula-approvals.reject', $approval) }}" class="space-y-2">
+                        <form method="POST" action="{{ route($faRoute . '.reject', $approval) }}" class="space-y-2">
                             @csrf
                             <textarea name="rejection_notes" rows="2" required placeholder="Jelaskan alasan penolakan..." class="form-input text-xs py-1.5 border-red-300 focus:ring-red-500"></textarea>
                             <div class="flex justify-end gap-2">

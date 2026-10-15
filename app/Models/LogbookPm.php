@@ -84,9 +84,9 @@ class LogbookPm extends Model
     public function getStatusBadgeClassAttribute(): string
     {
         return match ($this->status_pengujian) {
-            'Lulus'       => 'badge-success',
-            'Tidak Lulus' => 'badge-danger',
-            'Proses'      => 'badge-warning',
+            'Passed'         => 'badge-success',
+            'Rejected'       => 'badge-danger',
+            'On Going Trial' => 'badge-warning',
             default       => 'badge-secondary',
         };
     }

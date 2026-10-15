@@ -107,14 +107,27 @@ class UserController extends Controller
         }
 
         if ($user->id === auth()->id()) {
-            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+            return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
         }
 
-        $name = $user->name;
-        $user->delete();
+        // Akun tidak dihapus agar formula, trial, dan dokumen buatannya tetap utuh
+        $user->update(['is_active' => false]);
 
         return redirect()
             ->route('users.index')
-            ->with('success', "User {$name} berhasil dihapus.");
+            ->with('success', "User {$user->name} dinonaktifkan dan tidak bisa login lagi. Seluruh datanya tetap tersimpan.");
+    }
+
+    public function activate(User $user)
+    {
+        if (! auth()->user()->hasRole('Superadmin')) {
+            abort(403);
+        }
+
+        $user->update(['is_active' => true]);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', "User {$user->name} diaktifkan kembali.");
     }
 }

@@ -443,7 +443,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
          ->middleware('can:approval_center.access');
 
     // ── User Management (Superadmin Only) ───────────────────
-    Route::resource('users', UserController::class)->middleware('role:Superadmin');
+    Route::resource('users', UserController::class)->except('show')->middleware('role:Superadmin');
+    Route::patch('users/{user}/activate', [UserController::class, 'activate'])->name('users.activate')->middleware('role:Superadmin');
 
     // ── System Settings (Superadmin Only) ───────────────────
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:Superadmin');
@@ -451,10 +452,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Data Master (Superadmin & Staff R&D) ─────────────
     Route::delete('materials/documents/{document}', [MaterialController::class, 'destroyDocument'])->name('materials.documents.destroy')->middleware('role:Superadmin|Staff R&D');
-    Route::resource('materials', MaterialController::class)->middleware('role:Superadmin|Staff R&D');
-    Route::resource('suppliers', SupplierController::class)->middleware('role:Superadmin|Staff R&D');
-    Route::resource('product-categories', ProductCategoryController::class)->middleware('role:Superadmin|Staff R&D');
-    Route::resource('products', ProductController::class)->middleware('role:Superadmin|Staff R&D');
+    Route::resource('materials', MaterialController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
+    Route::resource('suppliers', SupplierController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
+    Route::resource('product-categories', ProductCategoryController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
+    Route::resource('products', ProductController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
 Route::resource('preformulation-studies', PreformulationStudyController::class)->middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager');
     Route::post('preformulation-studies/{preformulationStudy}/submit', [PreformulationStudyController::class, 'submit'])->name('preformulation-studies.submit')->middleware('role:Superadmin|Staff R&D|Staff Packdev');
     Route::delete('preformulation-studies/documents/{document}', [PreformulationStudyController::class, 'destroyDocument'])->name('preformulation-studies.documents.destroy')->middleware('role:Superadmin|Staff R&D|Staff Packdev');

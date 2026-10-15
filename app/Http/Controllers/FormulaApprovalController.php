@@ -10,11 +10,11 @@ use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class FormulaApprovalController extends Controller
 {
-    // GM only approval: OM step removed
-    private const MUTATION_BLOCKED = ['Pending', 'Approved'];
+    // GM only approval: OM step removed; aturan edit/hapus ada di FormulaApprovalFormPolicy
 
     // ──────────────────────────────────────────────────────────────
     // INDEX
@@ -305,7 +305,7 @@ class FormulaApprovalController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function duplicate(Request $request, FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
+        Gate::authorize('duplicate', $formApproval);
 
         $request->validate([
             'change_description' => 'nullable|string|max:1000',
@@ -313,7 +313,8 @@ class FormulaApprovalController extends Controller
 
         $copy = $formApproval->replicate();
         $copy->revision = $formApproval->revision + 1;
-        $copy->approval_status = 'Pending';
+        // Revisi baru mulai sebagai Draft; masuk antrean GM hanya lewat submit()
+        $copy->approval_status = 'Draft';
         $copy->artwork_status = 'Draft';
         $copy->submitted_at = null;
         $copy->approved_by_om = null;
@@ -349,7 +350,7 @@ class FormulaApprovalController extends Controller
 
         return redirect()
             ->route('formula-approvals.show', ['formApproval' => $copy, 'type' => $copy->type])
-            ->with('success', "Revisi baru ({$copy->revision_label}) dibuat dari {$formApproval->revision_label}. Upload artwork/final doc terbaru jika perlu.");
+            ->with('success', "Revisi baru ({$copy->revision_label}) dibuat sebagai Draft dari {$formApproval->revision_label}. Lengkapi data lalu klik Ajukan Approval.");
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -407,7 +408,7 @@ class FormulaApprovalController extends Controller
             'komoditi'              => 'nullable|string|max:255',
             'sample_code'           => 'nullable|string|max:100',
             'proposal_number'       => 'nullable|string|max:100',
-            'bentuk_sediaan'        => 'nullable|string|max:255',
+            'bentuk_sediaan'        => ['nullable', Rule::in(ProductCategory::pluck('name'))],
             'manufactured'          => 'nullable|string|max:255',
             'klaim_product'         => 'nullable|string|max:2000',
             'komposisi'             => 'nullable|string|max:3000',
@@ -610,15 +611,5 @@ class FormulaApprovalController extends Controller
         }
 
         return back()->with('success', 'Tracker status diperbarui ke ' . $newStatus);
-    }
-
-    private function canMutate(FormulaApprovalForm $form): bool
-    {
-        // Design: staff boleh edit lagi setelah Approved GM untuk upload file external (history tidak dihapus)
-        // Formula: tetap locked jika Pending/Approved
-        if ($form->type === 'Design' && $form->approval_status === 'Approved') {
-            return true;
-        }
-        return ! in_array($form->approval_status, self::MUTATION_BLOCKED);
     }
 }

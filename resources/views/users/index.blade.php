@@ -53,7 +53,12 @@
                     @foreach($users as $user)
                     <tr>
                         <td class="text-xs font-mono text-gray-400">#{{ $user->id }}</td>
-                        <td class="font-semibold text-ink">{{ $user->name }}</td>
+                        <td class="font-semibold text-ink">
+                            {{ $user->name }}
+                            @unless($user->is_active)
+                            <span class="badge bg-gray-100 text-gray-600 ring-1 ring-gray-200 ml-1">Nonaktif</span>
+                            @endunless
+                        </td>
                         <td class="text-sm font-mono text-gray-600">{{ $user->email }}</td>
                         <td>
                             @php
@@ -75,11 +80,18 @@
                                 <a href="{{ route('users.edit', $user) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 
                                 @if($user->id !== auth()->id())
-                                <form method="POST" action="{{ route('users.destroy', $user) }}"
-                                      onsubmit="return confirm('Hapus user {{ $user->name }}? Pengguna ini tidak akan bisa login lagi.')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn-ghost btn-sm text-red-500 hover:bg-red-50">Hapus</button>
-                                </form>
+                                    @if($user->is_active)
+                                    <form method="POST" action="{{ route('users.destroy', $user) }}"
+                                          onsubmit="return confirm('Nonaktifkan user {{ $user->name }}? Pengguna ini tidak akan bisa login lagi, tetapi datanya tetap tersimpan.')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn-ghost btn-sm text-red-500 hover:bg-red-50">Nonaktifkan</button>
+                                    </form>
+                                    @else
+                                    <form method="POST" action="{{ route('users.activate', $user) }}">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="btn-ghost btn-sm text-primary">Aktifkan</button>
+                                    </form>
+                                    @endif
                                 @endif
                             </div>
                         </td>

@@ -105,7 +105,7 @@ class FormulaController extends Controller
             'target_sachet_unit' => 'nullable|string|max:30',
             'materials'         => 'array',
             'materials.*.material_id' => 'required|exists:materials,id',
-            'materials.*.supplier_id' => 'nullable|exists:suppliers,id',
+            'materials.*.supplier_id' => 'required|exists:suppliers,id',
             'materials.*.percentage'  => 'required|numeric|min:0.001|max:100',
             'materials.*.price_per_kg'  => 'nullable|numeric|min:0',
             'materials.*.price_per_gram' => 'nullable|numeric|min:0',
@@ -113,6 +113,8 @@ class FormulaController extends Controller
             'materials.*.dose_05g'  => 'nullable|numeric|min:0',
             'materials.*.sachet_30' => 'nullable|numeric|min:0',
             'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
+        ], [
+            'materials.*.supplier_id.required' => 'Supplier wajib dipilih untuk setiap bahan.',
         ]);
 
         // Sync name from product
@@ -189,7 +191,7 @@ class FormulaController extends Controller
             'target_sachet_unit' => 'nullable|string|max:30',
             'materials'         => 'array',
             'materials.*.material_id' => 'required|exists:materials,id',
-            'materials.*.supplier_id' => 'nullable|exists:suppliers,id',
+            'materials.*.supplier_id' => 'required|exists:suppliers,id',
             'materials.*.percentage'  => 'required|numeric|min:0.001|max:100',
             'materials.*.price_per_kg'  => 'nullable|numeric|min:0',
             'materials.*.price_per_gram' => 'nullable|numeric|min:0',
@@ -197,6 +199,8 @@ class FormulaController extends Controller
             'materials.*.dose_05g'  => 'nullable|numeric|min:0',
             'materials.*.sachet_30' => 'nullable|numeric|min:0',
             'materials.*.hpp_rm'    => 'nullable|numeric|min:0',
+        ], [
+            'materials.*.supplier_id.required' => 'Supplier wajib dipilih untuk setiap bahan.',
         ]);
 
         // Sync name from product

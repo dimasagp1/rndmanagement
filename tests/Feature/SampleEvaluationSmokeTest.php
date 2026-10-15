@@ -109,7 +109,7 @@ class SampleEvaluationSmokeTest extends TestCase
 
         // ── Store session + 5 parameter ──
         $this->actingAs($staff)->post("/sample-evaluations/{$evaluation->id}/sessions", [
-            'trial_batch'    => 1,
+            'trial_batch'    => 'Batch 1',
             'evaluator_type' => 'Internal',
             'decision'       => 'Approved',
             'parameters'     => [
@@ -124,7 +124,7 @@ class SampleEvaluationSmokeTest extends TestCase
         $this->assertDatabaseHas('sample_evaluation_sessions', [
             'sample_evaluation_id' => $evaluation->id,
             'session_no'           => 1,
-            'trial_batch'          => 1,
+            'trial_batch'          => 'Batch 1',
             'decision'             => 'Approved',
         ]);
         $this->assertDatabaseHas('sample_evaluation_parameters', [
@@ -153,7 +153,7 @@ class SampleEvaluationSmokeTest extends TestCase
         $this->actingAs($om)->get("/sample-evaluations/{$evaluation->id}")->assertOk();
         $this->actingAs($om)->get('/sample-evaluations/create')->assertForbidden();
         $this->actingAs($om)->post("/sample-evaluations/{$evaluation->id}/sessions", [
-            'trial_batch'    => 2,
+            'trial_batch'    => 'Batch 2',
             'evaluator_type' => 'Internal',
             'parameters'     => [
                 'Rasa' => ['score' => 'Enak'], 'Warna' => ['score' => 'Cerah'],
@@ -162,8 +162,8 @@ class SampleEvaluationSmokeTest extends TestCase
             ],
         ])->assertForbidden();
 
-        // ── Staff lain tidak bisa lihat/edit punya staff lain ──
-        $this->actingAs($other)->get("/sample-evaluations/{$evaluation->id}")->assertForbidden();
+        // ── Staff lain bisa melihat (sama seperti modul lain), tetapi tidak bisa edit ──
+        $this->actingAs($other)->get("/sample-evaluations/{$evaluation->id}")->assertOk();
         $this->actingAs($other)->get("/sample-evaluations/{$evaluation->id}/edit")->assertForbidden();
 
         // ── Edit + hapus ──

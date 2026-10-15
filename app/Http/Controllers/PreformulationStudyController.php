@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\PreformulationStudyService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class PreformulationStudyController extends Controller
@@ -57,7 +58,7 @@ class PreformulationStudyController extends Controller
         $autoCode = $this->service->generateCode();
         $npdProposals = NpdProposal::orderBy('code')->get(['id', 'code', 'product_name', 'product_concept']);
         $products = Product::orderBy('name')->get(['id', 'name']);
-        $teamMembers = User::role(['Staff R&D', 'Staff Packdev'])->orderBy('name')->get(['id', 'name']);
+        $teamMembers = User::role(['Staff R&D', 'Staff Packdev'])->where('is_active', true)->orderBy('name')->get(['id', 'name']);
 
         return view('preformulation-studies.create', compact('autoCode', 'npdProposals', 'products', 'teamMembers'));
     }
@@ -104,13 +105,6 @@ class PreformulationStudyController extends Controller
             'documents',
             'approvedByOm',
             'approvedByGm',
-            'qtpp.attributes',
-            'cqas',
-            'cmas',
-            'cpps',
-            'riskAssessments',
-            'designSpaces',
-            'controlStrategies',
         ]);
 
         return view('preformulation-studies.show', ['study' => $preformulationStudy]);
@@ -123,7 +117,7 @@ class PreformulationStudyController extends Controller
         $preformulationStudy->load('documents');
         $npdProposals = NpdProposal::orderBy('code')->get(['id', 'code', 'product_name', 'product_concept']);
         $products = Product::orderBy('name')->get(['id', 'name']);
-        $teamMembers = User::role(['Staff R&D', 'Staff Packdev'])->orderBy('name')->get(['id', 'name']);
+        $teamMembers = User::role(['Staff R&D', 'Staff Packdev'])->where('is_active', true)->orderBy('name')->get(['id', 'name']);
 
         return view('preformulation-studies.edit', [
             'study'        => $preformulationStudy,
@@ -162,6 +156,7 @@ class PreformulationStudyController extends Controller
         Gate::authorize('delete', $preformulationStudy);
 
         $code = $preformulationStudy->code;
+        Storage::disk('public')->delete($preformulationStudy->documents()->pluck('file_path')->all());
         $preformulationStudy->delete();
 
         return redirect()
@@ -188,6 +183,7 @@ class PreformulationStudyController extends Controller
     {
         $study = $document->study;
         Gate::authorize('edit', $study);
+        Storage::disk('public')->delete($document->file_path);
         $document->delete();
 
         return redirect()

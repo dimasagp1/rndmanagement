@@ -61,7 +61,8 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        // Akun dinonaktifkan, bukan dihapus, agar data R&D buatannya tetap utuh
+        $user->update(['is_active' => false]);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

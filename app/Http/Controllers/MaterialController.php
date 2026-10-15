@@ -134,6 +134,13 @@ class MaterialController extends Controller
 
     public function destroy(Material $material)
     {
+        $formulaCount = $material->formulaMaterials()->distinct()->count('formula_id');
+        if ($formulaCount > 0) {
+            return redirect()
+                ->route('materials.index')
+                ->with('error', "Bahan baku {$material->name} tidak dapat dihapus karena masih dipakai di {$formulaCount} formula.");
+        }
+
         $name = $material->name;
         $material->delete();
 

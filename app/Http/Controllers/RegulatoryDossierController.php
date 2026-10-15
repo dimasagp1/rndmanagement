@@ -235,7 +235,7 @@ class RegulatoryDossierController extends Controller
                     'uploaded_by'   => auth()->id(),
                 ]);
 
-                RegulatoryAudit::log('File di-upload', $doc, "File \"{$originalName}\" diunggah" . ($validated['folder_id'] ? " ke folder \"{$doc->folder->name}\"" : " di root"));
+                RegulatoryAudit::log('File di-upload', $doc, "File \"{$originalName}\" diunggah" . (! empty($validated['folder_id']) ? " ke folder \"{$doc->folder->name}\"" : " di root"));
             }
 
             $uploaded++;
@@ -279,7 +279,7 @@ class RegulatoryDossierController extends Controller
         ]);
 
         $oldFolder = $document->folder?->name ?? 'Root';
-        $document->update(['folder_id' => $validated['folder_id']]);
+        $document->update(['folder_id' => $validated['folder_id'] ?? null]);
 
         $newFolder = $document->fresh()->folder?->name ?? 'Root';
 

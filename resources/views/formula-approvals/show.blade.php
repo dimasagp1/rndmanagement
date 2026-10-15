@@ -46,7 +46,7 @@
             @can('edit', $fa)
                 <a href="{{ route('formula-approvals.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit Approval</a>
             @endcan
-            @can('formula.create')
+            @can('duplicate', $fa)
                 <form method="POST" action="{{ route('formula-approvals.duplicate', $fa) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-outline text-primary border-primary/20 hover:bg-primary/5" onclick="return confirm('Buat revisi baru dari {{ $fa->revision_label }}?')">Duplikasi → Revisi {{ str_pad((string)((int)$fa->revision+1),2,'0',STR_PAD_LEFT) }}</button>

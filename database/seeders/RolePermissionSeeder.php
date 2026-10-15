@@ -104,17 +104,8 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission);
         }
 
-// Create permissions untuk Packaging Development
-        $packagingDevelopmentPermissions = [
-            'packaging_development.create',
-            'packaging_development.view',
-            'packaging_development.edit',
-            'packaging_development.delete',
-        ];
-
-        foreach ($packagingDevelopmentPermissions as $permission) {
-            Permission::findOrCreate($permission);
-        }
+        // Hapus permission modul Packaging Development yang sudah tidak ada
+        Permission::where('name', 'like', 'packaging_development.%')->delete();
 
         // Create permissions untuk Stability Test (minimal: judul + lampiran)
         $stabilityTestPermissions = [
@@ -243,10 +234,6 @@ class RolePermissionSeeder extends Seeder
             'regulatory_dossier.view',
             'regulatory_dossier.edit',
             'regulatory_dossier.delete',
-            'packaging_development.create',
-            'packaging_development.view',
-            'packaging_development.edit',
-            'packaging_development.delete',
         ]);
 
         // Assign permissions to Staff Packdev (sama dengan Staff R&D)
@@ -293,10 +280,6 @@ class RolePermissionSeeder extends Seeder
             'regulatory_dossier.view',
             'regulatory_dossier.edit',
             'regulatory_dossier.delete',
-            'packaging_development.create',
-            'packaging_development.view',
-            'packaging_development.edit',
-            'packaging_development.delete',
             'qbd.create',
             'qbd.view',
             'qbd.edit',
@@ -316,7 +299,6 @@ class RolePermissionSeeder extends Seeder
             'npd_proposal.view',
             'sample_evaluation.view',
             'stability_test.view',
-            'packaging_development.view',
             'regulatory_dossier.view',
             'technology_transfer.view',
             'nie_approval.create',
@@ -343,7 +325,6 @@ class RolePermissionSeeder extends Seeder
             'npd_proposal.view',
             'sample_evaluation.view',
             'stability_test.view',
-            'packaging_development.view',
             'regulatory_dossier.view',
             'technology_transfer.view',
             'nie_approval.create',
@@ -358,7 +339,7 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         $this->command->info('✅ Roles & Permissions seeded successfully!');
-        $this->command->info('📋 4 Roles created/found: Staff R&D, Staff Packdev, Operational Manager, General Manager');
+        $this->command->info('📋 5 Roles created/found: Superadmin, Staff R&D, Staff Packdev, Operational Manager, General Manager');
         $this->command->info('🔐 ' . Permission::count() . ' Permissions created/found');
     }
 }

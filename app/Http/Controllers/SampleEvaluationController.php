@@ -73,7 +73,7 @@ class SampleEvaluationController extends Controller
     {
         Gate::authorize('create', SampleEvaluation::class);
 
-        $users = User::orderBy('name')->get();
+        $users = User::where('is_active', true)->orderBy('name')->get();
         $npdProposals = NpdProposal::orderBy('code', 'desc')->get();
         $products = Product::orderBy('name')->get(['id', 'name']);
         $autoSampleId = $this->generateSampleId();
@@ -157,7 +157,11 @@ class SampleEvaluationController extends Controller
     {
         Gate::authorize('edit', $sampleEvaluation);
 
-        $users = User::orderBy('name')->get();
+        // User nonaktif disembunyikan, kecuali project owner saat ini agar pilihannya tidak hilang
+        $users = User::where('is_active', true)
+            ->orWhere('id', $sampleEvaluation->project_owner_id)
+            ->orderBy('name')
+            ->get();
         $npdProposals = NpdProposal::orderBy('code', 'desc')->get();
 
         return view('sample-evaluations.edit', compact('sampleEvaluation', 'users', 'npdProposals'));
@@ -233,17 +237,23 @@ class SampleEvaluationController extends Controller
             'evaluation_result' => 'nullable|string|max:10000',
             'sensory_result'    => 'nullable|string|max:10000',
             'decision'          => 'nullable|in:Approved,Reform',
-            'parameters'        => 'array',
+            'parameters'        => 'required|array',
             'parameters.*.score' => 'required|string|max:255',
             'parameters.*.note'  => 'nullable|string|max:1000',
             'attachment_file'   => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,zip',
             'attachment_type'   => 'nullable|in:Form Panel,Blind Code,Report Panel Test,Data Panelis,Result',
             'attachment_files'  => 'nullable|array',
             'attachment_files.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,zip',
+            'attachment_types'   => 'nullable|array',
+            'attachment_types.*' => 'nullable|in:Form Panel,Blind Code,Report Panel Test,Data Panelis,Result',
+            // Setiap parameter evaluasi wajib diberi skor
+            ...collect(SampleEvaluation::PARAMETERS)->mapWithKeys(fn ($p) => ["parameters.{$p}.score" => 'required|string|max:255'])->all(),
         ]);
 
+        $storedPaths = [];
+
         try {
-            DB::transaction(function () use ($request, $validated, $sampleEvaluation) {
+            DB::transaction(function () use ($request, $validated, $sampleEvaluation, &$storedPaths) {
                 $sessionNo = $sampleEvaluation->sessions()->max('session_no') + 1;
 
                 $session = $sampleEvaluation->sessions()->create([
@@ -268,6 +278,7 @@ class SampleEvaluationController extends Controller
                 if ($request->hasFile('attachment_file')) {
                     $file = $request->file('attachment_file');
                     $path = $file->store('sample-evaluations', 'public');
+                    $storedPaths[] = $path;
                     $session->attachments()->create([
                         'type'          => $validated['attachment_type'] ?? 'Result',
                         'file_path'     => $path,
@@ -280,9 +291,8 @@ class SampleEvaluationController extends Controller
                     foreach ($request->file('attachment_files') as $idx => $file) {
                         if ($file->isValid()) {
                             $path = $file->store('sample-evaluations', 'public');
-                            $type = is_array($request->input('attachment_types')) && isset($request->input('attachment_types')[$idx])
-                                ? $request->input('attachment_types')[$idx]
-                                : ($validated['attachment_type'] ?? 'Result');
+                            $storedPaths[] = $path;
+                            $type = $validated['attachment_types'][$idx] ?? $validated['attachment_type'] ?? 'Result';
                             $session->attachments()->create([
                                 'type'          => $type,
                                 'file_path'     => $path,
@@ -296,7 +306,11 @@ class SampleEvaluationController extends Controller
                 $sampleEvaluation->update(['status' => $this->recalculateStatus($sampleEvaluation)]);
             });
         } catch (\Throwable $e) {
-            return back()->withErrors(['parameters' => 'Gagal menyimpan sesi evaluasi: ' . $e->getMessage()]);
+            // Transaksi dibatalkan: hapus juga file yang sempat tersimpan
+            Storage::disk('public')->delete($storedPaths);
+            report($e);
+
+            return back()->withInput()->withErrors(['parameters' => 'Gagal menyimpan sesi evaluasi. Silakan coba lagi atau hubungi tim IT.']);
         }
 
         return back()->with('success', 'Sesi evaluasi berhasil ditambahkan.');

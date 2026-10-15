@@ -25,7 +25,9 @@ class CheckMaintenanceMode
         // Pengecualian route penting (login, logout, auth, up check)
         if ($request->is('login') ||
             $request->is('logout') ||
-            $request->is('password/*') ||
+            $request->is('forgot-password') ||
+            $request->is('reset-password/*') ||
+            $request->is('reset-password') ||
             $request->is('up') ||
             $request->is('build/*') ||
             $request->is('storage/*')

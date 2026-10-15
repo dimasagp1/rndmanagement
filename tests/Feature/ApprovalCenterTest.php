@@ -208,61 +208,65 @@ class ApprovalCenterTest extends TestCase
         });
     }
 
-    public function test_formula_approval_om_queue_only_shows_pending_forms()
+    // Formula Approval kini hanya disetujui GM (tahap OM dihapus)
+    public function test_formula_approval_tidak_masuk_antrean_om()
     {
-        $product = \App\Models\Product::create(['name' => 'Produk Approval']);
-
-        $pendingForm = \App\Models\FormulaApprovalForm::create([
-            'product_id'   => $product->id,
-            'product_name' => 'Produk Approval',
-        ]);
-        $gmForm = \App\Models\FormulaApprovalForm::create([
-            'product_id'   => \App\Models\Product::create(['name' => 'Produk Tahap GM'])->id,
-            'product_name' => 'Produk Tahap GM',
-            'approval_status' => 'Approval by OM',
+        \App\Models\FormulaApprovalForm::create([
+            'product_name'    => 'Produk Approval',
+            'approval_status' => 'Pending',
         ]);
 
         $response = $this->actingAs($this->manager)->get(route('approval-center.index'));
         $response->assertStatus(200);
-        $response->assertViewHas('pendingFormulaApprovals', function ($forms) use ($pendingForm, $gmForm) {
-            return $forms->contains('id', $pendingForm->id)
-                && ! $forms->contains('id', $gmForm->id);
-        });
+        $response->assertViewHas('pendingFormulaApprovals', fn ($forms) => $forms->isEmpty());
     }
 
-    public function test_formula_approval_gm_queue_only_shows_om_approved_forms()
+    public function test_formula_approval_gm_queue_only_shows_pending_forms()
     {
-        $product = \App\Models\Product::create(['name' => 'Produk GM']);
-
-        $gmForm = \App\Models\FormulaApprovalForm::create([
-            'product_id'      => $product->id,
-            'product_name'    => 'Produk GM',
-            'approval_status' => 'Approval by OM',
+        $pendingForm = \App\Models\FormulaApprovalForm::create([
+            'product_name'    => 'Produk Pending',
+            'approval_status' => 'Pending',
         ]);
-        \App\Models\FormulaApprovalForm::create([
-            'product_id'   => \App\Models\Product::create(['name' => 'Produk Pending'])->id,
-            'product_name' => 'Produk Pending',
+        $draftForm = \App\Models\FormulaApprovalForm::create([
+            'product_name'    => 'Produk Draft',
+            'approval_status' => 'Draft',
+        ]);
+        $approvedForm = \App\Models\FormulaApprovalForm::create([
+            'product_name'    => 'Produk Approved',
+            'approval_status' => 'Approved',
         ]);
 
         $response = $this->actingAs($this->gm)->get(route('approval-center.index'));
         $response->assertStatus(200);
-        $response->assertViewHas('pendingFormulaApprovals', function ($forms) use ($gmForm) {
-            return $forms->contains('id', $gmForm->id);
+        $response->assertViewHas('pendingFormulaApprovals', function ($forms) use ($pendingForm, $draftForm, $approvedForm) {
+            return $forms->contains('id', $pendingForm->id)
+                && ! $forms->contains('id', $draftForm->id)
+                && ! $forms->contains('id', $approvedForm->id);
         });
     }
 
-    public function test_manager_can_approve_form_approval_from_approval_center()
+    public function test_manager_tidak_bisa_menyetujui_form_approval()
     {
-        $product = \App\Models\Product::create(['name' => 'Produk OM']);
-
         $form = \App\Models\FormulaApprovalForm::create([
-            'product_id'   => $product->id,
-            'product_name' => 'Produk OM',
+            'product_name'    => 'Produk OM',
+            'approval_status' => 'Pending',
         ]);
 
-        $response = $this->actingAs($this->manager)->post(route('formula-approvals.approve-om', $form));
-        $this->assertEquals('Approval by OM', $form->fresh()->approval_status);
-        $this->assertEquals($this->manager->id, $form->fresh()->approved_by_om);
-        $response->assertRedirect(route('formula-approvals.show', $form));
+        $this->actingAs($this->manager)->post(route('formula-approvals.approve-om', $form))->assertStatus(422);
+        $this->actingAs($this->manager)->post(route('formula-approvals.approve-gm', $form))->assertForbidden();
+        $this->assertEquals('Pending', $form->fresh()->approval_status);
+    }
+
+    public function test_gm_can_approve_form_approval_from_approval_center()
+    {
+        $form = \App\Models\FormulaApprovalForm::create([
+            'product_name'    => 'Produk GM',
+            'approval_status' => 'Pending',
+        ]);
+
+        $response = $this->actingAs($this->gm)->post(route('formula-approvals.approve-gm', $form));
+        $this->assertEquals('Approved', $form->fresh()->approval_status);
+        $this->assertEquals($this->gm->id, $form->fresh()->approved_by_gm);
+        $response->assertRedirect(route('formula-approvals.show', ['formApproval' => $form, 'type' => $form->fresh()->type]));
     }
 }

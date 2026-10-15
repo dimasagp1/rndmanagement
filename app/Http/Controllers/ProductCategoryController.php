@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 
@@ -63,6 +64,13 @@ class ProductCategoryController extends Controller
 
     public function destroy(ProductCategory $productCategory)
     {
+        $productCount = Product::where('product_category_id', $productCategory->id)->count();
+        if ($productCount > 0) {
+            return redirect()
+                ->route('product-categories.index')
+                ->with('error', "Kategori {$productCategory->name} tidak dapat dihapus karena masih dipakai oleh {$productCount} produk.");
+        }
+
         $name = $productCategory->name;
         $productCategory->delete();
 

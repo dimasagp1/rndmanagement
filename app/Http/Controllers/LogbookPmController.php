@@ -8,6 +8,7 @@ use App\Models\TrialPm;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class LogbookPmController extends Controller
 {
@@ -185,6 +186,9 @@ class LogbookPmController extends Controller
         Gate::authorize('delete', $logbookPm);
 
         $name = $logbookPm->nama_material;
+        // Lampiran disimpan sebagai URL '/storage/...', ubah ke path disk sebelum dihapus
+        $files = collect($logbookPm->lampiran_dokumentasi ?? [])->push($logbookPm->file_scan)->filter();
+        Storage::disk('public')->delete($files->map(fn ($url) => Str::after($url, '/storage/'))->all());
         $logbookPm->delete();
 
         return redirect()
@@ -306,7 +310,7 @@ class LogbookPmController extends Controller
             'lampiran_files'       => 'nullable|array',
             'lampiran_files.*'     => 'file|mimes:jpeg,png,jpg,pdf|max:5120',
             'file_scan_upload'     => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:10240',
-            'om_approval'          => 'nullable|in:Pending,Approved,Rejected',
+            // om_approval sengaja tidak diterima di sini: hanya bisa diubah OM lewat approve()
             'lokasi_penyimpanan'   => 'nullable|string|max:255',
             'nama_penerima'        => 'required|string|max:255',
             'keterangan'           => 'nullable|string',

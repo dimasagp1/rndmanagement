@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\LogbookPm;
 use App\Models\Supplier;
 
 class SupplierController extends Controller
@@ -83,6 +84,14 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier)
     {
+        $formulaCount = $supplier->formulaMaterials()->distinct()->count('formula_id');
+        $logbookCount = LogbookPm::where('supplier_id', $supplier->id)->count();
+        if ($formulaCount > 0 || $logbookCount > 0) {
+            return redirect()
+                ->route('suppliers.index')
+                ->with('error', "Pemasok {$supplier->name} tidak dapat dihapus karena masih dipakai di {$formulaCount} formula dan {$logbookCount} Log Book PM.");
+        }
+
         $name = $supplier->name;
         $supplier->delete();
 

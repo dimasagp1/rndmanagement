@@ -56,6 +56,10 @@ class TimelineController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+
+        // Akun tanpa jabatan tidak boleh melihat data lintas modul
+        abort_if($user->roles->isEmpty(), 403, 'Akun Anda belum memiliki jabatan. Hubungi Superadmin untuk mendapatkan akses.');
+
         $isStaff = $user->hasRole(['Staff R&D', 'Staff Packdev']);
         $isManager = $user->hasRole('Operational Manager');
         $isGM = $user->hasRole('General Manager');
@@ -409,7 +413,7 @@ class TimelineController extends Controller
                 $pending->push([
                     'module' => 'Formula Approval', 'name' => $a->product_name, 'code' => $a->code,
                     'status' => $a->approval_status, 'action' => 'Approve',
-                    'route' => route('formula-approvals.show', $a),
+                    'route' => route(($a->source === 'approval-formula-design' ? 'approval-formula-designs' : 'formula-approvals') . '.show', $a),
                 ]);
             }
         }
@@ -454,8 +458,11 @@ class TimelineController extends Controller
 
         arsort($counts);
 
-        return collect($counts)->take(10)->map(function ($total, $uid) {
-            $user = User::find($uid);
+        $top = collect($counts)->take(10);
+        $users = User::whereIn('id', $top->keys())->get(['id', 'name'])->keyBy('id');
+
+        return $top->map(function ($total, $uid) use ($users) {
+            $user = $users->get($uid);
             return [
                 'name'  => $user?->name ?? 'Unknown',
                 'initials' => $this->initials($user?->name ?? '?'),

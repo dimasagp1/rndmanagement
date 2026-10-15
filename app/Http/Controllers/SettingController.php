@@ -99,10 +99,8 @@ class SettingController extends Controller
         $parafTypes = ['paraf_prod', 'paraf_eng', 'paraf_qc'];
         foreach ($parafTypes as $parafType) {
             if ($request->hasFile($parafType)) {
-                $oldParaf = setting($parafType);
-                if ($oldParaf) {
-                    Storage::disk('public')->delete($oldParaf);
-                }
+                // File paraf lama sengaja tidak dihapus: path-nya tersimpan di data
+                // pelaksanaan Trial PM yang sudah diparaf, dan masih dipakai saat cetak.
                 $path = $request->file($parafType)->store('settings/paraf', 'public');
                 Setting::updateOrCreate(['key' => $parafType], ['value' => $path]);
             }

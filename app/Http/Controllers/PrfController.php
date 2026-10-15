@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Services\PrfService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class PrfController extends Controller
 {
@@ -140,6 +141,7 @@ class PrfController extends Controller
 
         Gate::authorize('delete', $prf);
         $code = $prf->code;
+        Storage::disk('public')->delete($prf->documents()->pluck('file_path')->all());
         $prf->delete();
 
         return redirect()
@@ -153,6 +155,7 @@ class PrfController extends Controller
 
         Gate::authorize('edit', $prf);
 
+        Storage::disk('public')->delete($document->file_path);
         $document->delete();
 
         return redirect()

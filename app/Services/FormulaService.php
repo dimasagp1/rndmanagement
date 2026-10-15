@@ -191,19 +191,29 @@ class FormulaService
         }
 
         return DB::transaction(function () use ($formula, $createdBy) {
-            $newVersion = Formula::where('parent_formula_id', $formula->id)
-                    ->orWhere('id', $formula->id)
+            // Semua versi menunjuk ke formula induk paling awal, jadi hitung versi dari seluruh keluarganya
+            $rootId = $formula->parent_formula_id ?? $formula->id;
+            $newVersion = Formula::where('parent_formula_id', $rootId)
+                    ->orWhere('id', $rootId)
                     ->max('version') + 1;
 
             $newFormula = Formula::create([
                 'code'              => $this->generateCode(),
+                'product_id'        => $formula->product_id,
                 'name'              => $formula->name,
                 'formula_type'      => $formula->formula_type,
                 'formula_date'      => now()->format('Y-m-d'),
                 'version'           => $newVersion,
-                'parent_formula_id' => $formula->parent_formula_id ?? $formula->id,
+                'parent_formula_id' => $rootId,
                 'development_stage' => 'Product Form',
                 'preparation_method' => $formula->preparation_method,
+                'notes'             => $formula->notes,
+                'target_dose_a'      => $formula->target_dose_a,
+                'target_dose_a_unit' => $formula->target_dose_a_unit,
+                'target_dose_b'      => $formula->target_dose_b,
+                'target_dose_b_unit' => $formula->target_dose_b_unit,
+                'target_sachet'      => $formula->target_sachet,
+                'target_sachet_unit' => $formula->target_sachet_unit,
                 'approval_status'   => 'Draft',
                 'created_by'        => $createdBy,
             ]);
@@ -258,7 +268,7 @@ class FormulaService
             FormulaMaterial::create([
                 'formula_id'     => $formula->id,
                 'material_id'    => $mat['material_id'],
-                'supplier_id'    => $mat['supplier_id'] ?: null,
+                'supplier_id'    => $mat['supplier_id'] ?? null,
                 'percentage'     => $mat['percentage'],
                 'price_per_kg'   => $mat['price_per_kg'] ?? null,
                 'price_per_gram' => $mat['price_per_gram'] ?? null,

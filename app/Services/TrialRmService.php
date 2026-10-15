@@ -90,9 +90,9 @@ class TrialRmService
     public function update(TrialRm $trial, array $data): TrialRm
     {
         return DB::transaction(function () use ($trial, $data) {
-            if ($trial->approval_status !== 'Draft') {
+            if (! in_array($trial->approval_status, ['Draft', 'Rejected'])) {
                 throw ValidationException::withMessages([
-                    'status' => 'Hanya Trial berstatus Draft yang dapat diperbarui.',
+                    'status' => 'Hanya Trial berstatus Draft atau Rejected yang dapat diperbarui.',
                 ]);
             }
 

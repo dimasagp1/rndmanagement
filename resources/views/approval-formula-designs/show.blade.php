@@ -46,6 +46,8 @@
                 @if(!in_array($fa->approval_status, ['Pending','Approved']) || ($fa->type === 'Design' && $fa->approval_status === 'Approved'))
                 <a href="{{ route('approval-formula-designs.edit', ['formApproval' => $fa, 'type' => $fa->type]) }}" class="btn-outline">Edit</a>
                 @endif
+            @endcan
+            @can('duplicate', $fa)
                 <form method="POST" action="{{ route('approval-formula-designs.duplicate', $fa) }}" class="inline">
                     @csrf
                     <button type="submit" class="btn-outline text-primary border-primary/20 hover:bg-primary/5" onclick="return confirm('Buat revisi baru dari {{ $fa->revision_label }}?')">Duplikasi → Revisi {{ str_pad((string)((int)$fa->revision+1),2,'0',STR_PAD_LEFT) }}</button>

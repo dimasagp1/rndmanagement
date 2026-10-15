@@ -78,10 +78,10 @@ class UserManagementTest extends TestCase
         $response->assertRedirect(route('users.index'));
     }
 
-    public function test_superadmin_cannot_delete_themselves()
+    public function test_superadmin_cannot_deactivate_themselves()
     {
         $response = $this->actingAs($this->superadmin)->delete(route('users.destroy', $this->superadmin));
-        $this->assertNotNull(User::find($this->superadmin->id));
-        $response->assertSessionHas('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        $this->assertTrue(User::find($this->superadmin->id)->is_active);
+        $response->assertSessionHas('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
     }
 }

@@ -7,6 +7,8 @@ use App\Models\TrialPm;
 use App\Models\Product;
 use App\Services\TrialPmService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class TrialPmController extends Controller
@@ -68,6 +70,7 @@ class TrialPmController extends Controller
         Gate::authorize('create', TrialPm::class);
 
         $validated = $request->validate([
+            'product_id'                 => 'required|exists:products,id',
             'proposal_number'            => 'nullable|string|max:255',
             'packaging_material'         => 'required|string|max:255',
             'supplier'                   => 'required|string|max:255',
@@ -223,6 +226,8 @@ class TrialPmController extends Controller
     {
         Gate::authorize('delete', $trialPm);
         $code = $trialPm->code;
+        // Foto disimpan sebagai URL '/storage/...', ubah ke path disk sebelum dihapus
+        Storage::disk('public')->delete(collect($trialPm->photos ?? [])->map(fn ($url) => Str::after($url, '/storage/'))->all());
         $trialPm->delete();
 
         return redirect()
@@ -265,8 +270,8 @@ class TrialPmController extends Controller
             $this->service->approveDepartment(
                 $trialPm,
                 $validated['department'],
-                $validated['is_approved'],
-                $validated['notes'],
+                (bool) $validated['is_approved'],
+                $validated['notes'] ?? null,
                 auth()->id()
             );
         } catch (ValidationException $e) {

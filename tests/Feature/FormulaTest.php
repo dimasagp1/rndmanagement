@@ -67,6 +67,7 @@ class FormulaTest extends TestCase
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
             'code' => 'FRM-202607-001',
             'name' => 'Formula Test',
+            'product_id' => Product::where('name', 'Formula Test')->value('id'),
             'development_stage' => 'Product Form',
             'materials' => [
                 [
@@ -93,6 +94,7 @@ class FormulaTest extends TestCase
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
             'code' => 'FRM-202607-999',
             'name' => 'Formula Over 100',
+            'product_id' => Product::where('name', 'Formula Over 100')->value('id'),
             'development_stage' => 'Product Form',
             'materials' => [
                 [
@@ -208,6 +210,7 @@ class FormulaTest extends TestCase
         $response = $this->actingAs($this->staff)->post(route('formulas.store'), [
             'code' => 'FRM-202607-EX1',
             'name' => 'Existing Product Formula',
+            'product_id' => Product::where('name', 'Existing Product Formula')->value('id'),
             'formula_type' => 'existing',
             'materials' => [
                 [

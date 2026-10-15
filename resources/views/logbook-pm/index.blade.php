@@ -89,7 +89,7 @@
                     <label class="form-label text-xs">Status Pengujian</label>
                     <select name="status_pengujian" class="form-input text-sm py-1.5">
                         <option value="">Semua Status</option>
-                        @foreach(['Pending','Proses','Lulus','Tidak Lulus'] as $s)
+                        @foreach(['Pending','On Going Trial','Passed','Rejected'] as $s)
                         <option value="{{ $s }}" {{ request('status_pengujian') === $s ? 'selected' : '' }}>{{ $s }}</option>
                         @endforeach
                     </select>

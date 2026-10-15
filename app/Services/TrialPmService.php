@@ -96,9 +96,9 @@ class TrialPmService
     public function update(TrialPm $trial, array $data, ?User $signer = null): TrialPm
     {
         return DB::transaction(function () use ($trial, $data, $signer) {
-            if ($trial->approval_status !== 'Draft') {
+            if (! in_array($trial->approval_status, ['Draft', 'Rejected'])) {
                 throw ValidationException::withMessages([
-                    'status' => 'Hanya Trial PM berstatus Draft yang dapat diperbarui.',
+                    'status' => 'Hanya Trial PM berstatus Draft atau Rejected yang dapat diperbarui.',
                 ]);
             }
 
@@ -178,13 +178,23 @@ class TrialPmService
     // ──────────────────────────────────────────────────────────────
     public function submitForReview(TrialPm $trial): void
     {
-        if ($trial->approval_status !== 'Draft') {
+        if (! in_array($trial->approval_status, ['Draft', 'Rejected'])) {
             throw ValidationException::withMessages([
-                'status' => 'Hanya Trial PM berstatus Draft yang dapat diajukan.',
+                'status' => 'Hanya Trial PM berstatus Draft atau Rejected yang dapat diajukan.',
             ]);
         }
 
-        $trial->update(['approval_status' => 'Pending Review']);
+        DB::transaction(function () use ($trial) {
+            // Pengajuan ulang: persetujuan departemen dari putaran sebelumnya tidak berlaku lagi
+            TrialPmApproval::where('trial_pm_id', $trial->id)->update([
+                'is_approved' => false,
+                'notes'       => null,
+                'approved_by' => null,
+                'approved_at' => null,
+            ]);
+
+            $trial->update(['approval_status' => 'Pending Review']);
+        });
     }
 
     // ──────────────────────────────────────────────────────────────

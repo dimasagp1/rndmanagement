@@ -51,7 +51,7 @@
             <h1 class="page-title">Trial PM: {{ $trialPm->packaging_material }}</h1>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-            @if($trialPm->approval_status === 'Draft')
+            @if(in_array($trialPm->approval_status, ['Draft', 'Rejected']))
                 @can('edit', $trialPm)
                 <a href="{{ route('trial-pms.edit', $trialPm) }}" class="btn-outline" id="btn-edit-trial-pm">Edit</a>
                 @endcan

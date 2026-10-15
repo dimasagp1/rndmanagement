@@ -24,8 +24,9 @@ class TrialPmPolicy
 
     public function edit(User $user, TrialPm $trial): bool
     {
+        // Sama dengan Trial RM: Rejected boleh direvisi lalu diajukan ulang
         return $trial->created_by === $user->id
-            && $trial->approval_status === 'Draft'
+            && in_array($trial->approval_status, ['Draft', 'Rejected'])
             && $user->can('trial_pm.edit');
     }
 
@@ -44,7 +45,7 @@ class TrialPmPolicy
     public function submit(User $user, TrialPm $trial): bool
     {
         return $trial->created_by === $user->id
-            && $trial->approval_status === 'Draft'
+            && in_array($trial->approval_status, ['Draft', 'Rejected'])
             && $user->can('trial_pm.edit');
     }
 

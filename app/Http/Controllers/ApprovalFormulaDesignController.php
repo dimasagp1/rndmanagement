@@ -10,6 +10,7 @@ use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ApprovalFormulaDesignController extends Controller
 {
@@ -78,7 +79,7 @@ class ApprovalFormulaDesignController extends Controller
             'kategori' => 'required|string|max:255',
             'komoditi' => 'nullable|string|max:255',
             'sample_code' => 'nullable|string|max:100',
-            'bentuk_sediaan' => 'nullable|in:' . ProductCategory::pluck('name')->implode(','),
+            'bentuk_sediaan' => ['nullable', Rule::in(ProductCategory::pluck('name'))],
             'manufactured' => 'nullable|string|max:255',
             'klaim_product' => 'nullable|string|max:2000',
             'aturan_pakai' => 'nullable|string|max:255',
@@ -202,7 +203,7 @@ class ApprovalFormulaDesignController extends Controller
             'kategori' => 'required|string|max:255',
             'komoditi' => 'nullable|string|max:255',
             'sample_code' => 'nullable|string|max:100',
-            'bentuk_sediaan' => 'nullable|in:' . ProductCategory::pluck('name')->implode(','),
+            'bentuk_sediaan' => ['nullable', Rule::in(ProductCategory::pluck('name'))],
             'manufactured' => 'nullable|string|max:255',
             'klaim_product' => 'nullable|string|max:2000',
             'aturan_pakai' => 'nullable|string|max:255',
@@ -287,12 +288,13 @@ class ApprovalFormulaDesignController extends Controller
     // ── DUPLICATE ──────────────────────────────────────────────────
     public function duplicate(Request $request, FormulaApprovalForm $formApproval)
     {
-        abort_unless(auth()->user()->can('formula.edit'), 403);
+        Gate::authorize('duplicate', $formApproval);
         $request->validate(['change_description' => 'nullable|string|max:1000']);
 
         $copy = $formApproval->replicate();
         $copy->revision = $formApproval->revision + 1;
-        $copy->approval_status = 'Pending';
+        // Revisi baru mulai sebagai Draft; masuk antrean GM hanya lewat submit()
+        $copy->approval_status = 'Draft';
         $copy->artwork_status = 'Draft';
         $copy->submitted_at = null;
         $copy->approved_by_om = null;
@@ -324,7 +326,7 @@ class ApprovalFormulaDesignController extends Controller
         }
 
         return redirect()->route(self::PREFIX . '.show', ['formApproval' => $copy])
-            ->with('success', "Revisi baru ({$copy->revision_label}) dibuat.");
+            ->with('success', "Revisi baru ({$copy->revision_label}) dibuat sebagai Draft.");
     }
 
     // ── APPROVE GM ─────────────────────────────────────────────────
