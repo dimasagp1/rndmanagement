@@ -61,13 +61,14 @@ class NpdProposal extends Model
         return $this->hasMany(NpdProposalDocument::class);
     }
 
+    // Target bersifat opsional: tampilkan "—" bila belum diisi, bukan "Rp 0"
     public function getFormattedCogsAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->target_cogs, 0, ',', '.');
+        return $this->target_cogs === null ? '—' : 'Rp ' . number_format((float) $this->target_cogs, 0, ',', '.');
     }
 
     public function getFormattedSellingPriceAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->target_selling_price, 0, ',', '.');
+        return $this->target_selling_price === null ? '—' : 'Rp ' . number_format((float) $this->target_selling_price, 0, ',', '.');
     }
 }

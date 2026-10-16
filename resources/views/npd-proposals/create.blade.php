@@ -67,21 +67,22 @@
                         @error('product_name') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                        <select id="pic" name="pic"
-                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
-                            <option value="">— Pilih PIC / Project Owner —</option>
-                            @foreach($teamMembers as $member)
-                            <option value="{{ $member->name }}" {{ old('pic', auth()->user()->name) == $member->name ? 'selected' : '' }}>
-                                {{ $member->name }}
-                            </option>
-                            @endforeach
-                            @if(old('pic') && ! $teamMembers->pluck('name')->contains(old('pic')))
-                            <option value="{{ old('pic') }}" selected>{{ old('pic') }} (PIC lama)</option>
-                            @endif
-                        </select>
-                        @error('pic') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
-                        <p class="text-xs text-gray-400 mt-1">Daftar PIC diambil dari akun pengguna (Staff R&D / Staff Packdev).</p>
-                    </div>
+                <div>
+                    <label for="pic" class="block text-sm font-medium text-gray-700 mb-1">PIC / Project Owner</label>
+                    <select id="pic" name="pic"
+                            class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
+                        <option value="">— Pilih PIC / Project Owner —</option>
+                        @foreach($teamMembers as $member)
+                        <option value="{{ $member->name }}" {{ old('pic', auth()->user()->name) == $member->name ? 'selected' : '' }}>
+                            {{ $member->name }}
+                        </option>
+                        @endforeach
+                        @if(old('pic') && ! $teamMembers->pluck('name')->contains(old('pic')))
+                        <option value="{{ old('pic') }}" selected>{{ old('pic') }} (PIC lama)</option>
+                        @endif
+                    </select>
+                    @error('pic') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    <p class="text-xs text-gray-400 mt-1">Daftar PIC diambil dari akun pengguna (Staff R&D / Staff Packdev).</p>
                 </div>
 
                 <div>
@@ -93,14 +94,14 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="target_cogs" class="block text-sm font-medium text-gray-700 mb-1">Target COGS / HPP (Rp) *</label>
+                        <label for="target_cogs" class="block text-sm font-medium text-gray-700 mb-1">Target COGS / HPP (Rp) <span class="text-gray-400 font-normal">(opsional)</span></label>
                         <input type="number" id="target_cogs" name="target_cogs" step="0.01" min="0" value="{{ old('target_cogs') }}"
                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
                                placeholder="cth: 15000">
                         @error('target_cogs') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="target_selling_price" class="block text-sm font-medium text-gray-700 mb-1">Target Selling Price (Rp) *</label>
+                        <label for="target_selling_price" class="block text-sm font-medium text-gray-700 mb-1">Target Selling Price (Rp) <span class="text-gray-400 font-normal">(opsional)</span></label>
                         <input type="number" id="target_selling_price" name="target_selling_price" step="0.01" min="0" value="{{ old('target_selling_price') }}"
                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
                                placeholder="cth: 25000">
@@ -288,7 +289,7 @@
                 }
             };
         }
-    <script>
+
         function syncProductFromMaster(select) {
             const selected = select.options[select.selectedIndex];
             const nameInput = document.getElementById('product_name');

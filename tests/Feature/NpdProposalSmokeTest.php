@@ -86,4 +86,29 @@ class NpdProposalSmokeTest extends TestCase
             ->assertOk()
             ->assertDontSee("activeTab === 'npd_proposals'");
     }
+
+    public function test_target_cogs_dan_selling_price_boleh_dikosongkan(): void
+    {
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+
+        $staff = User::factory()->create();
+        $staff->assignRole('Staff R&D');
+        $prf = Prf::create([
+            'code' => 'PRF-OPSIONAL', 'product_concept' => 'Konsep', 'product_name' => 'Produk Y',
+            'created_by' => $staff->id,
+        ]);
+
+        $this->actingAs($staff)->post('/npd-proposals', [
+            'code' => 'NPD-OPSIONAL', 'prf_id' => $prf->id,
+            'product_name' => 'Produk Y', 'product_concept' => 'Konsep',
+        ])->assertSessionHasNoErrors();
+
+        $proposal = NpdProposal::where('code', 'NPD-OPSIONAL')->firstOrFail();
+        $this->assertNull($proposal->target_cogs);
+        $this->assertNull($proposal->target_selling_price);
+        $this->assertSame('—', $proposal->formatted_cogs);
+
+        $this->actingAs($staff)->get("/npd-proposals/{$proposal->id}")->assertOk()->assertDontSee('Rp 0');
+        $this->actingAs($staff)->get('/npd-proposals/create')->assertOk()->assertSee('(opsional)');
+    }
 }

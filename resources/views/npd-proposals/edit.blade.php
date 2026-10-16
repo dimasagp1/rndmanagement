@@ -37,29 +37,44 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
+                        <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Produk (Master)</label>
+                        <select id="product_id" name="product_id"
+                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary"
+                                onchange="syncProductFromMaster(this)">
+                            <option value="">— Pilih Produk Master —</option>
+                            @foreach($products as $product)
+                            <option value="{{ $product->id }}" data-name="{{ $product->name }}" {{ old('product_id', $proposal->product_id) == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Pilih dari master Produk agar terhubung ke dashboard.</p>
+                        @error('product_id') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
                         <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
                         <input type="text" id="product_name" name="product_name" value="{{ old('product_name', $proposal->product_name) }}"
                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
                         @error('product_name') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <div>
-                        <label for="pic" class="block text-sm font-medium text-gray-700 mb-1">PIC / Project Owner</label>
-                        <select id="pic" name="pic"
-                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
-                            <option value="">— Pilih PIC / Project Owner —</option>
-                            @foreach($teamMembers as $member)
-                            <option value="{{ $member->name }}" {{ old('pic', $proposal->pic) == $member->name ? 'selected' : '' }}>
-                                {{ $member->name }}
-                            </option>
-                            @endforeach
-                            @if(old('pic', $proposal->pic) && ! $teamMembers->pluck('name')->contains(old('pic', $proposal->pic)))
-                            <option value="{{ old('pic', $proposal->pic) }}" selected>
-                                {{ old('pic', $proposal->pic) }} (PIC lama)
-                            </option>
-                            @endif
-                        </select>
-                        @error('pic') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
-                    </div>
+                </div>
+
+                <div>
+                    <label for="pic" class="block text-sm font-medium text-gray-700 mb-1">PIC / Project Owner</label>
+                    <select id="pic" name="pic"
+                            class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
+                        <option value="">— Pilih PIC / Project Owner —</option>
+                        @foreach($teamMembers as $member)
+                        <option value="{{ $member->name }}" {{ old('pic', $proposal->pic) == $member->name ? 'selected' : '' }}>
+                            {{ $member->name }}
+                        </option>
+                        @endforeach
+                        @if(old('pic', $proposal->pic) && ! $teamMembers->pluck('name')->contains(old('pic', $proposal->pic)))
+                        <option value="{{ old('pic', $proposal->pic) }}" selected>
+                            {{ old('pic', $proposal->pic) }} (PIC lama)
+                        </option>
+                        @endif
+                    </select>
+                    @error('pic') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                    <p class="text-xs text-gray-400 mt-1">Daftar PIC diambil dari akun pengguna (Staff R&D / Staff Packdev).</p>
                 </div>
 
                 <div>
@@ -71,13 +86,13 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="target_cogs" class="block text-sm font-medium text-gray-700 mb-1">Target COGS / HPP (Rp) *</label>
+                        <label for="target_cogs" class="block text-sm font-medium text-gray-700 mb-1">Target COGS / HPP (Rp) <span class="text-gray-400 font-normal">(opsional)</span></label>
                         <input type="number" id="target_cogs" name="target_cogs" step="0.01" min="0" value="{{ old('target_cogs', $proposal->target_cogs) }}"
                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
                         @error('target_cogs') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="target_selling_price" class="block text-sm font-medium text-gray-700 mb-1">Target Selling Price (Rp) *</label>
+                        <label for="target_selling_price" class="block text-sm font-medium text-gray-700 mb-1">Target Selling Price (Rp) <span class="text-gray-400 font-normal">(opsional)</span></label>
                         <input type="number" id="target_selling_price" name="target_selling_price" step="0.01" min="0" value="{{ old('target_selling_price', $proposal->target_selling_price) }}"
                                class="w-full rounded-lg border-gray-300 bg-gray-50 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary">
                         @error('target_selling_price') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
@@ -301,5 +316,13 @@
 
             updateEmptyState();
         });
+
+        function syncProductFromMaster(select) {
+            const selected = select.options[select.selectedIndex];
+            const nameInput = document.getElementById('product_name');
+            if (nameInput && selected?.dataset?.name) {
+                nameInput.value = selected.dataset.name;
+            }
+        }
     </script>
 </x-app-layout>
