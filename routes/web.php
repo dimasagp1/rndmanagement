@@ -10,6 +10,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\MaterialSupplierController;
+use App\Http\Controllers\ProcurementPriceController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PreformulationStudyController;
@@ -454,6 +456,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('materials/documents/{document}', [MaterialController::class, 'destroyDocument'])->name('materials.documents.destroy')->middleware('role:Superadmin|Staff R&D');
     Route::resource('materials', MaterialController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
+
+    // ── Katalog Harga Material & Pemasok (Area Merah) ─────
+    Route::get('material-suppliers', [MaterialSupplierController::class, 'index'])->name('material-suppliers.index')->middleware('role:Superadmin|Staff R&D');
+    Route::post('material-suppliers', [MaterialSupplierController::class, 'store'])->name('material-suppliers.store')->middleware('role:Superadmin|Staff R&D');
+    Route::post('material-suppliers/{materialSupplier}/price', [MaterialSupplierController::class, 'updatePrice'])->name('material-suppliers.update-price')->middleware('role:Superadmin|Staff R&D');
+    Route::get('material-suppliers/{materialSupplier}/histories', [MaterialSupplierController::class, 'priceHistories'])->name('material-suppliers.histories')->middleware('role:Superadmin|Staff R&D');
+    Route::delete('material-suppliers/{materialSupplier}', [MaterialSupplierController::class, 'destroy'])->name('material-suppliers.destroy')->middleware('role:Superadmin|Staff R&D');
+
+    // ── Integrasi Harga Pengadaan / Procurement (Area Biru) ──
+    Route::get('procurement-prices', [ProcurementPriceController::class, 'index'])->name('procurement-prices.index')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/sync', [ProcurementPriceController::class, 'syncFromApi'])->name('procurement-prices.sync')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/{price}/map', [ProcurementPriceController::class, 'map'])->name('procurement-prices.map')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/{price}/apply', [ProcurementPriceController::class, 'apply'])->name('procurement-prices.apply')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/batch-apply', [ProcurementPriceController::class, 'batchApply'])->name('procurement-prices.batch-apply')->middleware('role:Superadmin|Staff R&D');
+    Route::delete('procurement-prices/{price}', [ProcurementPriceController::class, 'destroy'])->name('procurement-prices.destroy')->middleware('role:Superadmin|Staff R&D');
     Route::resource('product-categories', ProductCategoryController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
     Route::resource('products', ProductController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
 Route::resource('preformulation-studies', PreformulationStudyController::class)->middleware('role:Superadmin|Staff R&D|Staff Packdev|Operational Manager|General Manager');

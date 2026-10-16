@@ -197,6 +197,106 @@
                                        class="block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
                             </div>
                         </div>
+                    {{-- ─── Integrasi API Procurement / Pengadaan ────────────── --}}
+                    <div class="pt-6 border-t border-gray-100" x-data="{
+                        autoApply: {{ setting('procurement_auto_apply', '0') === '1' ? 'true' : 'false' }},
+                        token: '{{ setting('procurement_api_token', '') }}',
+                        generateToken() {
+                            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                            let result = 'rnd_proc_';
+                            for (let i = 0; i < 32; i++) {
+                                result += chars.charAt(Math.floor(Math.random() * chars.length));
+                            }
+                            this.token = result;
+                        }
+                    }">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-ink flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                    </svg>
+                                    Integrasi API Pengadaan (Procurement / Purchasing)
+                                </h3>
+                                <p class="text-xs text-gray-400">Sinkronisasi data harga kontrak & realisasi pembelian dari departemen Purchasing ke sistem R&D.</p>
+                            </div>
+                            <a href="{{ route('procurement-prices.index') }}" target="_blank"
+                               class="text-[11px] font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-lg transition inline-flex items-center gap-1">
+                                <span>Buka Feed Integrasi</span>
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                            </a>
+                        </div>
+
+                        <div class="bg-sky-50/40 border border-sky-150 rounded-xl p-4 sm:p-5 space-y-5 mt-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {{-- Outbound Sync API URL --}}
+                                <div>
+                                    <label class="form-label text-xs font-semibold" for="procurement_api_url">URL Endpoint API Procurement (Outbound Pull)</label>
+                                    <input type="url" id="procurement_api_url" name="procurement_api_url"
+                                           value="{{ old('procurement_api_url', setting('procurement_api_url')) }}"
+                                           class="form-input text-xs" placeholder="https://erp.perusahaan.com/api/v1/po-materials">
+                                    <p class="text-[10px] text-gray-500 mt-1">Endpoint GET untuk menarik data saat tombol <strong>"Tarik Data dari API"</strong> diklik.</p>
+                                </div>
+
+                                {{-- API Token / Secret Key --}}
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="form-label text-xs font-semibold mb-0" for="procurement_api_token">API Token / Webhook Secret Key</label>
+                                        <button type="button" @click="generateToken()" class="text-[10px] text-sky-700 hover:text-sky-900 font-semibold underline">
+                                            + Generate Token
+                                        </button>
+                                    </div>
+                                    <input type="text" id="procurement_api_token" name="procurement_api_token"
+                                           x-model="token"
+                                           class="form-input text-xs font-mono" placeholder="rnd_proc_xxxxxxxxxxxxxxxx">
+                                    <p class="text-[10px] text-gray-500 mt-1">Digunakan untuk otentikasi Bearer Token atau header <code>X-API-KEY</code>.</p>
+                                </div>
+                            </div>
+
+                            {{-- Toggle Auto Apply --}}
+                            <div class="flex items-start justify-between gap-4 pt-3 border-t border-sky-200/50">
+                                <div>
+                                    <label class="font-bold text-xs text-ink cursor-pointer" @click="autoApply = !autoApply">
+                                        Penerapan Otomatis ke Katalog R&D (Auto-Apply)
+                                    </label>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">
+                                        Jika diaktifkan, data PO yang masuk via API dan cocok dengan Master Bahan & Pemasok R&D akan <strong>langsung memperbarui harga acuan aktif</strong> dan mencatat riwayat perubahan harga secara otomatis tanpa perlu persetujuan manual.
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-2.5 flex-shrink-0">
+                                    <button type="button"
+                                            @click="autoApply = !autoApply"
+                                            :class="autoApply ? 'bg-sky-600' : 'bg-gray-300'"
+                                            class="relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-inner items-center"
+                                            aria-label="Toggle Auto Apply">
+                                        <span :class="autoApply ? 'translate-x-7' : 'translate-x-0.5'"
+                                              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"></span>
+                                    </button>
+                                    <span x-text="autoApply ? 'AKTIF (ON)' : 'MATI (OFF)'"
+                                          :class="autoApply ? 'text-sky-800 bg-sky-200/70 border-sky-300' : 'text-gray-500 bg-gray-100 border-gray-200'"
+                                          class="text-[10px] font-bold px-2 py-0.5 rounded border select-none w-20 text-center"></span>
+                                    <input type="hidden" name="procurement_auto_apply" :value="autoApply ? '1' : '0'">
+                                </div>
+                            </div>
+
+                            {{-- Inbound Endpoint Reference Box --}}
+                            <div class="p-3 bg-white/80 rounded-lg border border-sky-200/60 text-xs space-y-1.5">
+                                <span class="font-bold text-gray-800 flex items-center gap-1.5 text-[11px]">
+                                    <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Endpoint Webhook Masuk (Inbound API) untuk Sistem Procurement / ERP:
+                                </span>
+                                <div class="font-mono text-[11px] bg-gray-900 text-emerald-400 p-2 rounded overflow-x-auto select-all">
+                                    POST {{ url('/api/v1/procurement/prices') }}
+                                </div>
+                                <p class="text-[10px] text-gray-500">
+                                    Header wajib: <code class="bg-gray-100 px-1 py-0.5 rounded font-mono text-gray-800">Authorization: Bearer &lt;Token Di Atas&gt;</code> atau <code class="bg-gray-100 px-1 py-0.5 rounded font-mono text-gray-800">X-API-KEY: &lt;Token Di Atas&gt;</code>
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- ─── Mode Pemeliharaan Sistem (Maintenance Mode) ────────── --}}

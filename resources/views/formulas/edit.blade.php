@@ -199,6 +199,7 @@
                                             <td>
                                                 <select :name="`materials[${index}][material_id]`"
                                                         x-model="row.material_id"
+                                                        @change="fetchPrice(index)"
                                                         class="form-input text-xs py-1 px-1.5 tom-select" required>
                                                     <option value="">-- Pilih Material --</option>
                                                     @foreach($materials as $mat)
@@ -209,6 +210,7 @@
                                             <td>
                                                 <select :name="`materials[${index}][supplier_id]`"
                                                         x-model="row.supplier_id"
+                                                        @change="fetchPrice(index)"
                                                         class="form-input text-xs py-1 px-1.5 tom-select">
                                                     <option value="">-- Pilih Supplier --</option>
                                                     @foreach($suppliers as $sup)
@@ -439,6 +441,26 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
         removeRow(index) {
             this.rows.splice(index, 1);
             this.recalculate();
+        },
+
+        async fetchPrice(index) {
+            const row = this.rows[index];
+            if (!row.material_id) return;
+
+            try {
+                const url = `/api/material-suppliers/price?material_id=${row.material_id}&supplier_id=${row.supplier_id || ''}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.found) {
+                    row.price_per_kg = data.price_per_kg;
+                    if (!row.supplier_id && data.supplier_id) {
+                        row.supplier_id = data.supplier_id;
+                    }
+                    this.recalcRow(index);
+                }
+            } catch (err) {
+                console.error("Gagal auto-fetch harga:", err);
+            }
         },
 
         recalcRow(index) {

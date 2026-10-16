@@ -40,16 +40,7 @@
     </div>
 
     {{-- Tabs --}}
-    <div class="flex items-center border-b border-gray-250 mb-6">
-        <a href="{{ route('materials.index') }}"
-           class="px-4 py-2.5 border-b-2 border-transparent text-gray-500 hover:text-ink text-sm transition">
-            Bahan Baku (Materials)
-        </a>
-        <a href="{{ route('suppliers.index') }}"
-           class="px-4 py-2.5 border-b-2 border-primary text-primary font-bold text-sm transition">
-            Pemasok (Suppliers)
-        </a>
-    </div>
+    @include('materials.partials.tabs')
 
     <div class="card">
         <div class="overflow-x-auto">

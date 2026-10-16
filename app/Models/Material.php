@@ -30,6 +30,19 @@ class Material extends Model
         return $this->hasMany(FormulaMaterial::class);
     }
 
+    // Relasi ke MaterialSupplier & Supplier
+    public function materialSuppliers()
+    {
+        return $this->hasMany(MaterialSupplier::class);
+    }
+
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class, 'material_suppliers')
+            ->withPivot('current_price', 'currency', 'effective_date', 'price_source', 'is_active')
+            ->withTimestamps();
+    }
+
     // Relasi ke MaterialDocument
     public function documents()
     {

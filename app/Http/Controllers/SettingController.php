@@ -43,11 +43,21 @@ class SettingController extends Controller
             'maintenance_notice_enabled' => ['nullable', 'in:0,1'],
             'maintenance_notice_message' => ['nullable', 'string', 'max:500'],
             'maintenance_allowed_roles' => ['nullable', 'array'],
+            // Procurement API settings
+            'procurement_api_url' => ['nullable', 'string', 'max:255'],
+            'procurement_api_token' => ['nullable', 'string', 'max:255'],
+            'procurement_auto_apply' => ['nullable', 'in:0,1'],
         ]);
 
         // Save text settings
         Setting::updateOrCreate(['key' => 'app_name'], ['value' => $request->app_name]);
         Setting::updateOrCreate(['key' => 'company_name'], ['value' => $request->company_name]);
+
+        // Save Procurement API Settings
+        Setting::updateOrCreate(['key' => 'procurement_api_url'], ['value' => $request->procurement_api_url]);
+        Setting::updateOrCreate(['key' => 'procurement_api_token'], ['value' => $request->procurement_api_token]);
+        $procurementAutoApply = $request->input('procurement_auto_apply') === '1' ? '1' : '0';
+        Setting::updateOrCreate(['key' => 'procurement_auto_apply'], ['value' => $procurementAutoApply]);
 
         // Save Maintenance Mode Settings
         $maintenanceEnabled = $request->input('maintenance_enabled') === '1' ? '1' : '0';
