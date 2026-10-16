@@ -7,6 +7,7 @@ use App\Models\ProcurementVendorPrice;
 use App\Models\Material;
 use App\Models\Supplier;
 use App\Models\MaterialSupplier;
+use App\Models\ProcurementMappingAlias;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -115,18 +116,14 @@ class ProcurementPriceController extends Controller
             $unit    = $item['unit'] ?? $item['uom'] ?? 'kg';
             $matCode = $item['material_code'] ?? $item['item_code'] ?? null;
 
-            if (empty($matName) || empty($venName)) {
+            // Abaikan item non-material dummy / harga 0 (misal Ongkir, tanda titik '.')
+            if (empty($matName) || empty($venName) || $price <= 0 || in_array(strtolower($matName), ['.', '-', '--'])) {
                 continue;
             }
 
-            // Cari kecocokan otomatis dengan master data R&D
-            $matchedMaterial = Material::where('name', $matName)
-                ->orWhere('name', 'like', "%{$matName}%")
-                ->first();
-
-            $matchedSupplier = Supplier::where('name', $venName)
-                ->orWhere('name', 'like', "%{$venName}%")
-                ->first();
+            // Cari kecocokan otomatis dengan Master Data R&D + Memory Pemetaan
+            $matchedMaterial = ProcurementMappingAlias::resolveMaterial($matName);
+            $matchedSupplier = ProcurementMappingAlias::resolveSupplier($venName);
 
             $status = ($matchedMaterial && $matchedSupplier) ? 'mapped' : 'unmapped';
 
@@ -192,12 +189,14 @@ class ProcurementPriceController extends Controller
 
     /**
      * Petakan manual item unmapped ke material & supplier R&D.
+     * Otomatis menyimpan ke Memory Pemetaan & memetakan seluruh PO sejenis.
      */
     public function map(Request $request, ProcurementVendorPrice $price)
     {
         $validated = $request->validate([
             'material_id' => ['required', 'exists:materials,id'],
             'supplier_id' => ['required', 'exists:suppliers,id'],
+            'propagate'   => ['nullable', 'boolean'],
         ]);
 
         $price->update([
@@ -206,7 +205,79 @@ class ProcurementPriceController extends Controller
             'sync_status'         => 'mapped',
         ]);
 
-        return redirect()->back()->with('success', "Item {$price->material_name} berhasil dipetakan ke Master R&D.");
+        // 1. Simpan ke Kamus Memory Pemetaan agar penarikan PO di masa depan otomatis terpetakan
+        ProcurementMappingAlias::updateOrCreate(
+            ['source_type' => 'material', 'source_name' => $price->material_name],
+            ['target_id' => $validated['material_id']]
+        );
+        ProcurementMappingAlias::updateOrCreate(
+            ['source_type' => 'supplier', 'source_name' => $price->vendor_name],
+            ['target_id' => $validated['supplier_id']]
+        );
+
+        // 2. Propagasi ke seluruh data feed unmapped saat ini dengan nama sejenis
+        $propagate = $request->boolean('propagate', true);
+        $propagatedCount = 0;
+
+        if ($propagate) {
+            // Pasangkan material_id ke semua unmapped dengan material_name sama
+            ProcurementVendorPrice::where('sync_status', 'unmapped')
+                ->where('material_name', $price->material_name)
+                ->update(['matched_material_id' => $validated['material_id']]);
+
+            // Pasangkan supplier_id ke semua unmapped dengan vendor_name sama
+            ProcurementVendorPrice::where('sync_status', 'unmapped')
+                ->where('vendor_name', $price->vendor_name)
+                ->update(['matched_supplier_id' => $validated['supplier_id']]);
+
+            // Item unmapped yang kini lengkap (matched material & supplier) langsung aktif jadi 'mapped'
+            $propagatedCount = ProcurementVendorPrice::where('sync_status', 'unmapped')
+                ->whereNotNull('matched_material_id')
+                ->whereNotNull('matched_supplier_id')
+                ->update(['sync_status' => 'mapped']);
+        }
+
+        $msg = "Item {$price->material_name} berhasil dipetakan ke Master R&D dan disimpan ke ingatan sistem.";
+        if ($propagatedCount > 0) {
+            $msg .= " Serta otomatis memetakan {$propagatedCount} data PO sejenis lainnya di daftar feed!";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Sisir seluruh data feed unmapped dan cocokkan otomatis dengan Memory Pemetaan.
+     */
+    public function autoMapAll()
+    {
+        $unmappedItems = ProcurementVendorPrice::where('sync_status', 'unmapped')->get();
+        $mappedCount = 0;
+
+        foreach ($unmappedItems as $item) {
+            $mat = $item->matched_material_id 
+                ? Material::find($item->matched_material_id) 
+                : ProcurementMappingAlias::resolveMaterial($item->material_name);
+
+            $sup = $item->matched_supplier_id 
+                ? Supplier::find($item->matched_supplier_id) 
+                : ProcurementMappingAlias::resolveSupplier($item->vendor_name);
+
+            $status = ($mat && $sup) ? 'mapped' : 'unmapped';
+
+            if ($mat || $sup) {
+                $item->update([
+                    'matched_material_id' => $mat?->id,
+                    'matched_supplier_id' => $sup?->id,
+                    'sync_status'         => $status,
+                ]);
+
+                if ($status === 'mapped') {
+                    $mappedCount++;
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', "Pencocokan cerdas selesai: {$mappedCount} item berhasil dipetakan secara otomatis menggunakan ingatan sistem.");
     }
 
     /**

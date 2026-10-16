@@ -472,6 +472,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('procurement-prices/{price}/map', [ProcurementPriceController::class, 'map'])->name('procurement-prices.map')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/{price}/apply', [ProcurementPriceController::class, 'apply'])->name('procurement-prices.apply')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/batch-apply', [ProcurementPriceController::class, 'batchApply'])->name('procurement-prices.batch-apply')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/auto-map', [ProcurementPriceController::class, 'autoMapAll'])->name('procurement-prices.auto-map')->middleware('role:Superadmin|Staff R&D');
     Route::delete('procurement-prices/{price}', [ProcurementPriceController::class, 'destroy'])->name('procurement-prices.destroy')->middleware('role:Superadmin|Staff R&D');
     Route::resource('product-categories', ProductCategoryController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
     Route::resource('products', ProductController::class)->except('show')->middleware('role:Superadmin|Staff R&D');

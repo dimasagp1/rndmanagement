@@ -8,6 +8,7 @@ use App\Models\ProcurementVendorPrice;
 use App\Models\Material;
 use App\Models\Supplier;
 use App\Models\MaterialSupplier;
+use App\Models\ProcurementMappingAlias;
 use Illuminate\Support\Facades\Log;
 
 class ProcurementApiController extends Controller
@@ -82,14 +83,9 @@ class ProcurementApiController extends Controller
                 continue;
             }
 
-            // Matching dengan master R&D
-            $matchedMaterial = Material::where('name', $matName)
-                ->orWhere('name', 'like', "%{$matName}%")
-                ->first();
-
-            $matchedSupplier = Supplier::where('name', $venName)
-                ->orWhere('name', 'like', "%{$venName}%")
-                ->first();
+            // Matching dengan master R&D + memory pemetaan
+            $matchedMaterial = ProcurementMappingAlias::resolveMaterial($matName);
+            $matchedSupplier = ProcurementMappingAlias::resolveSupplier($venName);
 
             $status = ($matchedMaterial && $matchedSupplier) ? 'mapped' : 'unmapped';
 

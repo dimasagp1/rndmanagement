@@ -39,6 +39,20 @@
                     </button>
                 </form>
 
+                @if($unmappedCount > 0)
+                <form method="POST" action="{{ route('procurement-prices.auto-map') }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                            title="Sisir seluruh feed dan cocokkan otomatis dengan data yang pernah dipetakan sebelumnya"
+                            class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Auto-Map Riwayat
+                    </button>
+                </form>
+                @endif
+
                 @if($mappedCount > 0)
                 <form method="POST" action="{{ route('procurement-prices.batch-apply') }}" class="inline">
                     @csrf
@@ -328,6 +342,18 @@
                                 <option value="{{ $sup->id }}">{{ $sup->name }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div class="p-3 bg-sky-50 rounded-xl border border-sky-150">
+                            <label class="flex items-start gap-2.5 cursor-pointer">
+                                <input type="checkbox" name="propagate" value="1" checked class="mt-0.5 rounded border-sky-300 text-sky-600 focus:ring-sky-500">
+                                <div>
+                                    <span class="text-xs font-bold text-sky-900 block">⚡ Ingat Pemetaan & Terapkan ke Seluruh Data Sejenis</span>
+                                    <span class="text-[11px] text-sky-700 block mt-0.5 leading-snug">
+                                        Sistem akan otomatis mengingat pemetaan ini ketika ada penarikan PO baru di masa depan, dan langsung memetakan semua PO unmapped yang bernama sama saat ini.
+                                    </span>
+                                </div>
+                            </label>
                         </div>
 
                         <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-150">
