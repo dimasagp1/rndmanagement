@@ -52,18 +52,37 @@
     {{-- Tabs --}}
     @include('materials.partials.tabs')
 
+    {{-- Status Filter Tabs --}}
+    <div class="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 sm:pb-0">
+        <a href="{{ route('suppliers.index', request()->except('status', 'page')) }}"
+           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ !request('status') ? 'bg-primary text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+            Semua ({{ $totalCount ?? $suppliers->total() }})
+        </a>
+        <a href="{{ route('suppliers.index', array_merge(request()->except('page'), ['status' => 'commercial'])) }}"
+           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ request('status') === 'commercial' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+            <span class="w-2 h-2 rounded-full {{ request('status') === 'commercial' ? 'bg-white' : 'bg-emerald-500' }}"></span>
+            Approved AVL ({{ $commercialCount ?? 0 }})
+        </a>
+        <a href="{{ route('suppliers.index', array_merge(request()->except('page'), ['status' => 'trial'])) }}"
+           class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ request('status') === 'trial' ? 'bg-amber-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+            <span class="w-2 h-2 rounded-full {{ request('status') === 'trial' ? 'bg-white' : 'bg-amber-500' }}"></span>
+            Pemasok Trial R&D ({{ $trialCount ?? 0 }})
+        </a>
+    </div>
+
     <div class="card">
         <div class="overflow-x-auto">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th class="w-20">No</th>
+                        <th class="w-16">No</th>
                         <th>Nama Supplier</th>
+                        <th class="text-center">Klasifikasi</th>
                         <th>PIC Kontak</th>
                         <th>Telepon</th>
                         <th>Email</th>
                         <th>Alamat</th>
-                        <th class="w-32 text-center">Aksi</th>
+                        <th class="w-36 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,12 +90,32 @@
                     <tr>
                         <td class="text-xs font-mono text-gray-400">{{ $index + 1 + ($suppliers->currentPage() - 1) * $suppliers->perPage() }}</td>
                         <td class="font-semibold text-ink">{{ $supplier->name }}</td>
+                        <td class="text-center">
+                            @if($supplier->isTrial())
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200" title="Supplier baru dalam pengujian sampel formulasi">
+                                ⚡ Trial R&D
+                            </span>
+                            @else
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Supplier resmi lolos audit AVL">
+                                🏢 Approved AVL
+                            </span>
+                            @endif
+                        </td>
                         <td class="text-sm text-gray-700">{{ $supplier->contact ?? '—' }}</td>
                         <td class="text-sm font-mono text-gray-600">{{ $supplier->phone ?? '—' }}</td>
                         <td class="text-sm font-mono text-gray-600">{{ $supplier->email ?? '—' }}</td>
                         <td class="text-xs text-gray-500 max-w-xs truncate" title="{{ $supplier->address }}">{{ $supplier->address ?? '—' }}</td>
                         <td>
                             <div class="flex items-center justify-center gap-1">
+                                @if($supplier->isTrial())
+                                <form method="POST" action="{{ route('suppliers.promote', $supplier) }}" class="inline"
+                                      onsubmit="return confirm('Promosikan {{ $supplier->name }} menjadi Pemasok Komersial (Approved AVL)?')">
+                                    @csrf
+                                    <button type="submit" class="btn-ghost btn-sm text-emerald-600 hover:bg-emerald-50 text-xs font-semibold" title="Promosikan ke Approved AVL">
+                                        Jadikan AVL
+                                    </button>
+                                </form>
+                                @endif
                                 <a href="{{ route('suppliers.edit', $supplier) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                 <form method="POST" action="{{ route('suppliers.destroy', $supplier) }}"
                                       onsubmit="return confirm('Hapus supplier {{ $supplier->name }}?')">

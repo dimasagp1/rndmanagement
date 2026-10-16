@@ -241,8 +241,22 @@
                             @foreach($formula->materials->sortByDesc('percentage') as $i => $mat)
                             <tr>
                                 <td class="text-gray-300 text-xs">{{ $i + 1 }}</td>
-                                <td class="font-medium text-ink">{{ $mat->material?->name ?? '—' }}</td>
-                                <td class="text-xs text-gray-500">{{ $mat->supplier?->name ?? '—' }}</td>
+                                <td class="font-medium text-ink">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>{{ $mat->material?->name ?? '—' }}</span>
+                                        @if($mat->material?->status === 'trial')
+                                        <span class="badge text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 font-semibold" title="Bahan Baku Trial R&D">Trial</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="text-xs text-gray-500">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>{{ $mat->supplier?->name ?? '—' }}</span>
+                                        @if($mat->supplier?->status === 'trial')
+                                        <span class="badge text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-800 border border-purple-300 font-semibold" title="Supplier Trial R&D">Trial</span>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="text-right text-xs font-mono">{{ $mat->price_per_kg ? number_format($mat->price_per_kg, 0) : '—' }}</td>
                                 <td class="text-right">
                                     <div class="flex items-center justify-end gap-2">

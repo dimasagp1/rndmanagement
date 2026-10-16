@@ -12,6 +12,12 @@ class SupplierController extends Controller
     {
         $query = Supplier::latest();
 
+        if ($status = $request->get('status')) {
+            if (in_array($status, ['commercial', 'trial'])) {
+                $query->where('status', $status);
+            }
+        }
+
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -23,7 +29,11 @@ class SupplierController extends Controller
 
         $suppliers = $query->paginate(15)->withQueryString();
 
-        return view('suppliers.index', compact('suppliers'));
+        $totalCount      = Supplier::count();
+        $commercialCount = Supplier::where('status', 'commercial')->count();
+        $trialCount      = Supplier::where('status', 'trial')->count();
+
+        return view('suppliers.index', compact('suppliers', 'totalCount', 'commercialCount', 'trialCount'));
     }
 
     public function create()
@@ -35,6 +45,7 @@ class SupplierController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:150', 'unique:suppliers,name'],
+            'status' => ['nullable', 'in:commercial,trial'],
             'contact' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:100'],
@@ -43,6 +54,7 @@ class SupplierController extends Controller
 
         $supplier = Supplier::create([
             'name' => $request->name,
+            'status' => $request->get('status', 'commercial'),
             'contact' => $request->contact,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -63,6 +75,7 @@ class SupplierController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:150', 'unique:suppliers,name,'.$supplier->id],
+            'status' => ['nullable', 'in:commercial,trial'],
             'contact' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:100'],
@@ -71,6 +84,7 @@ class SupplierController extends Controller
 
         $supplier->update([
             'name' => $request->name,
+            'status' => $request->get('status', $supplier->status),
             'contact' => $request->contact,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -80,6 +94,15 @@ class SupplierController extends Controller
         return redirect()
             ->route('suppliers.index')
             ->with('success', "Pemasok {$supplier->name} berhasil diperbarui.");
+    }
+
+    /**
+     * Promosikan supplier trial menjadi komersial (Approved AVL).
+     */
+    public function promote(Supplier $supplier)
+    {
+        $supplier->update(['status' => 'commercial']);
+        return redirect()->back()->with('success', "Pemasok {$supplier->name} berhasil dipromosikan menjadi Komersial (Approved AVL).");
     }
 
     public function destroy(Supplier $supplier)

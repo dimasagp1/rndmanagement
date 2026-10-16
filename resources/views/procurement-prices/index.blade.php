@@ -328,9 +328,18 @@
                             <label for="map_material_id" class="block text-xs font-semibold text-gray-700 mb-1">Pilih Master Bahan Baku R&D <span class="text-red-500">*</span></label>
                             <select id="map_material_id" name="material_id" x-model="selectedMaterialId" required class="form-input text-xs w-full">
                                 <option value="">— Pilih Bahan Baku R&D —</option>
-                                @foreach($materials as $mat)
-                                <option value="{{ $mat->id }}">{{ $mat->name }}</option>
-                                @endforeach
+                                <optgroup label="🌿 Bahan Baku Komersial (Resmi)">
+                                    @foreach($materials->filter(fn($m) => $m->status !== 'trial') as $mat)
+                                    <option value="{{ $mat->id }}">{{ $mat->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                @if($materials->filter(fn($m) => $m->status === 'trial')->count() > 0)
+                                <optgroup label="⚡ Bahan Baku Trial R&D (Sample Lab)">
+                                    @foreach($materials->filter(fn($m) => $m->status === 'trial') as $mat)
+                                    <option value="{{ $mat->id }}">⚡ {{ $mat->name }} (Trial)</option>
+                                    @endforeach
+                                </optgroup>
+                                @endif
                             </select>
                         </div>
 
@@ -338,9 +347,18 @@
                             <label for="map_supplier_id" class="block text-xs font-semibold text-gray-700 mb-1">Pilih Master Pemasok R&D <span class="text-red-500">*</span></label>
                             <select id="map_supplier_id" name="supplier_id" x-model="selectedSupplierId" required class="form-input text-xs w-full">
                                 <option value="">— Pilih Pemasok R&D —</option>
-                                @foreach($suppliers as $sup)
-                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
-                                @endforeach
+                                <optgroup label="🏢 Pemasok Komersial (Approved AVL)">
+                                    @foreach($suppliers->filter(fn($s) => $s->status !== 'trial') as $sup)
+                                    <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                @if($suppliers->filter(fn($s) => $s->status === 'trial')->count() > 0)
+                                <optgroup label="⚡ Pemasok Trial / Calon Rekanan R&D">
+                                    @foreach($suppliers->filter(fn($s) => $s->status === 'trial') as $sup)
+                                    <option value="{{ $sup->id }}">⚡ {{ $sup->name }} (Trial)</option>
+                                    @endforeach
+                                </optgroup>
+                                @endif
                             </select>
                         </div>
 

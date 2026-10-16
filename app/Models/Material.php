@@ -14,14 +14,35 @@ class Material extends Model
         'name',
         'type',
         'unit',
+        'status',
         'description',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'type', 'unit'])
+            ->logOnly(['name', 'type', 'unit', 'status'])
             ->logOnlyDirty();
+    }
+
+    public function scopeCommercial($query)
+    {
+        return $query->where('status', 'commercial');
+    }
+
+    public function scopeTrial($query)
+    {
+        return $query->where('status', 'trial');
+    }
+
+    public function isTrial(): bool
+    {
+        return $this->status === 'trial';
+    }
+
+    public function isCommercial(): bool
+    {
+        return $this->status === 'commercial';
     }
 
     // Relasi ke FormulaMaterial

@@ -13,6 +13,12 @@ class MaterialController extends Controller
     {
         $query = Material::with('documents')->latest();
 
+        if ($status = $request->get('status')) {
+            if (in_array($status, ['commercial', 'trial'])) {
+                $query->where('status', $status);
+            }
+        }
+
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -24,7 +30,11 @@ class MaterialController extends Controller
 
         $materials = $query->paginate(15)->withQueryString();
 
-        return view('materials.index', compact('materials'));
+        $totalCount      = Material::count();
+        $commercialCount = Material::where('status', 'commercial')->count();
+        $trialCount      = Material::where('status', 'trial')->count();
+
+        return view('materials.index', compact('materials', 'totalCount', 'commercialCount', 'trialCount'));
     }
 
     public function create()
@@ -38,6 +48,7 @@ class MaterialController extends Controller
             'name' => ['required', 'string', 'max:150', 'unique:materials,name'],
             'type' => ['nullable', 'string', 'max:50'],
             'unit' => ['required', 'string', 'max:20'],
+            'status' => ['nullable', 'in:commercial,trial'],
             'description' => ['nullable', 'string'],
             'documents' => ['nullable', 'array'],
             'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:10240'],
@@ -48,6 +59,7 @@ class MaterialController extends Controller
             'name' => $request->name,
             'type' => $request->type,
             'unit' => $request->unit,
+            'status' => $request->get('status', 'commercial'),
             'description' => $request->description,
         ]);
 
@@ -86,6 +98,7 @@ class MaterialController extends Controller
             'name' => ['required', 'string', 'max:150', 'unique:materials,name,'.$material->id],
             'type' => ['nullable', 'string', 'max:50'],
             'unit' => ['required', 'string', 'max:20'],
+            'status' => ['nullable', 'in:commercial,trial'],
             'description' => ['nullable', 'string'],
             'documents' => ['nullable', 'array'],
             'documents.*.file' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:10240'],
@@ -96,6 +109,7 @@ class MaterialController extends Controller
             'name' => $request->name,
             'type' => $request->type,
             'unit' => $request->unit,
+            'status' => $request->get('status', $material->status),
             'description' => $request->description,
         ]);
 
@@ -120,6 +134,15 @@ class MaterialController extends Controller
         return redirect()
             ->route('materials.index')
             ->with('success', "Bahan baku {$material->name} berhasil diperbarui.");
+    }
+
+    /**
+     * Promosikan bahan trial menjadi komersial (lolos uji).
+     */
+    public function promote(Material $material)
+    {
+        $material->update(['status' => 'commercial']);
+        return redirect()->back()->with('success', "Bahan baku {$material->name} berhasil dipromosikan menjadi Komersial.");
     }
 
     public function destroyDocument(MaterialDocument $document)

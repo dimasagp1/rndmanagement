@@ -12,6 +12,7 @@ class Supplier extends Model
 
     protected $fillable = [
         'name',
+        'status',
         'contact',
         'phone',
         'email',
@@ -21,8 +22,28 @@ class Supplier extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'contact', 'phone', 'email'])
+            ->logOnly(['name', 'status', 'contact', 'phone', 'email'])
             ->logOnlyDirty();
+    }
+
+    public function scopeCommercial($query)
+    {
+        return $query->where('status', 'commercial');
+    }
+
+    public function scopeTrial($query)
+    {
+        return $query->where('status', 'trial');
+    }
+
+    public function isTrial(): bool
+    {
+        return $this->status === 'trial';
+    }
+
+    public function isCommercial(): bool
+    {
+        return $this->status === 'commercial';
     }
 
     // Relasi ke FormulaMaterial

@@ -20,9 +20,30 @@ class MaterialSupplier extends Model
         'lead_time_days',
         'effective_date',
         'price_source',
+        'status',
         'notes',
         'is_active',
     ];
+
+    public function scopeCommercial($query)
+    {
+        return $query->where('status', 'commercial');
+    }
+
+    public function scopeTrial($query)
+    {
+        return $query->where('status', 'trial');
+    }
+
+    public function isTrial(): bool
+    {
+        return $this->status === 'trial';
+    }
+
+    public function isCommercial(): bool
+    {
+        return $this->status === 'commercial';
+    }
 
     protected $casts = [
         'current_price'   => 'decimal:2',

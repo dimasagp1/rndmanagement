@@ -39,8 +39,8 @@ class ProcurementPriceController extends Controller
 
         $prices = $query->paginate(15)->withQueryString();
 
-        $materials = Material::orderBy('name')->get(['id', 'name']);
-        $suppliers = Supplier::orderBy('name')->get(['id', 'name']);
+        $materials = Material::orderBy('name')->get(['id', 'name', 'status']);
+        $suppliers = Supplier::orderBy('name')->get(['id', 'name', 'status']);
 
         // Summary counts
         $totalFeed = ProcurementVendorPrice::count();

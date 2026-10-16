@@ -49,6 +49,7 @@
             'dose_05g'       => $m->dose_05g ?? '',
             'sachet_30'      => $m->sachet_30 ?? '',
             'hpp_rm'         => $m->hpp_rm ?? '',
+            'is_trial_price' => ($m->material?->status === 'trial' || $m->supplier?->status === 'trial'),
         ])->values()->toArray();
     @endphp
 
@@ -202,9 +203,18 @@
                                                         @change="fetchPrice(index)"
                                                         class="form-input text-xs py-1 px-1.5 tom-select" required>
                                                     <option value="">-- Pilih Material --</option>
-                                                    @foreach($materials as $mat)
-                                                    <option value="{{ $mat->id }}">{{ $mat->name }}</option>
-                                                    @endforeach
+                                                    <optgroup label="🌿 Bahan Baku Komersial (Resmi)">
+                                                        @foreach($materials->filter(fn($m) => $m->status !== 'trial') as $mat)
+                                                        <option value="{{ $mat->id }}">{{ $mat->name }}</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    @if($materials->filter(fn($m) => $m->status === 'trial')->count() > 0)
+                                                    <optgroup label="⚡ Bahan Baku Trial R&D (Sample Lab)">
+                                                        @foreach($materials->filter(fn($m) => $m->status === 'trial') as $mat)
+                                                        <option value="{{ $mat->id }}">⚡ {{ $mat->name }} (Trial)</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    @endif
                                                 </select>
                                             </td>
                                             <td>
@@ -213,16 +223,33 @@
                                                         @change="fetchPrice(index)"
                                                         class="form-input text-xs py-1 px-1.5 tom-select">
                                                     <option value="">-- Pilih Supplier --</option>
-                                                    @foreach($suppliers as $sup)
-                                                    <option value="{{ $sup->id }}">{{ $sup->name }}</option>
-                                                    @endforeach
+                                                    <optgroup label="🏢 Pemasok Komersial (Approved AVL)">
+                                                        @foreach($suppliers->filter(fn($s) => $s->status !== 'trial') as $sup)
+                                                        <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    @if($suppliers->filter(fn($s) => $s->status === 'trial')->count() > 0)
+                                                    <optgroup label="⚡ Pemasok Trial / Calon Rekanan R&D">
+                                                        @foreach($suppliers->filter(fn($s) => $s->status === 'trial') as $sup)
+                                                        <option value="{{ $sup->id }}">⚡ {{ $sup->name }} (Trial)</option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                    @endif
                                                 </select>
                                             </td>
                                             <td>
-                                                <input type="number" :name="`materials[${index}][price_per_kg]`"
-                                                       x-model="row.price_per_kg" @input="recalcRow(index)"
-                                                       min="0" step="100" placeholder="0"
-                                                       class="form-input w-full text-xs py-1 px-1.5 font-mono text-right">
+                                                <div>
+                                                    <input type="number" :name="`materials[${index}][price_per_kg]`"
+                                                           x-model="row.price_per_kg" @input="recalcRow(index)"
+                                                           min="0" step="100" placeholder="0"
+                                                           class="form-input w-full text-xs py-1 px-1.5 font-mono text-right"
+                                                           :class="row.is_trial_price ? 'border-amber-400 bg-amber-50/40 text-amber-900 font-semibold' : ''">
+                                                    <div x-show="row.is_trial_price" class="mt-0.5 text-right">
+                                                        <span class="inline-block text-[9px] px-1 py-0.2 bg-amber-100 text-amber-800 font-semibold rounded border border-amber-300">
+                                                            ⚡ Harga Trial
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td>
                                                 <input type="number" :name="`materials[${index}][price_per_gram]`"
@@ -420,8 +447,8 @@
 <script>
 function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', targetDoseB = 0.5000, targetDoseBUnit = 'g', targetSachet = 30, targetSachetUnit = 'sachet') {
     const rows = initial.length > 0
-        ? initial.map(m => ({ id: m.id || Date.now() + Math.random(), ...m }))
-        : [{ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' }];
+        ? initial.map(m => ({ id: m.id || Date.now() + Math.random(), is_trial_price: !!m.is_trial_price, ...m }))
+        : [{ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '', is_trial_price: false }];
 
     return {
         formType: '{{ old('formula_type', $formula->formula_type ?? 'new_product') }}',
@@ -435,7 +462,7 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
         targetSachetUnit: targetSachetUnit || 'sachet',
 
         addRow() {
-            this.rows.push({ id: Date.now() + Math.random(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '' });
+            this.rows.push({ id: Date.now() + Math.random(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '', is_trial_price: false });
         },
 
         removeRow(index) {
@@ -453,10 +480,13 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
                 const data = await res.json();
                 if (data.found) {
                     row.price_per_kg = data.price_per_kg;
+                    row.is_trial_price = !!data.is_trial;
                     if (!row.supplier_id && data.supplier_id) {
                         row.supplier_id = data.supplier_id;
                     }
                     this.recalcRow(index);
+                } else {
+                    row.is_trial_price = false;
                 }
             } catch (err) {
                 console.error("Gagal auto-fetch harga:", err);

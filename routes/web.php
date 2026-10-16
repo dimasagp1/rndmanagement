@@ -455,13 +455,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Data Master (Superadmin & Staff R&D) ─────────────
     Route::delete('materials/documents/{document}', [MaterialController::class, 'destroyDocument'])->name('materials.documents.destroy')->middleware('role:Superadmin|Staff R&D');
+    Route::post('materials/{material}/promote', [MaterialController::class, 'promote'])->name('materials.promote')->middleware('role:Superadmin|Staff R&D');
     Route::resource('materials', MaterialController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
     Route::post('suppliers/sync-procurement', [SupplierController::class, 'syncFromProcurement'])->name('suppliers.sync-procurement')->middleware('role:Superadmin|Staff R&D');
+    Route::post('suppliers/{supplier}/promote', [SupplierController::class, 'promote'])->name('suppliers.promote')->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
 
     // ── Katalog Harga Material & Pemasok (Area Merah) ─────
     Route::get('material-suppliers', [MaterialSupplierController::class, 'index'])->name('material-suppliers.index')->middleware('role:Superadmin|Staff R&D');
     Route::post('material-suppliers', [MaterialSupplierController::class, 'store'])->name('material-suppliers.store')->middleware('role:Superadmin|Staff R&D');
+    Route::post('material-suppliers/{materialSupplier}/promote', [MaterialSupplierController::class, 'promote'])->name('material-suppliers.promote')->middleware('role:Superadmin|Staff R&D');
     Route::post('material-suppliers/{materialSupplier}/price', [MaterialSupplierController::class, 'updatePrice'])->name('material-suppliers.update-price')->middleware('role:Superadmin|Staff R&D');
     Route::get('material-suppliers/{materialSupplier}/histories', [MaterialSupplierController::class, 'priceHistories'])->name('material-suppliers.histories')->middleware('role:Superadmin|Staff R&D');
     Route::delete('material-suppliers/{materialSupplier}', [MaterialSupplierController::class, 'destroy'])->name('material-suppliers.destroy')->middleware('role:Superadmin|Staff R&D');

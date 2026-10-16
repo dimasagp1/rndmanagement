@@ -55,6 +55,24 @@
         {{-- Tabs --}}
         @include('materials.partials.tabs')
 
+        {{-- Status Filter Tabs --}}
+        <div class="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 sm:pb-0">
+            <a href="{{ route('materials.index', request()->except('status', 'page')) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ !request('status') ? 'bg-primary text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                Semua ({{ $totalCount ?? $materials->total() }})
+            </a>
+            <a href="{{ route('materials.index', array_merge(request()->except('page'), ['status' => 'commercial'])) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ request('status') === 'commercial' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <span class="w-2 h-2 rounded-full {{ request('status') === 'commercial' ? 'bg-white' : 'bg-emerald-500' }}"></span>
+                Bahan Komersial ({{ $commercialCount ?? 0 }})
+            </a>
+            <a href="{{ route('materials.index', array_merge(request()->except('page'), ['status' => 'trial'])) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ request('status') === 'trial' ? 'bg-amber-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <span class="w-2 h-2 rounded-full {{ request('status') === 'trial' ? 'bg-white' : 'bg-amber-500' }}"></span>
+                Bahan Trial R&D ({{ $trialCount ?? 0 }})
+            </a>
+        </div>
+
         <div class="card">
             <div class="overflow-x-auto">
                 <table class="data-table">
@@ -62,11 +80,12 @@
                         <tr>
                             <th class="w-16">No</th>
                             <th>Nama Bahan Baku</th>
+                            <th class="text-center">Klasifikasi</th>
                             <th>Bentuk Sediaan</th>
                             <th>Satuan</th>
                             <th>Aplikasi Penggunaan</th>
                             <th>Dokumen Pendukung</th>
-                            <th class="w-32 text-center">Aksi</th>
+                            <th class="w-36 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -74,6 +93,17 @@
                         <tr>
                             <td class="text-xs font-mono text-gray-400">{{ $index + 1 + ($materials->currentPage() - 1) * $materials->perPage() }}</td>
                             <td class="font-semibold text-ink">{{ $material->name }}</td>
+                            <td class="text-center">
+                                @if($material->isTrial())
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200" title="Bahan masih dalam tahap trial/pengujian R&D">
+                                    ⚡ Trial R&D
+                                </span>
+                                @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Bahan komersial resmi terdaftar">
+                                    🌿 Komersial
+                                </span>
+                                @endif
+                            </td>
                             <td>
                                 @if($material->type)
                                 <span class="badge bg-emerald-100 text-emerald-700">{{ $material->type }}</span>
@@ -118,6 +148,15 @@
                             </td>
                             <td>
                                 <div class="flex items-center justify-center gap-1">
+                                    @if($material->isTrial())
+                                    <form method="POST" action="{{ route('materials.promote', $material) }}" class="inline"
+                                          onsubmit="return confirm('Promosikan {{ $material->name }} menjadi Bahan Baku Komersial?')">
+                                        @csrf
+                                        <button type="submit" class="btn-ghost btn-sm text-emerald-600 hover:bg-emerald-50 text-xs font-semibold" title="Loloskan ke Komersial">
+                                            Loloskan
+                                        </button>
+                                    </form>
+                                    @endif
                                     <a href="{{ route('materials.edit', $material) }}" class="btn-ghost btn-sm text-primary">Edit</a>
                                     <form method="POST" action="{{ route('materials.destroy', $material) }}"
                                           onsubmit="return confirm('Hapus bahan baku {{ $material->name }}?')">

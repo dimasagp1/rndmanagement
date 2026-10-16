@@ -42,6 +42,26 @@
                             <input type="text" id="name" name="name" value="{{ old('name', $material->name) }}" class="form-input" required>
                         </div>
 
+                        <div>
+                            <label class="form-label">Klasifikasi Bahan Baku *</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                                <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition hover:bg-emerald-50/30 {{ old('status', $material->status) === 'commercial' ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-200' }}">
+                                    <input type="radio" name="status" value="commercial" {{ old('status', $material->status) === 'commercial' ? 'checked' : '' }} class="mt-0.5 text-emerald-600 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-xs font-bold text-gray-900 block">🌿 Bahan Baku Komersial (Resmi)</span>
+                                        <span class="text-[11px] text-gray-500 block mt-0.5">Sudah terdaftar resmi untuk formula produksi komersial & sinkron dengan pengadaan.</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition hover:bg-amber-50/30 {{ old('status', $material->status) === 'trial' ? 'border-amber-500 bg-amber-50/50' : 'border-gray-200' }}">
+                                    <input type="radio" name="status" value="trial" {{ old('status', $material->status) === 'trial' ? 'checked' : '' }} class="mt-0.5 text-amber-600 focus:ring-amber-500">
+                                    <div>
+                                        <span class="text-xs font-bold text-gray-900 block">⚡ Bahan Baku Trial R&D (Sample Lab)</span>
+                                        <span class="text-[11px] text-gray-500 block mt-0.5">Bahan baru yang masih dalam tahap eksplorasi formulasi lab / uji coba sample.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="form-label" for="type">Bentuk Sediaan</label>

@@ -38,6 +38,13 @@ class MaterialSupplierController extends Controller
             $query->where('supplier_id', $supplierId);
         }
 
+        // Filter status
+        if ($status = $request->get('status')) {
+            if (in_array($status, ['commercial', 'trial'])) {
+                $query->where('status', $status);
+            }
+        }
+
         // Filter source
         if ($source = $request->get('source')) {
             $query->where('price_source', $source);
@@ -45,11 +52,13 @@ class MaterialSupplierController extends Controller
 
         $materialSuppliers = $query->paginate(15)->withQueryString();
 
-        $materials = Material::orderBy('name')->get(['id', 'name', 'unit']);
-        $suppliers = Supplier::orderBy('name')->get(['id', 'name']);
+        $materials = Material::orderBy('name')->get(['id', 'name', 'unit', 'status']);
+        $suppliers = Supplier::orderBy('name')->get(['id', 'name', 'status']);
 
         // Summary counts
         $totalRelations = MaterialSupplier::count();
+        $commercialCount = MaterialSupplier::where('status', 'commercial')->count();
+        $trialCount = MaterialSupplier::where('status', 'trial')->count();
         $totalMaterialsWithSupplier = MaterialSupplier::distinct('material_id')->count('material_id');
         $totalPriceChanges = MaterialPriceHistory::count();
 
@@ -58,6 +67,8 @@ class MaterialSupplierController extends Controller
             'materials',
             'suppliers',
             'totalRelations',
+            'commercialCount',
+            'trialCount',
             'totalMaterialsWithSupplier',
             'totalPriceChanges'
         ));
@@ -80,6 +91,7 @@ class MaterialSupplierController extends Controller
             ],
             'current_price'    => ['required', 'numeric', 'min:0'],
             'currency'         => ['nullable', 'string', 'max:10'],
+            'status'           => ['nullable', 'in:commercial,trial'],
             'vendor_item_code' => ['nullable', 'string', 'max:100'],
             'moq'              => ['nullable', 'numeric', 'min:0'],
             'lead_time_days'   => ['nullable', 'integer', 'min:0'],
@@ -88,6 +100,13 @@ class MaterialSupplierController extends Controller
         ], [
             'supplier_id.unique' => 'Bahan baku ini sudah terdaftar memiliki relasi dengan pemasok yang dipilih.',
         ]);
+
+        $status = $validated['status'] ?? null;
+        if (!$status) {
+            $mat = Material::find($validated['material_id']);
+            $sup = Supplier::find($validated['supplier_id']);
+            $status = ($mat?->isTrial() || $sup?->isTrial()) ? 'trial' : 'commercial';
+        }
 
         $materialSupplier = MaterialSupplier::create([
             'material_id'      => $validated['material_id'],
@@ -99,6 +118,7 @@ class MaterialSupplierController extends Controller
             'lead_time_days'   => $validated['lead_time_days'] ?? null,
             'effective_date'   => $validated['effective_date'] ?? now()->toDateString(),
             'price_source'     => 'manual_rnd',
+            'status'           => $status,
             'notes'            => $validated['notes'] ?? null,
             'is_active'        => true,
         ]);
@@ -211,10 +231,24 @@ class MaterialSupplierController extends Controller
                 'currency'       => $relation->currency,
                 'effective_date' => $relation->effective_date?->format('Y-m-d'),
                 'source'         => $relation->price_source,
+                'status'         => $relation->status,
+                'is_trial'       => $relation->isTrial(),
             ]);
         }
 
         return response()->json(['price' => null, 'found' => false]);
+    }
+
+    /**
+     * Promosikan relasi harga trial menjadi komersial (Approved).
+     */
+    public function promote(MaterialSupplier $materialSupplier)
+    {
+        $materialSupplier->update(['status' => 'commercial']);
+        $matName = $materialSupplier->material?->name;
+        $supName = $materialSupplier->supplier?->name;
+
+        return redirect()->back()->with('success', "Relasi harga {$matName} - {$supName} berhasil dipromosikan menjadi Komersial.");
     }
 
     /**

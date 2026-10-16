@@ -84,6 +84,24 @@
             </div>
         </div>
 
+        {{-- Status Filter Tabs --}}
+        <div class="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 sm:pb-0">
+            <a href="{{ route('material-suppliers.index', request()->except('status', 'page')) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-semibold transition {{ !request('status') ? 'bg-primary text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                Semua ({{ $totalRelations }})
+            </a>
+            <a href="{{ route('material-suppliers.index', array_merge(request()->except('page'), ['status' => 'commercial'])) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ request('status') === 'commercial' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <span class="w-2 h-2 rounded-full {{ request('status') === 'commercial' ? 'bg-white' : 'bg-emerald-500' }}"></span>
+                Harga Komersial ({{ $commercialCount }})
+            </a>
+            <a href="{{ route('material-suppliers.index', array_merge(request()->except('page'), ['status' => 'trial'])) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 {{ request('status') === 'trial' ? 'bg-amber-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                <span class="w-2 h-2 rounded-full {{ request('status') === 'trial' ? 'bg-white' : 'bg-amber-500' }}"></span>
+                Harga Trial R&D ({{ $trialCount }})
+            </a>
+        </div>
+
         {{-- Table --}}
         <div class="card">
             <div class="overflow-x-auto">
@@ -93,11 +111,12 @@
                             <th class="w-14">No</th>
                             <th>Nama Bahan Baku</th>
                             <th>Pemasok / Vendor</th>
+                            <th class="text-center">Klasifikasi</th>
                             <th class="text-right">Harga Acuan Aktif</th>
                             <th class="text-center">Sumber Harga</th>
                             <th>Tgl Berlaku</th>
                             <th class="text-center">Riwayat Harga</th>
-                            <th class="w-40 text-center">Aksi</th>
+                            <th class="w-44 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -114,6 +133,17 @@
                                 <p class="font-medium text-gray-900">{{ $item->supplier?->name ?: '—' }}</p>
                                 @if($item->vendor_item_code)
                                 <span class="text-[11px] font-mono text-gray-400">Kode: {{ $item->vendor_item_code }}</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if($item->isTrial())
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200" title="Relasi harga dalam tahap pengujian / sample R&D">
+                                    ⚡ Trial R&D
+                                </span>
+                                @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Relasi harga komersial aktif">
+                                    🌿 Komersial
+                                </span>
                                 @endif
                             </td>
                             <td class="text-right">
@@ -151,7 +181,16 @@
                                 </button>
                             </td>
                             <td class="text-center">
-                                <div class="inline-flex items-center gap-2">
+                                <div class="inline-flex items-center gap-1">
+                                    @if($item->isTrial())
+                                    <form method="POST" action="{{ route('material-suppliers.promote', $item) }}" class="inline"
+                                          onsubmit="return confirm('Promosikan relasi harga {{ addslashes($item->material?->name) }} dengan {{ addslashes($item->supplier?->name) }} menjadi Komersial?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-ghost btn-xs text-emerald-600 hover:bg-emerald-50 font-semibold" title="Loloskan ke Komersial">
+                                            Loloskan
+                                        </button>
+                                    </form>
+                                    @endif
                                     <button type="button"
                                             @click="openUpdateModal({{ $item->id }}, '{{ addslashes($item->material?->name) }}', '{{ addslashes($item->supplier?->name) }}', {{ (float) $item->current_price }})"
                                             class="btn btn-ghost btn-xs text-emerald-700 hover:bg-emerald-50 font-semibold"
@@ -172,7 +211,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center py-10 text-gray-400 text-sm">
+                            <td colspan="9" class="text-center py-10 text-gray-400 text-sm">
                                 Belum ada relasi bahan baku dan pemasok yang terdaftar. Klik <strong>"Tambah Pemasok Bahan"</strong> untuk mulai menambahkan.
                             </td>
                         </tr>
@@ -213,9 +252,18 @@
                             <label for="material_id" class="block text-xs font-semibold text-gray-700 mb-1">Bahan Baku <span class="text-red-500">*</span></label>
                             <select id="material_id" name="material_id" required class="form-input text-xs w-full">
                                 <option value="">— Pilih Bahan Baku —</option>
-                                @foreach($materials as $mat)
-                                <option value="{{ $mat->id }}">{{ $mat->name }} ({{ $mat->unit ?: 'kg' }})</option>
-                                @endforeach
+                                <optgroup label="🌿 Bahan Baku Komersial">
+                                    @foreach($materials->where('status', 'commercial') as $mat)
+                                    <option value="{{ $mat->id }}">{{ $mat->name }} ({{ $mat->unit ?: 'kg' }})</option>
+                                    @endforeach
+                                </optgroup>
+                                @if($materials->where('status', 'trial')->isNotEmpty())
+                                <optgroup label="⚡ Bahan Baku Trial R&D">
+                                    @foreach($materials->where('status', 'trial') as $mat)
+                                    <option value="{{ $mat->id }}">[TRIAL] {{ $mat->name }} ({{ $mat->unit ?: 'kg' }})</option>
+                                    @endforeach
+                                </optgroup>
+                                @endif
                             </select>
                         </div>
 
@@ -223,10 +271,33 @@
                             <label for="supplier_id" class="block text-xs font-semibold text-gray-700 mb-1">Pemasok / Rekanan <span class="text-red-500">*</span></label>
                             <select id="supplier_id" name="supplier_id" required class="form-input text-xs w-full">
                                 <option value="">— Pilih Pemasok —</option>
-                                @foreach($suppliers as $sup)
-                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
-                                @endforeach
+                                <optgroup label="🏢 Pemasok Komersial (Approved AVL)">
+                                    @foreach($suppliers->where('status', 'commercial') as $sup)
+                                    <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                @if($suppliers->where('status', 'trial')->isNotEmpty())
+                                <optgroup label="⚡ Pemasok Trial R&D">
+                                    @foreach($suppliers->where('status', 'trial') as $sup)
+                                    <option value="{{ $sup->id }}">[TRIAL] {{ $sup->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                                @endif
                             </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Klasifikasi Relasi Harga</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 cursor-pointer text-xs hover:bg-emerald-50/40">
+                                    <input type="radio" name="status" value="commercial" checked class="text-emerald-600 focus:ring-emerald-500">
+                                    <span class="font-medium text-gray-800">🌿 Harga Komersial</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 cursor-pointer text-xs hover:bg-amber-50/40">
+                                    <input type="radio" name="status" value="trial" class="text-amber-600 focus:ring-amber-500">
+                                    <span class="font-medium text-gray-800">⚡ Harga Trial / Sample</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
