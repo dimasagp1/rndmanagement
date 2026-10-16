@@ -50,8 +50,8 @@
         @if($forms->isEmpty())
         <x-empty-state
             icon="approval"
-            title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Data' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain.' : 'Form Approval akan tampil di sini.' }}"
+            :title="request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Data'"
+            :description="request('search') ? 'Coba kata kunci lain.' : 'Form Approval akan tampil di sini.'"
         />
         @else
         <div class="overflow-x-auto">

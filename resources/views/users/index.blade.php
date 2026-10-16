@@ -70,8 +70,14 @@
                             <span class="badge bg-blue-100 text-blue-700 ring-1 ring-blue-200">💼 GM</span>
                             @elseif($role === 'Operational Manager')
                             <span class="badge bg-amber-100 text-amber-700 ring-1 ring-amber-200">👨‍💼 Manager</span>
-                            @else
+                            @elseif($role === 'Staff R&D')
                             <span class="badge bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">🔬 Staff R&D</span>
+                            @elseif($role === 'Staff Packdev')
+                            <span class="badge bg-teal-100 text-teal-700 ring-1 ring-teal-200">📦 Staff Packdev</span>
+                            @elseif($role)
+                            <span class="badge bg-gray-100 text-gray-700 ring-1 ring-gray-200">{{ $role }}</span>
+                            @else
+                            <span class="badge bg-gray-100 text-gray-500 ring-1 ring-gray-200">Tanpa jabatan</span>
                             @endif
                         </td>
                         <td class="text-xs text-gray-400">{{ $user->created_at->isoFormat('D MMM Y') }}</td>

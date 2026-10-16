@@ -69,8 +69,8 @@
         @if($forms->isEmpty())
         <x-empty-state
             icon="approval"
-            title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Final Approval' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain.' : 'Final approval formula & artwork akan tampil di sini (Staff dapat membuat, GM approve online).' }}"
+            :title="request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Final Approval'"
+            :description="request('search') ? 'Coba kata kunci lain.' : 'Final approval formula & artwork akan tampil di sini (Staff dapat membuat, GM approve online).'"
         />
         @else
         <div class="overflow-x-auto">

@@ -9,6 +9,7 @@ class GeneralController extends Controller
     public const TABS = [
         'prf'                  => 'PRF',
         'npd-proposal'         => 'NPD Proposal',
+        'preformulation-study' => 'Preformulation Study',
         'preformulation-qbd'   => 'QbD',
         'formulation-development' => 'Formulation Development',
         'sample-evaluation'    => 'Sample Evaluation',
@@ -24,6 +25,7 @@ class GeneralController extends Controller
     public const GROUPS = [
         'Insight & Concept' => ['prf', 'npd-proposal'],
         'Development & Regulatory' => [
+            'preformulation-study',
             'preformulation-qbd',
             'formulation-development',
             'sample-evaluation',
@@ -52,6 +54,10 @@ class GeneralController extends Controller
 
         if ($tab === 'npd-proposal') {
             return redirect()->route('npd-proposals.index');
+        }
+
+        if ($tab === 'preformulation-study') {
+            return redirect()->route('preformulation-studies.index');
         }
 
         if ($tab === 'preformulation-qbd') {

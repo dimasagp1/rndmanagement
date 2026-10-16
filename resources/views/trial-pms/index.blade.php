@@ -81,8 +81,8 @@
         @if($trials->isEmpty())
         <x-empty-state
             icon="trial"
-            title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Trial PM' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain atau hapus filter.' : 'Mulai dengan membuat catatan trial PM pertama Anda.' }}"
+            :title="request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Trial PM'"
+            :description="request('search') ? 'Coba kata kunci lain atau hapus filter.' : 'Mulai dengan membuat catatan trial PM pertama Anda.'"
         >
             <x-slot name="action">
                 @if(!request('search'))

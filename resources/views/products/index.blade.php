@@ -43,8 +43,8 @@
         @if($products->isEmpty())
         <x-empty-state
             icon="package"
-            title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Produk' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain atau hapus pencarian.' : 'Mulai dengan menambahkan nama produk pertama Anda.' }}"
+            :title="request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Produk'"
+            :description="request('search') ? 'Coba kata kunci lain atau hapus pencarian.' : 'Mulai dengan menambahkan nama produk pertama Anda.'"
         >
             <x-slot name="action">
                 @if(!request('search'))

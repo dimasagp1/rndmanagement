@@ -69,8 +69,8 @@
         @if($formulas->isEmpty())
         <x-empty-state
             icon="formula"
-            title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Formula' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain atau hapus filter.' : 'Mulai dengan membuat formula pertama Anda.' }}"
+            :title="request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Formula'"
+            :description="request('search') ? 'Coba kata kunci lain atau hapus filter.' : 'Mulai dengan membuat formula pertama Anda.'"
         >
             <x-slot name="action">
                 @if(!request('search'))

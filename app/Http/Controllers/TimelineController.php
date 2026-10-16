@@ -92,17 +92,19 @@ class TimelineController extends Controller
         }
 
         if ($statusFilter) {
-            $items = $items->filter(fn ($item) => strtolower($item['status'] ?? '') === strtolower($statusFilter));
+            // Filter per kelompok status, sama dengan kartu ringkasan (mis. "Pending" mencakup Pending Tahap 1/2)
+            $items = $items->filter(fn ($item) => self::statusGroup($item['status'] ?? null) === strtolower($statusFilter));
         }
 
         $items = $items->values();
         $totalItems = $items->count();
 
         // ── 4. Summary stats ──────────────────────────────────
-        $approved = $items->whereIn('status', ['Approved', 'Completed', 'Completed by GM', 'Lulus'])->count();
-        $pending = $items->filter(fn ($i) => str_starts_with(strtolower($i['status'] ?? ''), 'pending'))->count();
-        $rejected = $items->where('status', 'Rejected')->count();
-        $draft = $items->where('status', 'Draft')->count();
+        $groups = $items->countBy(fn ($i) => self::statusGroup($i['status'] ?? null));
+        $approved = $groups->get('approved', 0);
+        $pending = $groups->get('pending', 0);
+        $rejected = $groups->get('rejected', 0);
+        $draft = $groups->get('draft', 0);
         $pipelinePercent = $totalItems > 0 ? round($approved / $totalItems * 100) : 0;
 
         // ── 5. Module stat cards (global) ─────────────────────
@@ -135,6 +137,20 @@ class TimelineController extends Controller
             'workload', 'ownerOptions', 'isStaff', 'isManager', 'isGM',
             'productCards', 'products', 'productId', 'currentProduct', 'unlinkedCount'
         ));
+    }
+
+    // ── Kelompok status untuk filter & ringkasan ────────────────
+    private static function statusGroup(?string $status): ?string
+    {
+        $status = strtolower($status ?? '');
+
+        return match (true) {
+            in_array($status, ['approved', 'completed', 'completed by gm', 'lulus', 'passed']) => 'approved',
+            str_starts_with($status, 'pending') || $status === 'approval by om' => 'pending',
+            $status === 'rejected' => 'rejected',
+            in_array($status, ['draft', 'draf']) => 'draft',
+            default => null,
+        };
     }
 
     // ── Build product cards for grid ────────────────────────────

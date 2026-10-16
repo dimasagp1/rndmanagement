@@ -117,7 +117,8 @@
                                 
                                 <form method="POST" action="{{ route('approval-center.formulas.approve', $formula) }}">
                                     @csrf
-                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-formula-{{ $formula->id }}">
+                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-formula-{{ $formula->id }}"
+                                            onclick="return confirm('Setujui Formula {{ $formula->code }}? Tindakan ini tidak dapat dibatalkan.')">
                                         Setujui
                                     </button>
                                 </form>
@@ -184,7 +185,8 @@
                                 
                                 <form method="POST" action="{{ route('approval-center.trial-rms.approve', $trial) }}">
                                     @csrf
-                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-trial-{{ $trial->id }}">
+                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-trial-{{ $trial->id }}"
+                                            onclick="return confirm('Setujui Trial RM {{ $trial->code }}? Tindakan ini tidak dapat dibatalkan.')">
                                         Setujui
                                     </button>
                                 </form>
@@ -252,7 +254,8 @@
                                 
                                 <form method="POST" action="{{ route('approval-center.trial-pms.approve', $trial) }}">
                                     @csrf
-                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-trial-pm-{{ $trial->id }}">
+                                    <button type="submit" class="btn-primary btn-sm" id="btn-approve-trial-pm-{{ $trial->id }}"
+                                            onclick="return confirm('Setujui Trial PM {{ $trial->code }}? Tindakan ini tidak dapat dibatalkan.')">
                                         Setujui
                                     </button>
                                 </form>
@@ -317,7 +320,8 @@
                             
                             <form method="POST" action="{{ route('approval-center.preformulation-studies.approve', $study) }}">
                                 @csrf
-                                <button type="submit" class="btn-primary btn-sm">
+                                <button type="submit" class="btn-primary btn-sm"
+                                        onclick="return confirm('Setujui Preformulation Study {{ $study->code }}? Tindakan ini tidak dapat dibatalkan.')">
                                     Setujui
                                 </button>
                             </form>
@@ -385,7 +389,8 @@
                             <a href="{{ route($faRoute . '.show', $approval) }}" class="btn-ghost btn-sm">Lihat Detail</a>
                             <form method="POST" action="{{ route($faRoute . '.approve-gm', $approval) }}">
                                 @csrf
-                                <button type="submit" class="btn-primary btn-sm">Setujui (GM)</button>
+                                <button type="submit" class="btn-primary btn-sm"
+                                        onclick="return confirm('Setujui Formula Approval {{ $approval->code }}? Tindakan ini tidak dapat dibatalkan.')">Setujui (GM)</button>
                             </form>
                             <button type="button"
                                     @click="activeRejectItem = activeRejectItem === 'fa_{{ $approval->id }}' ? null : 'fa_{{ $approval->id }}'"

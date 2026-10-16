@@ -91,8 +91,8 @@
         @if($evaluations->isEmpty())
         <x-empty-state
             icon="trial"
-            title="{{ request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Sample Evaluation' }}"
-            description="{{ request('search') ? 'Coba kata kunci lain atau hapus filter.' : 'Mulai dengan membuat evaluasi sampel pertama Anda.' }}"
+            :title="request('search') ? 'Tidak Ada Hasil' : 'Belum Ada Sample Evaluation'"
+            :description="request('search') ? 'Coba kata kunci lain atau hapus filter.' : 'Mulai dengan membuat evaluasi sampel pertama Anda.'"
         >
             <x-slot name="action">
                 @if(!request('search'))
