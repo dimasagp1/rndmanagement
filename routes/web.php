@@ -451,10 +451,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── System Settings (Superadmin Only) ───────────────────
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:Superadmin');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update')->middleware('role:Superadmin');
+    Route::post('/settings/test-procurement-api', [SettingController::class, 'testProcurementApi'])->name('settings.test-procurement-api')->middleware('role:Superadmin');
 
     // ── Data Master (Superadmin & Staff R&D) ─────────────
     Route::delete('materials/documents/{document}', [MaterialController::class, 'destroyDocument'])->name('materials.documents.destroy')->middleware('role:Superadmin|Staff R&D');
     Route::resource('materials', MaterialController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
+    Route::post('suppliers/sync-procurement', [SupplierController::class, 'syncFromProcurement'])->name('suppliers.sync-procurement')->middleware('role:Superadmin|Staff R&D');
     Route::resource('suppliers', SupplierController::class)->except('show')->middleware('role:Superadmin|Staff R&D');
 
     // ── Katalog Harga Material & Pemasok (Area Merah) ─────

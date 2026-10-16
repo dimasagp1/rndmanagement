@@ -99,4 +99,73 @@ class SupplierController extends Controller
             ->route('suppliers.index')
             ->with('success', "Pemasok {$name} berhasil dihapus.");
     }
+
+    /**
+     * Tarik dan sinkronkan daftar rekanan pemasok resmi dari API Procurement.
+     */
+    public function syncFromProcurement(Request $request)
+    {
+        $apiUrl = setting('procurement_api_url', config('services.procurement.url'));
+        $apiKey = setting('procurement_api_token', config('services.procurement.key'));
+
+        if (empty($apiUrl)) {
+            return redirect()->route('suppliers.index')
+                ->with('error', 'URL Endpoint API Procurement belum disetel di Pengaturan Sistem. Silakan atur terlebih dahulu di menu Pengaturan Sistem.');
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'X-API-KEY'     => $apiKey ?: '',
+                    'Authorization' => 'Bearer ' . ($apiKey ?: ''),
+                    'Accept'        => 'application/json',
+                ])
+                ->timeout(15)
+                ->get($apiUrl);
+
+            if (! $response->successful()) {
+                return redirect()->route('suppliers.index')
+                    ->with('error', "Gagal menghubungi API Procurement: Status HTTP {$response->status()}");
+            }
+
+            $json = $response->json();
+            $items = $json['data'] ?? $json;
+        } catch (\Exception $e) {
+            return redirect()->route('suppliers.index')
+                ->with('error', "Koneksi ke API Procurement gagal: {$e->getMessage()}");
+        }
+
+        if (! is_array($items) || empty($items)) {
+            return redirect()->route('suppliers.index')
+                ->with('error', 'Data respons dari API Procurement kosong atau format tidak sesuai.');
+        }
+
+        $newCount = 0;
+        $existingCount = 0;
+
+        foreach ($items as $item) {
+            $venName = trim($item['vendor_name'] ?? '');
+            if (empty($venName) || in_array(strtolower($venName), ['vendor odoo terdaftar', 'vendor'])) {
+                continue;
+            }
+
+            $supplier = Supplier::where('name', $venName)->first();
+
+            if (! $supplier) {
+                Supplier::create([
+                    'name'    => $venName,
+                    'contact' => !empty($item['vendor_code']) ? 'Kode AVL: ' . $item['vendor_code'] : null,
+                    'phone'   => null,
+                    'email'   => null,
+                    'address' => 'Sinkronisasi dari Master AVL Sistem Procurement / Odoo ERP',
+                ]);
+                $newCount++;
+            } else {
+                $existingCount++;
+            }
+        }
+
+        return redirect()->route('suppliers.index')
+            ->with('success', "Sinkronisasi pemasok berhasil: {$newCount} pemasok baru ditambahkan ({$existingCount} pemasok sudah terdaftar di R&D).");
+    }
 }
+

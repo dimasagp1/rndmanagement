@@ -201,6 +201,11 @@
                     <div class="pt-6 border-t border-gray-100" x-data="{
                         autoApply: {{ setting('procurement_auto_apply', '0') === '1' ? 'true' : 'false' }},
                         token: '{{ setting('procurement_api_token', '') }}',
+                        url: '{{ setting('procurement_api_url', '') }}',
+                        testing: false,
+                        testStatus: null,
+                        testMessage: '',
+                        testSamples: [],
                         generateToken() {
                             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                             let result = 'rnd_proc_';
@@ -208,6 +213,38 @@
                                 result += chars.charAt(Math.floor(Math.random() * chars.length));
                             }
                             this.token = result;
+                        },
+                        async runTestConnection() {
+                            if (!this.url) {
+                                alert('Mohon isi URL Endpoint API Procurement terlebih dahulu.');
+                                return;
+                            }
+                            this.testing = true;
+                            this.testStatus = null;
+                            this.testMessage = '';
+                            this.testSamples = [];
+                            try {
+                                const res = await fetch('{{ route('settings.test-procurement-api') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({
+                                        url: this.url,
+                                        token: this.token
+                                    })
+                                });
+                                const data = await res.json();
+                                this.testStatus = data.success ? 'success' : 'error';
+                                this.testMessage = data.message;
+                                if (data.samples) this.testSamples = data.samples;
+                            } catch (err) {
+                                this.testStatus = 'error';
+                                this.testMessage = 'Gagal menghubungi server lokal: ' + err.message;
+                            } finally {
+                                this.testing = false;
+                            }
                         }
                     }">
                         <div class="flex items-center justify-between mb-2">
@@ -229,14 +266,14 @@
                             </a>
                         </div>
 
-                        <div class="bg-sky-50/40 border border-sky-150 rounded-xl p-4 sm:p-5 space-y-5 mt-4">
+                        <div class="bg-sky-50/40 border border-sky-150 rounded-xl p-4 sm:p-5 space-y-4 mt-4">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {{-- Outbound Sync API URL --}}
                                 <div>
                                     <label class="form-label text-xs font-semibold" for="procurement_api_url">URL Endpoint API Procurement (Outbound Pull)</label>
                                     <input type="url" id="procurement_api_url" name="procurement_api_url"
-                                           value="{{ old('procurement_api_url', setting('procurement_api_url')) }}"
-                                           class="form-input text-xs" placeholder="https://erp.perusahaan.com/api/v1/po-materials">
+                                           x-model="url"
+                                           class="form-input text-xs" placeholder="http://procurement.test/api/v1/procurement/material-prices">
                                     <p class="text-[10px] text-gray-500 mt-1">Endpoint GET untuk menarik data saat tombol <strong>"Tarik Data dari API"</strong> diklik.</p>
                                 </div>
 
@@ -252,6 +289,55 @@
                                            x-model="token"
                                            class="form-input text-xs font-mono" placeholder="rnd_proc_xxxxxxxxxxxxxxxx">
                                     <p class="text-[10px] text-gray-500 mt-1">Digunakan untuk otentikasi Bearer Token atau header <code>X-API-KEY</code>.</p>
+                                </div>
+                            </div>
+
+                            {{-- Kolom & Tombol Uji Coba Koneksi API --}}
+                            <div class="p-3 bg-white rounded-xl border border-sky-200/80 shadow-xs">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div>
+                                        <h5 class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                                            Uji Coba Koneksi API (Connection Test)
+                                        </h5>
+                                        <p class="text-[11px] text-gray-500 mt-0.5">Tes langsung apakah URL endpoint dan token Procurement dapat dihubungi oleh sistem R&D.</p>
+                                    </div>
+                                    <button type="button"
+                                            @click="runTestConnection()"
+                                            :disabled="testing"
+                                            class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition flex-shrink-0">
+                                        <svg x-show="testing" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                        </svg>
+                                        <svg x-show="!testing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                        <span x-text="testing ? 'Menguji Koneksi...' : '⚡ Uji Koneksi API'"></span>
+                                    </button>
+                                </div>
+
+                                {{-- Hasil Uji Coba Alert Box --}}
+                                <div x-show="testStatus !== null" class="mt-3 pt-3 border-t border-gray-150" x-cloak>
+                                    <div :class="testStatus === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'"
+                                         class="p-3 rounded-lg border text-xs">
+                                        <div class="flex items-start gap-2">
+                                            <span class="font-bold text-sm" x-text="testStatus === 'success' ? '✓' : '✗'"></span>
+                                            <div class="flex-1">
+                                                <p class="font-semibold" x-text="testMessage"></p>
+                                                <template x-if="testSamples.length > 0">
+                                                    <div class="mt-2 pt-2 border-t border-emerald-200/60">
+                                                        <span class="font-bold text-[10px] uppercase text-emerald-900 block mb-1">Contoh Data Terbaca:</span>
+                                                        <ul class="list-disc list-inside space-y-0.5 text-[11px] font-mono">
+                                                            <template x-for="item in testSamples" :key="item.material_code || item.material_name">
+                                                                <li x-text="`${item.material_name} (${item.vendor_name || 'Vendor'}) - Rp ${Number(item.price_per_unit).toLocaleString('id-ID')}`"></li>
+                                                            </template>
+                                                        </ul>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

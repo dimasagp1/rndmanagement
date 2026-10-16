@@ -31,6 +31,16 @@
                     </a>
                     @endif
                 </form>
+                <form method="POST" action="{{ route('procurement-prices.sync') }}" class="inline flex-shrink-0">
+                    @csrf
+                    <button type="submit" class="px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition" title="Tarik data harga bahan & vendor terbaru dari Procurement API">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Tarik dari Procurement
+                    </button>
+                </form>
+
                 <button type="button" @click="openCreateModal()" class="btn-primary flex-shrink-0" id="btn-create-material-supplier">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>

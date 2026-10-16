@@ -118,4 +118,61 @@ class SettingController extends Controller
 
         return back()->with('success', 'Konfigurasi sistem dan mode pemeliharaan berhasil diperbarui.');
     }
+
+    /**
+     * Uji coba koneksi ke API Procurement secara live dari halaman Pengaturan Sistem.
+     */
+    public function testProcurementApi(Request $request)
+    {
+        if (! auth()->user()->hasRole('Superadmin')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $apiUrl = $request->input('url') ?: setting('procurement_api_url', config('services.procurement.url', ''));
+        $apiKey = $request->input('token') ?: setting('procurement_api_token', config('services.procurement.key', ''));
+
+        if (empty($apiUrl)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'URL Endpoint API Procurement belum diisi. Masukkan URL endpoint terlebih dahulu.',
+            ], 422);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'X-API-KEY'     => $apiKey ?: '',
+                    'Authorization' => 'Bearer ' . ($apiKey ?: ''),
+                    'Accept'        => 'application/json',
+                ])
+                ->timeout(10)
+                ->get($apiUrl);
+
+            if ($response->successful()) {
+                $json = $response->json();
+                $items = $json['data'] ?? $json;
+                $count = is_array($items) ? count($items) : 0;
+                $samples = is_array($items) ? array_slice($items, 0, 3) : [];
+
+                return response()->json([
+                    'success'    => true,
+                    'status'     => $response->status(),
+                    'message'    => "Koneksi berhasil! Server merespons HTTP {$response->status()} OK. Ditemukan {$count} data harga bahan baku.",
+                    'total_data' => $count,
+                    'samples'    => $samples,
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'status'  => $response->status(),
+                    'message' => "Koneksi gagal! Server merespons dengan HTTP {$response->status()}.",
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Gagal terhubung ke API: " . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
+
