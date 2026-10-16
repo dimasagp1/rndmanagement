@@ -51,6 +51,19 @@
                         Auto-Map Riwayat
                     </button>
                 </form>
+
+                <form method="POST" action="{{ route('procurement-prices.create-all-masters') }}" class="inline">
+                    @csrf
+                    <button type="submit"
+                            onclick="return confirm('Daftarkan semua item unmapped ({{ $unmappedCount }}) menjadi Master Bahan Baku & Pemasok baru dan langsung terapkan ke R&D?');"
+                            title="Daftarkan seluruh item yang belum terpetakan menjadi Master Bahan & Pemasok baru di R&D"
+                            class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Jadikan Semua Master Baru ({{ $unmappedCount }})
+                    </button>
+                </form>
                 @endif
 
                 @if($mappedCount > 0)
@@ -250,11 +263,35 @@
                             </td>
                             <td class="text-center">
                                 <div class="inline-flex items-center gap-1.5">
+                                    @if($item->sync_status === 'applied')
+                                    <span class="text-xs text-emerald-600 font-medium inline-flex items-center gap-1 mr-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        Tersinkron
+                                    </span>
+                                    @endif
+
                                     @if($item->sync_status === 'mapped')
                                     <form method="POST" action="{{ route('procurement-prices.apply', $item) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="btn btn-primary btn-xs text-xs font-semibold" title="Terapkan ke Katalog Harga R&D">
                                             Terapkan ke R&D
+                                        </button>
+                                    </form>
+                                    @endif
+
+                                    @if($item->sync_status === 'unmapped')
+                                    <form method="POST" action="{{ route('procurement-prices.create-master', $item) }}" class="inline">
+                                        @csrf
+                                        <button type="submit"
+                                                onclick="return confirm('Daftarkan \'{{ addslashes($item->material_name) }}\' & \'{{ addslashes($item->vendor_name) }}\' sebagai Master Bahan Baku & Pemasok baru di R&D?');"
+                                                class="px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 inline-flex items-center gap-1 transition shadow-2xs"
+                                                title="Buat Master Bahan & Pemasok Baru Langsung">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                            </svg>
+                                            Jadikan Master Baru
                                         </button>
                                     </form>
                                     @endif
@@ -369,6 +406,18 @@
                                     <span class="text-xs font-bold text-sky-900 block">⚡ Ingat Pemetaan & Terapkan ke Seluruh Data Sejenis</span>
                                     <span class="text-[11px] text-sky-700 block mt-0.5 leading-snug">
                                         Sistem akan otomatis mengingat pemetaan ini ketika ada penarikan PO baru di masa depan, dan langsung memetakan semua PO unmapped yang bernama sama saat ini.
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-150">
+                            <label class="flex items-start gap-2.5 cursor-pointer">
+                                <input type="checkbox" name="promote_to_commercial" value="1" checked class="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500">
+                                <div>
+                                    <span class="text-xs font-bold text-emerald-900 block">🌿 Promosikan ke Komersial jika Bahan/Pemasok Terpilih adalah Trial</span>
+                                    <span class="text-[11px] text-emerald-700 block mt-0.5 leading-snug">
+                                        Jika memetakan ke bahan atau pemasok yang dulunya berstatus Trial R&D, otomatis di-upgrade ke Komersial / Approved AVL karena sudah resmi ada transaksi PO pengadaan.
                                     </span>
                                 </div>
                             </label>

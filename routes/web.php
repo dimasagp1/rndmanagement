@@ -473,6 +473,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('procurement-prices', [ProcurementPriceController::class, 'index'])->name('procurement-prices.index')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/sync', [ProcurementPriceController::class, 'syncFromApi'])->name('procurement-prices.sync')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/{price}/map', [ProcurementPriceController::class, 'map'])->name('procurement-prices.map')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/{price}/create-master', [ProcurementPriceController::class, 'createMaster'])->name('procurement-prices.create-master')->middleware('role:Superadmin|Staff R&D');
+    Route::post('procurement-prices/create-all-masters', [ProcurementPriceController::class, 'createAllMasters'])->name('procurement-prices.create-all-masters')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/{price}/apply', [ProcurementPriceController::class, 'apply'])->name('procurement-prices.apply')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/batch-apply', [ProcurementPriceController::class, 'batchApply'])->name('procurement-prices.batch-apply')->middleware('role:Superadmin|Staff R&D');
     Route::post('procurement-prices/auto-map', [ProcurementPriceController::class, 'autoMapAll'])->name('procurement-prices.auto-map')->middleware('role:Superadmin|Staff R&D');

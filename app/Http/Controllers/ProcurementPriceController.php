@@ -237,12 +237,185 @@ class ProcurementPriceController extends Controller
                 ->update(['sync_status' => 'mapped']);
         }
 
-        $msg = "Item {$price->material_name} berhasil dipetakan ke Master R&D dan disimpan ke ingatan sistem.";
+        // 3. Jika dipilih opsi promosikan ke Komersial
+        $promotedInfo = '';
+        if ($request->boolean('promote_to_commercial', false)) {
+            $material = Material::find($validated['material_id']);
+            if ($material && $material->isTrial()) {
+                $material->update(['status' => 'commercial']);
+                $promotedInfo .= " Bahan '{$material->name}' dipromosikan ke Komersial.";
+            }
+            $supplier = Supplier::find($validated['supplier_id']);
+            if ($supplier && $supplier->isTrial()) {
+                $supplier->update(['status' => 'commercial']);
+                $promotedInfo .= " Pemasok '{$supplier->name}' dipromosikan ke Approved AVL.";
+            }
+        }
+
+        $msg = "Item {$price->material_name} berhasil dipetakan ke Master R&D dan disimpan ke ingatan sistem." . $promotedInfo;
         if ($propagatedCount > 0) {
             $msg .= " Serta otomatis memetakan {$propagatedCount} data PO sejenis lainnya di daftar feed!";
         }
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Daftarkan item pengadaan langsung menjadi Master Bahan Baku & Pemasok baru di R&D,
+     * sekaligus mencatat relasi harga aktif dan ingatan alias untuk tarikan Odoo masa depan.
+     */
+    public function createMaster(Request $request, ProcurementVendorPrice $price)
+    {
+        $status = $request->input('status', 'commercial');
+
+        // 1. Cari atau buat Master Bahan Baku di R&D
+        $material = Material::where('name', $price->material_name)->first();
+        if (!$material) {
+            $material = Material::create([
+                'name'        => $price->material_name,
+                'unit'        => $price->unit ?: 'kg',
+                'type'        => 'Bahan Baku',
+                'status'      => $status,
+                'description' => "Otomatis dibuat dari Integrasi Pengadaan PO: " . ($price->po_number ?: '-'),
+            ]);
+        }
+
+        // 2. Cari atau buat Master Pemasok di R&D
+        $supplier = Supplier::where('name', $price->vendor_name)->first();
+        if (!$supplier) {
+            $supplier = Supplier::create([
+                'name'    => $price->vendor_name,
+                'status'  => $status,
+                'address' => 'Diimpor otomatis dari Procurement/Odoo',
+            ]);
+        }
+
+        // 3. Simpan ke Kamus Memory Pemetaan agar penarikan PO di masa depan otomatis terpetakan
+        ProcurementMappingAlias::updateOrCreate(
+            ['source_type' => 'material', 'source_name' => $price->material_name],
+            ['target_id' => $material->id]
+        );
+        ProcurementMappingAlias::updateOrCreate(
+            ['source_type' => 'supplier', 'source_name' => $price->vendor_name],
+            ['target_id' => $supplier->id]
+        );
+
+        // 4. Update data feed price ini
+        $price->update([
+            'matched_material_id' => $material->id,
+            'matched_supplier_id' => $supplier->id,
+            'sync_status'         => 'applied',
+        ]);
+
+        // 5. Terapkan langsung ke Katalog Harga Bahan R&D (MaterialSupplier)
+        $materialSupplier = MaterialSupplier::firstOrCreate(
+            [
+                'material_id' => $material->id,
+                'supplier_id' => $supplier->id,
+            ],
+            [
+                'current_price'  => $price->price_per_unit,
+                'currency'       => $price->currency ?: 'IDR',
+                'effective_date' => $price->po_date ?: now()->toDateString(),
+                'price_source'   => 'procurement_api',
+                'status'         => $status,
+                'is_active'      => true,
+            ]
+        );
+
+        $materialSupplier->updatePrice(
+            newPrice: (float) $price->price_per_unit,
+            reason: "Auto-Create Master dari PO Procurement: " . ($price->po_number ?: '-') . " ({$price->vendor_name})",
+            effectiveDate: $price->po_date?->toDateString() ?: now()->toDateString(),
+            source: 'procurement_api',
+            userId: auth()->id()
+        );
+
+        // 6. Propagasi ke semua unmapped item yang bernama sama
+        ProcurementVendorPrice::where('sync_status', 'unmapped')
+            ->where('material_name', $price->material_name)
+            ->where('vendor_name', $price->vendor_name)
+            ->update([
+                'matched_material_id' => $material->id,
+                'matched_supplier_id' => $supplier->id,
+                'sync_status'         => 'applied',
+            ]);
+
+        return redirect()->back()->with('success', "Bahan '{$material->name}' dan Pemasok '{$supplier->name}' berhasil didaftarkan sebagai Master R&D baru serta langsung diterapkan ke katalog harga!");
+    }
+
+    /**
+     * Daftarkan sekaligus seluruh data feed unmapped menjadi Master Bahan & Pemasok baru di R&D.
+     */
+    public function createAllMasters(Request $request)
+    {
+        $unmappedItems = ProcurementVendorPrice::where('sync_status', 'unmapped')->get();
+        if ($unmappedItems->isEmpty()) {
+            return redirect()->back()->with('info', 'Tidak ada data unmapped yang perlu didaftarkan.');
+        }
+
+        $count = 0;
+        foreach ($unmappedItems as $item) {
+            $material = $item->matched_material_id 
+                ? Material::find($item->matched_material_id) 
+                : (Material::where('name', $item->material_name)->first() ?? Material::create([
+                    'name'        => $item->material_name,
+                    'unit'        => $item->unit ?: 'kg',
+                    'type'        => 'Bahan Baku',
+                    'status'      => 'commercial',
+                    'description' => "Otomatis dibuat dari Bulk Register Procurement: PO " . ($item->po_number ?: '-'),
+                ]));
+
+            $supplier = $item->matched_supplier_id 
+                ? Supplier::find($item->matched_supplier_id) 
+                : (Supplier::where('name', $item->vendor_name)->first() ?? Supplier::create([
+                    'name'    => $item->vendor_name,
+                    'status'  => 'commercial',
+                    'address' => 'Diimpor otomatis dari Procurement/Odoo',
+                ]));
+
+            ProcurementMappingAlias::updateOrCreate(
+                ['source_type' => 'material', 'source_name' => $item->material_name],
+                ['target_id' => $material->id]
+            );
+            ProcurementMappingAlias::updateOrCreate(
+                ['source_type' => 'supplier', 'source_name' => $item->vendor_name],
+                ['target_id' => $supplier->id]
+            );
+
+            $item->update([
+                'matched_material_id' => $material->id,
+                'matched_supplier_id' => $supplier->id,
+                'sync_status'         => 'applied',
+            ]);
+
+            $materialSupplier = MaterialSupplier::firstOrCreate(
+                [
+                    'material_id' => $material->id,
+                    'supplier_id' => $supplier->id,
+                ],
+                [
+                    'current_price'  => $item->price_per_unit,
+                    'currency'       => $item->currency ?: 'IDR',
+                    'effective_date' => $item->po_date ?: now()->toDateString(),
+                    'price_source'   => 'procurement_api',
+                    'status'         => 'commercial',
+                    'is_active'      => true,
+                ]
+            );
+
+            $materialSupplier->updatePrice(
+                newPrice: (float) $item->price_per_unit,
+                reason: "Bulk Auto-Create dari PO Procurement: " . ($item->po_number ?: '-'),
+                effectiveDate: $item->po_date?->toDateString() ?: now()->toDateString(),
+                source: 'procurement_api',
+                userId: auth()->id()
+            );
+
+            $count++;
+        }
+
+        return redirect()->back()->with('success', "Berhasil mendaftarkan {$count} item sebagai Master Bahan Baku & Pemasok baru serta langsung menerapkan harganya ke R&D.");
     }
 
     /**
