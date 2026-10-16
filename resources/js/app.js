@@ -16,13 +16,21 @@ function initTomSelect(el) {
         const ts = new TomSelect(el, {
             create: false,
             placeholder: el.getAttribute('placeholder') || 'Select an option',
-            searchField: ['text']
+            searchField: ['text'],
+            dropdownParent: 'body',
+            maxOptions: 500,
         });
 
         ts.on('change', (value) => {
             el.value = value;
             el.dispatchEvent(new Event('input', { bubbles: true }));
             el.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        el.addEventListener('change', () => {
+            if (ts.getValue() !== el.value) {
+                ts.setValue(el.value, true);
+            }
         });
     } catch (e) {
         console.error('TomSelect init error:', e);
@@ -34,9 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init existing
     document.querySelectorAll('.tom-select').forEach(initTomSelect);
 
-    // Watch for new elements inserted into the DOM
+    // Watch for new elements inserted into or removed from the DOM
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
+            // Handle additions
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     if (node.classList.contains('ts-wrapper') || node.classList.contains('ts-control')) {
@@ -46,6 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         initTomSelect(node);
                     } else {
                         node.querySelectorAll('.tom-select').forEach(initTomSelect);
+                    }
+                }
+            });
+
+            // Handle removals (clean up destroyed TomSelect instances & body dropdowns)
+            mutation.removedNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    node.querySelectorAll?.('select.tom-select').forEach((sel) => {
+                        if (sel.tomselect) sel.tomselect.destroy();
+                    });
+                    if (node.tagName === 'SELECT' && node.tomselect) {
+                        node.tomselect.destroy();
                     }
                 }
             });

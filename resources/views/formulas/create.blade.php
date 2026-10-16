@@ -118,13 +118,13 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto min-h-[300px] pb-16">
                             <table class="data-table text-xs">
                                 <thead>
                                     <tr>
                                         <th class="w-8">No</th>
-                                        <th class="min-w-[140px]">Material</th>
-                                        <th class="min-w-[120px]">Supplier</th>
+                                        <th class="min-w-[220px]">Material</th>
+                                        <th class="min-w-[180px]">Supplier</th>
                                         <th class="w-24" style="min-width: 100px;">Harga/kg</th>
                                         <th class="w-20" style="min-width: 80px;">Harga/g</th>
                                         <th class="w-20" style="min-width: 80px;">Persentase</th>
@@ -428,6 +428,12 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
                     row.is_trial_price = !!data.is_trial;
                     if (!row.supplier_id && data.supplier_id) {
                         row.supplier_id = data.supplier_id;
+                        this.$nextTick(() => {
+                            const supEl = document.querySelector(`select[name="materials[${index}][supplier_id]"]`);
+                            if (supEl && supEl.tomselect) {
+                                supEl.tomselect.setValue(data.supplier_id, true);
+                            }
+                        });
                     }
                     this.recalcRow(index);
                 } else {
