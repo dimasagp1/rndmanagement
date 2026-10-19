@@ -203,10 +203,13 @@
                                             <td>
                                                 <div>
                                                     <input type="number" :name="`materials[${index}][price_per_kg]`"
-                                                           x-model="row.price_per_kg" @input="recalcRow(index)"
+                                                           x-model="row.price_per_kg" @input="row.priceLookupRequestId = (row.priceLookupRequestId || 0) + 1; row.priceLookupStatus = ''; recalcRow(index)"
                                                            min="0" step="100" placeholder="0"
                                                            class="form-input w-full text-xs py-1 px-1.5 font-mono text-right"
                                                            :class="row.is_trial_price ? 'border-amber-400 bg-amber-50/40 text-amber-900 font-semibold' : ''">
+                                                    <p x-show="row.priceLookupStatus === 'loading'" class="mt-0.5 text-[10px] text-gray-400">Mengambil harga dari data master...</p>
+                                                    <p x-show="row.priceLookupStatus === 'missing'" class="mt-0.5 text-[10px] text-amber-600">Harga pasangan bahan dan pemasok belum tersedia di data master.</p>
+                                                    <p x-show="row.priceLookupStatus === 'error'" class="mt-0.5 text-[10px] text-red-600">Harga gagal diambil. Periksa koneksi lalu pilih ulang bahan atau pemasok.</p>
                                                     <div x-show="row.is_trial_price" class="mt-0.5 text-right">
                                                         <span class="inline-block text-[9px] px-1 py-0.2 bg-amber-100 text-amber-800 font-semibold rounded border border-amber-300">
                                                             ⚡ Harga Trial
@@ -390,6 +393,8 @@
 </x-app-layout>
 
 <script>
+const formulaPriceLookupUrl = @json(route('api.material-suppliers.price'));
+
 function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', targetDoseB = 0.5000, targetDoseBUnit = 'g', targetSachet = 30, targetSachetUnit = 'sachet') {
     const rows = initial.length > 0
         ? initial.map(m => ({ id: m.id || Date.now() + Math.random(), is_trial_price: false, ...m }))
@@ -417,30 +422,63 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
 
         async fetchPrice(index) {
             const row = this.rows[index];
-            if (!row.material_id) return;
+            const requestId = (row.priceLookupRequestId || 0) + 1;
+            row.priceLookupRequestId = requestId;
+
+            if (!row.material_id) {
+                row.price_per_kg = '';
+                row.is_trial_price = false;
+                row.priceLookupStatus = '';
+                this.recalcRow(index);
+                return;
+            }
+
+            row.price_per_kg = '';
+            row.is_trial_price = false;
+            this.recalcRow(index);
+            row.priceLookupStatus = 'loading';
 
             try {
-                const url = `/api/material-suppliers/price?material_id=${row.material_id}&supplier_id=${row.supplier_id || ''}`;
-                const res = await fetch(url);
+                const url = new URL(formulaPriceLookupUrl, window.location.origin);
+                url.searchParams.set('material_id', row.material_id);
+                if (row.supplier_id) url.searchParams.set('supplier_id', row.supplier_id);
+
+                const res = await fetch(url, { headers: { Accept: 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
+
+                const currentIndex = this.rows.findIndex(current => current.id === row.id);
+                if (currentIndex === -1 || row.priceLookupRequestId !== requestId) return;
+
                 if (data.found) {
                     row.price_per_kg = data.price_per_kg;
                     row.is_trial_price = !!data.is_trial;
+                    row.priceLookupStatus = '';
                     if (!row.supplier_id && data.supplier_id) {
                         row.supplier_id = data.supplier_id;
                         this.$nextTick(() => {
-                            const supEl = document.querySelector(`select[name="materials[${index}][supplier_id]"]`);
+                            const currentIndex = this.rows.findIndex(current => current.id === row.id);
+                            const supEl = currentIndex === -1
+                                ? null
+                                : document.querySelector(`select[name="materials[${currentIndex}][supplier_id]"]`);
                             if (supEl && supEl.tomselect) {
                                 supEl.tomselect.setValue(data.supplier_id, true);
                             }
                         });
                     }
-                    this.recalcRow(index);
+                    this.recalcRow(currentIndex);
                 } else {
+                    row.price_per_kg = '';
                     row.is_trial_price = false;
+                    row.priceLookupStatus = 'missing';
+                    this.recalcRow(currentIndex);
                 }
             } catch (err) {
                 console.error("Gagal auto-fetch harga:", err);
+                const currentIndex = this.rows.findIndex(current => current.id === row.id);
+                if (currentIndex !== -1 && row.priceLookupRequestId === requestId) {
+                    row.priceLookupStatus = 'error';
+                }
             }
         },
 
