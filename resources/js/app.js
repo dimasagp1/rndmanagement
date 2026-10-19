@@ -51,12 +51,13 @@ TomSelect.prototype.positionDropdown = function() {
 
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
-    const spaceBelow = viewportHeight - rect.bottom;
-    const spaceAbove = rect.top;
+    const viewportPadding = 12;
+    const dropdownGap = 4;
+    const spaceBelow = Math.max(0, viewportHeight - rect.bottom - dropdownGap - viewportPadding);
+    const spaceAbove = Math.max(0, rect.top - dropdownGap - viewportPadding);
 
-    // Minimum space needed below to open downwards comfortably
     const minHeightNeeded = 220;
-    const openUpwards = (spaceBelow < minHeightNeeded && spaceAbove > spaceBelow);
+    const openUpwards = spaceBelow < minHeightNeeded && spaceAbove > spaceBelow;
 
     // Apply fixed positioning relative to viewport so parent overflows never clip
     dropdown.style.position = 'fixed';
@@ -77,18 +78,16 @@ TomSelect.prototype.positionDropdown = function() {
     dropdown.style.left = `${left}px`;
 
     if (openUpwards) {
-        // Open upwards
-        const availableHeight = Math.min(320, Math.max(140, spaceAbove - 20));
+        const availableHeight = Math.min(320, spaceAbove);
         dropdown.style.top = 'auto';
-        dropdown.style.bottom = `${viewportHeight - rect.top + 4}px`;
+        dropdown.style.bottom = `${viewportHeight - rect.top + dropdownGap}px`;
         content.style.maxHeight = `${availableHeight}px`;
         dropdown.classList.add('ts-dropdown-up');
         dropdown.classList.remove('ts-dropdown-down');
     } else {
-        // Open downwards
-        const availableHeight = Math.min(320, Math.max(140, spaceBelow - 20));
+        const availableHeight = Math.min(320, spaceBelow);
         dropdown.style.bottom = 'auto';
-        dropdown.style.top = `${rect.bottom + 4}px`;
+        dropdown.style.top = `${rect.bottom + dropdownGap}px`;
         content.style.maxHeight = `${availableHeight}px`;
         dropdown.classList.add('ts-dropdown-down');
         dropdown.classList.remove('ts-dropdown-up');
@@ -156,4 +155,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 Alpine.start();
-
