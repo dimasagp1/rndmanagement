@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Formula;
 use App\Models\Material;
+use App\Models\MaterialSupplier;
 use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Validation\Rule;
@@ -73,11 +74,13 @@ class FormulaController extends Controller
 
         $materials = Material::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
+        $priceAvailability = $this->priceAvailability();
+        $supplierNames = $suppliers->mapWithKeys(fn ($supplier) => [(string) $supplier->id => $supplier->name]);
         $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
         $autoCode  = $this->service->generateCode();
         $products  = Product::orderBy('name')->get();
 
-        return view('formulas.create', compact('materials', 'suppliers', 'stages', 'autoCode', 'products'));
+        return view('formulas.create', compact('materials', 'suppliers', 'priceAvailability', 'supplierNames', 'stages', 'autoCode', 'products'));
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -158,12 +161,25 @@ class FormulaController extends Controller
 
         $materials = Material::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
+        $priceAvailability = $this->priceAvailability();
+        $supplierNames = $suppliers->mapWithKeys(fn ($supplier) => [(string) $supplier->id => $supplier->name]);
         $stages    = ['Product Form', 'Laboratory Trial', 'Sensory Test', 'Plant Trial', 'Market Test'];
         $products  = Product::orderBy('name')->get();
 
         $formula->load(['materials.material', 'materials.supplier']);
 
-        return view('formulas.edit', compact('formula', 'materials', 'suppliers', 'stages', 'products'));
+        return view('formulas.edit', compact('formula', 'materials', 'suppliers', 'priceAvailability', 'supplierNames', 'stages', 'products'));
+    }
+
+    private function priceAvailability(): array
+    {
+        return MaterialSupplier::query()
+            ->where('is_active', true)
+            ->where('current_price', '>', 0)
+            ->get(['material_id', 'supplier_id'])
+            ->groupBy('material_id')
+            ->map(fn ($relations) => $relations->pluck('supplier_id')->map(fn ($id) => (string) $id)->values()->all())
+            ->all();
     }
 
     // ──────────────────────────────────────────────────────────────

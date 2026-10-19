@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Formula;
 use App\Models\Material;
+use App\Models\MaterialSupplier;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\User;
@@ -60,6 +61,37 @@ class FormulaTest extends TestCase
                   'Formula Draft', 'Formula Approved', 'Existing Product Formula'] as $name) {
             Product::create(['name' => $name]);
         }
+    }
+
+    public function test_formula_create_marks_materials_with_active_nonzero_master_prices(): void
+    {
+        MaterialSupplier::create([
+            'material_id' => $this->material1->id,
+            'supplier_id' => $this->supplier->id,
+            'current_price' => 85000,
+            'is_active' => true,
+        ]);
+
+        MaterialSupplier::create([
+            'material_id' => $this->material2->id,
+            'supplier_id' => $this->supplier->id,
+            'current_price' => 0,
+            'is_active' => true,
+        ]);
+
+        $inactiveSupplier = Supplier::create(['name' => 'PT Supplier Tidak Aktif']);
+        MaterialSupplier::create([
+            'material_id' => $this->material2->id,
+            'supplier_id' => $inactiveSupplier->id,
+            'current_price' => 125000,
+            'is_active' => false,
+        ]);
+
+        $response = $this->actingAs($this->staff)->get(route('formulas.create'));
+
+        $response->assertOk()
+            ->assertSee('Ekstrak Jahe — ✓ Harga tersedia')
+            ->assertDontSee('Madu Murni — ✓ Harga tersedia');
     }
 
     public function test_staff_rnd_can_create_formula_draft_with_any_percentage()

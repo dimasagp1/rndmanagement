@@ -54,7 +54,7 @@
     @endphp
 
     <form method="POST" action="{{ route('formulas.update', $formula) }}"
-          x-data="formulaForm({{ json_encode($existingMaterials) }}, {{ old('target_dose_a', $formula->target_dose_a) }}, '{{ old('target_dose_a_unit', $formula->target_dose_a_unit ?? 'g') }}', {{ old('target_dose_b', $formula->target_dose_b) }}, '{{ old('target_dose_b_unit', $formula->target_dose_b_unit ?? 'g') }}', {{ old('target_sachet', $formula->target_sachet) }}, '{{ old('target_sachet_unit', $formula->target_sachet_unit ?? 'sachet') }}')"
+          x-data="formulaForm({{ json_encode($existingMaterials) }}, {{ old('target_dose_a', $formula->target_dose_a) }}, '{{ old('target_dose_a_unit', $formula->target_dose_a_unit ?? 'g') }}', {{ old('target_dose_b', $formula->target_dose_b) }}, '{{ old('target_dose_b_unit', $formula->target_dose_b_unit ?? 'g') }}', {{ old('target_sachet', $formula->target_sachet) }}, '{{ old('target_sachet_unit', $formula->target_sachet_unit ?? 'sachet') }}', @js($priceAvailability), @js($supplierNames))"
           id="formula-edit-form">
         @csrf
         @method('PUT')
@@ -200,18 +200,19 @@
                                             <td>
                                                 <select :name="`materials[${index}][material_id]`"
                                                         x-model="row.material_id"
-                                                        @change="fetchPrice(index)"
+                                                        x-init="syncSupplierPriceIndicators(index)"
+                                                        @change="syncSupplierPriceIndicators(index); fetchPrice(index)"
                                                         class="form-input text-xs py-1 px-1.5 tom-select" required>
                                                     <option value="">-- Pilih Material --</option>
                                                     <optgroup label="🌿 Bahan Baku Komersial (Resmi)">
                                                         @foreach($materials->filter(fn($m) => $m->status !== 'trial') as $mat)
-                                                        <option value="{{ $mat->id }}">{{ $mat->name }}</option>
+                                                        <option value="{{ $mat->id }}">{{ $mat->name }}{{ isset($priceAvailability[$mat->id]) ? ' — ✓ Harga tersedia' : '' }}</option>
                                                         @endforeach
                                                     </optgroup>
                                                     @if($materials->filter(fn($m) => $m->status === 'trial')->count() > 0)
                                                     <optgroup label="⚡ Bahan Baku Trial R&D (Sample Lab)">
                                                         @foreach($materials->filter(fn($m) => $m->status === 'trial') as $mat)
-                                                        <option value="{{ $mat->id }}">⚡ {{ $mat->name }} (Trial)</option>
+                                                        <option value="{{ $mat->id }}">⚡ {{ $mat->name }} (Trial){{ isset($priceAvailability[$mat->id]) ? ' — ✓ Harga tersedia' : '' }}</option>
                                                         @endforeach
                                                     </optgroup>
                                                     @endif
@@ -450,7 +451,7 @@
 <script>
 const formulaPriceLookupUrl = @json(route('api.material-suppliers.price'));
 
-function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', targetDoseB = 0.5000, targetDoseBUnit = 'g', targetSachet = 30, targetSachetUnit = 'sachet') {
+function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', targetDoseB = 0.5000, targetDoseBUnit = 'g', targetSachet = 30, targetSachetUnit = 'sachet', priceAvailability = {}, supplierNames = {}) {
     const rows = initial.length > 0
         ? initial.map(m => ({ id: m.id || Date.now() + Math.random(), is_trial_price: !!m.is_trial_price, ...m }))
         : [{ id: Date.now(), material_id: '', supplier_id: '', price_per_kg: '', price_per_gram: '', percentage: '', dose_2g: '', dose_05g: '', sachet_30: '', hpp_rm: '', is_trial_price: false }];
@@ -458,6 +459,8 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
     return {
         formType: '{{ old('formula_type', $formula->formula_type ?? 'new_product') }}',
         rows,
+        priceAvailability,
+        supplierNames,
         totalPercentage: rows.reduce((s, r) => s + (parseFloat(r.percentage) || 0), 0),
         targetDoseA: parseFloat(targetDoseA) || 2.0000,
         targetDoseAUnit: targetDoseAUnit || 'g',
@@ -473,6 +476,30 @@ function formulaForm(initial = [], targetDoseA = 2.0000, targetDoseAUnit = 'g', 
         removeRow(index) {
             this.rows.splice(index, 1);
             this.recalculate();
+        },
+
+        syncSupplierPriceIndicators(index) {
+            const row = this.rows[index];
+            const pricedSuppliers = this.priceAvailability[String(row.material_id)] || [];
+            const select = document.querySelector(`select[name="materials[${index}][supplier_id]"]`);
+            if (!select) return;
+
+            Array.from(select.options).forEach(option => {
+                if (!option.value) return;
+
+                const name = this.supplierNames[option.value] || option.textContent.replace(/ — ✓ Harga tersedia$/, '');
+                const label = pricedSuppliers.includes(String(option.value))
+                    ? `${name} — ✓ Harga tersedia`
+                    : name;
+                option.textContent = label;
+
+                if (select.tomselect && select.tomselect.options[option.value]) {
+                    select.tomselect.updateOption(option.value, {
+                        ...select.tomselect.options[option.value],
+                        text: label,
+                    });
+                }
+            });
         },
 
         async fetchPrice(index) {
