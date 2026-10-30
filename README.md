@@ -125,7 +125,7 @@ Sistem memiliki **5 role** yang diatur melalui Spatie Laravel-Permission dan Lar
 | **NIE Approval / QBD (CRUD)** | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Technology Transfer / Stability Test (CRUD)** | ✓ | ✓ | View | View | ✓ |
 
-> **Catatan:** `formula.delete` dan `trial_rm.delete` tidak di-grant ke Staff R&D — hanya Superadmin yang bisa menghapus dokumen (bypass). Ini memastikan integritas data riset.
+> **Catatan:** `trial_rm.delete` tidak di-grant ke Staff R&D — hanya Superadmin yang bisa menghapus dokumen (bypass). `formula.delete` diizinkan untuk Staff R&D khusus formula berstatus Draft miliknya sendiri untuk menjaga integritas data riset.
 
 ---
 

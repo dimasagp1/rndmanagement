@@ -245,6 +245,15 @@ class FormulaController extends Controller
     public function destroy(Formula $formula)
     {
         Gate::authorize('delete', $formula);
+
+        if ($formula->trialRms()->exists()) {
+            return back()->with('error', "Formula {$formula->code} tidak dapat dihapus karena sudah memiliki data Trial RM.");
+        }
+
+        if ($formula->childFormulas()->exists()) {
+            return back()->with('error', "Formula {$formula->code} tidak dapat dihapus karena memiliki turunan reformulasi.");
+        }
+
         $code = $formula->code;
         $formula->delete();
 

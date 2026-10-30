@@ -258,4 +258,88 @@ class FormulaTest extends TestCase
         $this->assertEquals('existing', $formula->formula_type);
         $this->assertNull($formula->development_stage);
     }
+
+    public function test_creator_can_delete_draft_formula()
+    {
+        $formula = Formula::create([
+            'code' => 'FRM-202607-DEL1',
+            'name' => 'Formula Draft to Delete',
+            'product_id' => Product::first()->id,
+            'approval_status' => 'Draft',
+            'created_by' => $this->staff->id,
+        ]);
+
+        $formula->materials()->create([
+            'material_id' => $this->material1->id,
+            'supplier_id' => $this->supplier->id,
+            'percentage' => 100.00,
+        ]);
+
+        $response = $this->actingAs($this->staff)->delete(route('formulas.destroy', $formula));
+
+        $response->assertRedirect(route('formulas.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('formulas', ['id' => $formula->id]);
+        $this->assertDatabaseMissing('formula_materials', ['formula_id' => $formula->id]);
+    }
+
+    public function test_staff_cannot_delete_approved_formula()
+    {
+        $formula = Formula::create([
+            'code' => 'FRM-202607-DEL2',
+            'name' => 'Formula Approved No Delete',
+            'product_id' => Product::first()->id,
+            'approval_status' => 'Approved',
+            'created_by' => $this->staff->id,
+        ]);
+
+        $response = $this->actingAs($this->staff)->delete(route('formulas.destroy', $formula));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('formulas', ['id' => $formula->id]);
+    }
+
+    public function test_user_cannot_delete_other_user_draft_formula()
+    {
+        $otherUser = User::factory()->create();
+        $otherUser->assignRole('Staff R&D');
+
+        $formula = Formula::create([
+            'code' => 'FRM-202607-DEL3',
+            'name' => 'Formula Other User',
+            'product_id' => Product::first()->id,
+            'approval_status' => 'Draft',
+            'created_by' => $otherUser->id,
+        ]);
+
+        $response = $this->actingAs($this->staff)->delete(route('formulas.destroy', $formula));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('formulas', ['id' => $formula->id]);
+    }
+
+    public function test_cannot_delete_formula_with_trial_rm()
+    {
+        $formula = Formula::create([
+            'code' => 'FRM-202607-DEL4',
+            'name' => 'Formula with Trial RM',
+            'product_id' => Product::first()->id,
+            'approval_status' => 'Draft',
+            'created_by' => $this->staff->id,
+        ]);
+
+        \App\Models\TrialRm::create([
+            'formula_id' => $formula->id,
+            'sample_identity' => 'SMP-DEL4',
+            'created_by' => $this->staff->id,
+            'trial_date' => now(),
+            'approval_status' => 'Draft',
+            'product_id' => Product::first()->id,
+        ]);
+
+        $response = $this->actingAs($this->staff)->delete(route('formulas.destroy', $formula));
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('formulas', ['id' => $formula->id]);
+    }
 }
