@@ -69,17 +69,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-
-                {{-- Dashboard (hidden, route tetap aktif di /dashboard) --}}
-                {{-- <a href="{{ route('dashboard') }}"
-                   class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                    <span>Dashboard</span>
-                </a> --}}
+            <nav class="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
 
                 {{-- Dashboard (Timeline View) --}}
                 <a href="{{ route('timeline.index') }}"
@@ -91,9 +81,10 @@
                     <span>Dashboard</span>
                 </a>
 
-                <!-- Divider -->
-                <div class="my-3 border-t border-white/10"></div>
-                <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Modul Utama</p>
+                <!-- Modul Utama -->
+                <div class="pt-2.5 pb-1 px-3 border-t border-white/10 mt-2">
+                    <p class="text-white/40 text-[10px] font-bold uppercase tracking-wider">Modul Utama</p>
+                </div>
 
                 <!-- NPD Workflow (per grup) -->
                 @php($general = \App\Http\Controllers\GeneralController::class)
@@ -106,14 +97,14 @@
                 <div x-data="{ open: {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'true' : 'false' }} }">
                     <button type="button" @click="open = !open"
                             class="sidebar-link w-full justify-between {{ (in_array(request()->route('tab'), $slugs) || array_intersect($moduleActive, $slugs)) ? 'active' : '' }}">
-                        <span class="flex items-center gap-3 min-w-0">
+                        <span class="flex items-center gap-2.5 min-w-0">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
-                            <span class="flex-1">{{ $group }}</span>
+                            <span class="flex-1 truncate">{{ $group }}</span>
                         </span>
-                        <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                        <svg class="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200"
                              :class="open ? 'rotate-180' : ''"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -121,7 +112,8 @@
                     </button>
                     <div x-show="open" x-transition:enter="transition ease-out duration-150"
                          x-transition:enter-start="opacity-0 -translate-y-1"
-                         x-transition:enter-end="opacity-100 translate-y-0">
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="mt-0.5 space-y-0.5">
                         @foreach($slugs as $slug)
                         @if(isset($modulePerms[$slug]) && ! auth()->user()->can($modulePerms[$slug]))
                             @continue
@@ -140,24 +132,24 @@
                             <div x-show="subOpen" x-transition:enter="transition ease-out duration-150"
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="ml-4 pl-2 border-l border-white/10">
+                                 class="ml-6 pl-2.5 border-l border-white/15 my-0.5 space-y-0.5">
                                 <a href="{{ route('formulas.index') }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('formulas.*') ? 'active' : '' }}">
+                                   class="sidebar-nested-link {{ request()->routeIs('formulas.*') ? 'active' : '' }}">
                                     <span class="flex-1 truncate">Formula RM</span>
                                 </a>
                                 @can('trial_rm.view')
                                 <a href="{{ route('trial-rms.index') }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('trial-rms.*') ? 'active' : '' }}">
+                                   class="sidebar-nested-link {{ request()->routeIs('trial-rms.*') ? 'active' : '' }}">
                                     <span class="flex-1 truncate">Trial Formulation</span>
                                 </a>
                                 @endcan
                                 @can('trial_pm.view')
                                 <a href="{{ route('trial-pms.index') }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('trial-pms.*') ? 'active' : '' }}">
+                                   class="sidebar-nested-link {{ request()->routeIs('trial-pms.*') ? 'active' : '' }}">
                                     <span class="flex-1 truncate">Trial PM</span>
                                 </a>
                                 <a href="{{ route('logbook-pm.index') }}"
-                                   class="sidebar-sub-link {{ request()->routeIs('logbook-pm.*') ? 'active' : '' }}">
+                                   class="sidebar-nested-link {{ request()->routeIs('logbook-pm.*') ? 'active' : '' }}">
                                     <span class="flex-1 truncate">Log Book PM</span>
                                 </a>
                                 @endcan
@@ -195,8 +187,9 @@
 
                 <!-- Approval Center (Manager & GM only) -->
                 @can('approval_center.access')
-                <div class="my-3 border-t border-white/10"></div>
-                <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Manajemen</p>
+                <div class="pt-2.5 pb-1 px-3 border-t border-white/10 mt-2">
+                    <p class="text-white/40 text-[10px] font-bold uppercase tracking-wider">Manajemen</p>
+                </div>
 
                 <a href="{{ route('approval-center.index') }}"
                    class="sidebar-link {{ request()->routeIs('approval-center.*') ? 'active' : '' }}">
@@ -204,9 +197,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
-                    <span class="flex-1">Approval Center</span>
+                    <span class="flex-1 truncate">Approval Center</span>
                     @if(($navNotifCount ?? 0) > 0)
-                    <span class="ml-auto min-w-[1.25rem] h-5 px-1 bg-accent text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                    <span class="ml-auto min-w-[1.25rem] h-4.5 px-1 bg-accent text-white text-[11px] rounded-full flex items-center justify-center font-semibold">
                         {{ ($navNotifCount ?? 0) > 99 ? '99+' : ($navNotifCount ?? 0) }}
                     </span>
                     @endif
@@ -215,12 +208,13 @@
 
                 {{-- Superadmin-only Menus --}}
                 @role('Superadmin')
-                <div class="my-3 border-t border-white/10"></div>
-                <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Akses & Sistem</p>
+                <div class="pt-2.5 pb-1 px-3 border-t border-white/10 mt-2">
+                    <p class="text-white/40 text-[10px] font-bold uppercase tracking-wider">Akses &amp; Sistem</p>
+                </div>
 
                 <a href="{{ route('users.index') }}"
                    class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                     <span>Akses Kontrol</span>
@@ -228,23 +222,23 @@
 
                 <a href="{{ route('settings.index') }}"
                    class="sidebar-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     <span>Pengaturan Sistem</span>
                 </a>
-
                 @endrole
 
                 {{-- Data Master (Superadmin & Staff R&D) --}}
                 @hasanyrole('Superadmin|Staff R&D')
-                <div class="my-3 border-t border-white/10"></div>
-                <p class="px-3 mb-2 text-white/35 text-xs font-semibold uppercase tracking-widest">Master Data</p>
+                <div class="pt-2.5 pb-1 px-3 border-t border-white/10 mt-2">
+                    <p class="text-white/40 text-[10px] font-bold uppercase tracking-wider">Master Data</p>
+                </div>
 
                 <a href="{{ route('materials.index') }}"
                    class="sidebar-link {{ request()->routeIs('materials.*') || request()->routeIs('suppliers.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                     <span>Data Master</span>
@@ -252,7 +246,7 @@
 
                 <a href="{{ route('product-categories.index') }}"
                    class="sidebar-link {{ request()->routeIs('product-categories.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                     </svg>
                     <span>Category</span>
@@ -260,7 +254,7 @@
 
                 <a href="{{ route('products.index') }}"
                    class="sidebar-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                     <span>Nama Produk</span>
