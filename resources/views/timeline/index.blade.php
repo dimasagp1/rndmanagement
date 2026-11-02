@@ -12,41 +12,6 @@
         activityShow: 10,
         productSearch: ''
     }">
-        {{-- ─── Header ─────────────────────────────────────── --}}
-        <header class="flex justify-between items-start mb-6">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shadow-sm">PH</div>
-                <div>
-                    <h1 class="text-sm font-bold text-primary uppercase tracking-wider">RND Herbatech</h1>
-                    <p class="text-sm text-gray-500">
-                        @if($currentProduct)
-                            Filter Produk: <span class="font-semibold text-ink">{{ $currentProduct->name }}</span>
-                            <span class="text-gray-400">({{ $currentProduct->category?->name ?? 'Tanpa kategori' }})</span>
-                        @elseif($isStaff) Item saya &amp; pipeline NPD
-                        @elseif($isManager) Approval queue &amp; team overview
-                        @elseif($isGM) Approval queue &amp; team overview
-                        @else System overview
-                        @endif
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                @if($currentProduct)
-                <a href="{{ route('timeline.index', ['tab' => 'pipeline']) }}" class="btn-ghost flex-shrink-0 text-xs">
-                    ✕ Reset Filter Produk
-                </a>
-                @endif
-                @if($isStaff)
-                <a href="{{ route('formulas.create') }}" class="btn-primary flex-shrink-0 text-xs">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Tambah Formula
-                </a>
-                @endif
-                <a href="{{ route('timeline.index') }}" class="btn-ghost flex-shrink-0 text-xs">
-                    Reset Semua
-                </a>
-            </div>
-        </header>
 
         {{-- ─── Top-Level Tab Navigation ───────────────────── --}}
         <div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-3 overflow-x-auto">
