@@ -20,6 +20,14 @@
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .sidebar-link { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; gap: 0.625rem !important; font-size: 0.8125rem !important; }
+        .sidebar-link svg { width: 1rem !important; height: 1rem !important; }
+        .sidebar-sub-link { padding-left: 1.75rem !important; padding-right: 0.625rem !important; padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; font-size: 0.75rem !important; }
+        .sidebar-nested-link { display: flex; align-items: center; padding: 0.375rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; color: rgba(255, 255, 255, 0.65); transition: all 150ms; }
+        .sidebar-nested-link:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.1); }
+        .sidebar-nested-link.active { color: #ffffff; font-weight: 600; background-color: rgba(255, 255, 255, 0.15); }
+    </style>
 </head>
 <body class="font-sans antialiased bg-surface text-ink" x-data="{ sidebarOpen: false }">
 
