@@ -329,17 +329,38 @@ class FormulaTest extends TestCase
         ]);
 
         \App\Models\TrialRm::create([
+            'code' => 'TRM-202607-DEL4',
             'formula_id' => $formula->id,
             'sample_identity' => 'SMP-DEL4',
             'created_by' => $this->staff->id,
             'trial_date' => now(),
             'approval_status' => 'Draft',
             'product_id' => Product::first()->id,
+            'process_steps' => 'Initial process steps',
         ]);
 
         $response = $this->actingAs($this->staff)->delete(route('formulas.destroy', $formula));
 
         $response->assertSessionHas('error');
+        $this->assertDatabaseHas('formulas', ['id' => $formula->id]);
+    }
+
+    public function test_superadmin_cannot_delete_other_user_formula()
+    {
+        $superadmin = User::factory()->create();
+        $superadmin->assignRole('Superadmin');
+
+        $formula = Formula::create([
+            'code' => 'FRM-202607-DEL5',
+            'name' => 'Formula Staff Only',
+            'product_id' => Product::first()->id,
+            'approval_status' => 'Draft',
+            'created_by' => $this->staff->id,
+        ]);
+
+        $response = $this->actingAs($superadmin)->delete(route('formulas.destroy', $formula));
+
+        $response->assertForbidden();
         $this->assertDatabaseHas('formulas', ['id' => $formula->id]);
     }
 }

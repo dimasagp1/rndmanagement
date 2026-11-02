@@ -78,8 +78,17 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Qbd::class, QbdPolicy::class);
 
         // Implicitly grant "Superadmin" role all permission checks
-        Gate::before(function ($user, $ability) {
-            return $user->hasRole('Superadmin') ? true : null;
+        Gate::before(function ($user, $ability, array $arguments = []) {
+            if ($user->hasRole('Superadmin')) {
+                // Untuk aksi delete pada Formula, jangan bypass agar hanya pemilik data (creator) yang dapat menghapus
+                if ($ability === 'delete' && isset($arguments[0]) && $arguments[0] instanceof Formula) {
+                    return null;
+                }
+
+                return true;
+            }
+
+            return null;
         });
 
         // Share pending approval count ke semua view layout

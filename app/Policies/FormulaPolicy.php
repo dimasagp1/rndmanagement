@@ -74,11 +74,11 @@ class FormulaPolicy
     }
 
     /**
-     * Delete — hanya creator, hanya Draft
+     * Delete — hanya creator (pemilik file), hanya jika status Draft
      */
     public function delete(User $user, Formula $formula): bool
     {
-        return $formula->created_by === $user->id
+        return (int) $formula->created_by === (int) $user->id
             && $formula->approval_status === 'Draft'
             && $user->can('formula.delete');
     }
